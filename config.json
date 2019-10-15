@@ -1,0 +1,43 @@
+{
+	"name": "XDRO",
+	"namespace": "Vanderbilt\\XDRO",
+	"framework-version": 3,
+	"description": "REDCap external module to help track Exceedingly Drug Resistant Organisms in patients across intake/discharge from various facilities.",
+	"documentation": "README.md",
+	"authors": [
+		{
+			"name": "Carl Reed",
+			"email": "datacore@vumc.org",
+			"institution": "Vanderbilt University Medical Center"
+		}
+	],
+	"permissions": [],
+	"enable-every-page-hooks-on-system-pages": false,
+	"links": {
+		"project": [
+			{
+				"name": "<i class='fas fa-search'></i> Patient Search",
+				"icon": "search",
+				"url": "patient_search.php"
+			},
+			{
+				"name": "<i class='fas fa-file'></i> Patient Record",
+				"icon": "search",
+				"url": "patient_record.php"
+			}
+		],
+		"control-center": []
+	},
+	"no-auth-pages": [
+		"patient_search"
+	],
+	"project-settings": [],
+	"system-settings": [],
+	"crons": [],
+	"compatibility": {
+		"php-version-min": "",
+		"php-version-max": "",
+		"redcap-version-min": "",
+		"redcap-version-max": ""
+	}
+}
