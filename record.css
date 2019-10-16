@@ -1,0 +1,152 @@
+@import url(//db.onlinewebfonts.com/c/090fac32abeec01857bae0369f615f89?family=AvenirNextLTW04-Light);
+
+div.logo {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	
+	width: 250px;
+	height: 250px;
+	
+	background-color: #003399;
+	border-radius: 50%;
+	z-index: 2;
+}
+div.logo img {
+	width: 67%;
+}
+#xdro-title {
+	color: white;
+	font-size: 6rem;
+	font-family: AvenirNextLTW04-Light;
+	margin-top: -1.75rem;
+	padding: 0px;
+}
+
+div.header-info {
+	text-align: right;
+	font-size: 1.25rem;
+}
+#patient-match {
+	display: inline;
+	border: 2.25px solid #c0504d;
+	width: 500px;
+	
+	text-align: right;
+	font-weight: 700;
+	font-size: 1rem;
+	
+	padding: 4px;
+	margin-right: 0px;
+}
+#patient-match span {
+	margin-left: 40px;
+	margin-right: 4px;
+}
+#ip-blurb {
+	text-align: right;
+}
+#registry-title {
+	background-color: #003399;
+}
+#registry-title h1 {
+	color: white;
+	font-size: 1.25rem;
+	font-weight: 100;
+	padding: 12px;
+}
+#test-results {
+	text-align: left;
+}
+#test-results span {
+	display: block;
+}
+#test-results span:nth-child(1) {font-size: 1.25rem;}
+#test-results span:nth-child(2) {font-size: 1.1rem;}
+#test-results span:nth-child(3) {font-size: 1rem;}
+
+#record {
+	padding: 16px;
+}
+#record div:first-child {
+	margin-right: 16px;
+}
+
+/* column 1 */
+#patient-info {
+	display: flex;
+	flex-direction: column;
+	border: 0.75px solid #1f497d;
+}
+#patient-info table th {
+	text-align: right;
+}
+.simpletable th {
+	font-weight: 700;
+	padding: 0px;
+	margin: 0px;
+	vertical-align: top;
+}
+.simpletable td {
+	text-align: left;
+	padding-left: 4px;
+}
+#lab-info {
+	display: flex;
+	flex-direction: column;
+}
+#action-items {
+	border: 4.5px solid #c0504d;
+}
+
+/* column 2 */
+#resistances table {
+	margin-left: auto;
+}
+#resistances span {
+	font-size: 1rem;
+}
+#resistances td {
+	padding-left: 70px;
+	font-size: .9375rem;
+}
+#susceptibilities table, #susceptibilities tr, #susceptibilities th, #susceptibilities td {
+	border: 1px dashed #888;
+}
+#susceptibilities tbody {
+	border-top: 1.5px solid black;
+}
+#susceptibilities thead tr:nth-child(2) {
+	height: 1.625rem;
+}
+#susceptibilities td {
+	font-size: 0.625rem;
+	padding: 4px;
+}
+#susceptibilities td:not(:first-child) {
+	border-right: 1.5px solid black;
+	border-left: 1.5px solid black;
+	text-align: center;
+}
+
+/* etc */
+.symbol-font {
+	font-family: symbol;
+}
+.bluefont {
+	color: #1f497d;
+}
+.redfont {
+	color: #c00000;
+}
+
+/* @media only screen and (min-width: 1151px) { */
+	#registry-title {
+		padding-left: 150px;
+		margin-left: -5px;
+	}
+	#test-results {
+		padding-left: 166px;
+	}
+/* } */
