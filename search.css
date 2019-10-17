@@ -1,0 +1,61 @@
+@import url(//db.onlinewebfonts.com/c/090fac32abeec01857bae0369f615f89?family=AvenirNextLTW04-Light);
+
+/* header, logo, title bar */
+#header {
+	display: flex;
+	align-items: center;
+}
+div.logo {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	
+	width: 250px;
+	height: 250px;
+	
+	background-color: #003399;
+	border-radius: 50%;
+	z-index: 2;
+}
+div.logo img {
+	width: 67%;
+}
+#xdro-title {
+	color: white;
+	font-size: 6rem;
+	font-family: AvenirNextLTW04-Light;
+	margin-top: -1.75rem;
+	padding: 0px;
+}
+#registry-title {
+	/* display: flex; */
+	/* flex-direction: column; */
+	/* align-items: center; */
+	/* justify-content: center; */
+	background-color: #003399;
+	
+	text-align: right;
+	
+	height: 3rem;
+	padding-left: 150px;
+	margin-left: -15px;
+}
+#registry-title h1 {
+	color: white;
+	font-size: 1.25rem;
+	font-weight: 100;
+	padding: 12px;
+}
+
+/* search query and search bar */
+#search {
+	margin-top: 60px;
+}
+#search-info {
+	background-color: #d7d5cb;
+	padding: 32px 2px 50px 8px;
+}
+#search-input {
+	background-color: #eeece1;
+}
