@@ -4,7 +4,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 
 // get dummy data record 1
 $data = reset(reset(\REDCap::getData($module->getProjectId(), 'array', 1)));
-file_put_contents("C:/vumc/log.txt", print_r($data, true));
+// file_put_contents("C:/log.txt", print_r($data, true));
 ?>
 <link rel="stylesheet" href="<?=$module->getUrl('record.css')?>"/>
 <script type="text/javascript" src="<?=$module->getUrl('record.js')?>"></script>
@@ -42,7 +42,7 @@ file_put_contents("C:/vumc/log.txt", print_r($data, true));
 				<tr><th>RESIDENCE: </th><td><?=$data["patient_state"]?></td></tr>
 				<tr><th>JURISDICTION: </th><td><?=$data["jurisdiction_nm"]?></td></tr>
 			</table>
-			<span class='px-3 mb-3'>Click <a href=""><b>HERE</b></a> for more demographic information</span>
+			<span class='px-3 mb-3'>Click <a href='' data-toggle='modal' data-target='.modal'><b>HERE</b></a> for more demographic information</span>
 		</div>
 		<div id='lab-info' class='mb-3 mt-3'>
 			<table class='mb-3 mt-1 simpletable'>
@@ -155,6 +155,44 @@ file_put_contents("C:/vumc/log.txt", print_r($data, true));
 		</div>
 	</div>
 </div>
-
+<div class="modal" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Patient Demographics</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<p><b>DEMOGRAPHIC INFORMATION AS OF: </b><?=$data['age_reported_time']?></p>
+				<table class='simpletable'>
+					<tbody>
+							<tr><th>FIRST NAME:</th><td><?=$data['patient_first_nm']?></td></tr>
+							<tr><th>LAST NAME:</th><td><?=$data['patient_last_nm']?></td></tr>
+							<tr><th>DATE OF BIRTH:</th><td><?=$data['patient_dob']?></td></tr>
+							<tr><th>CURRENT GENDER:</th><td><?=$data['curr_sex_cd']?></td></tr>
+							<tr><th>PHONE:</th><td><?=$data['patient_phone_home']?></td></tr>
+							<tr><th>ADDRESS:</th><td><?=$data['street_addr_1']?><br><?=$data['street_addr_2']?></td></tr>
+							<tr><th>CITY:</th><td><?=$data['city_desc']?></td></tr>
+							<tr><th>STATE:</th><td><?=$data['state_desc']?></td></tr>
+							<tr><th>ZIP:</th><td><?=$data['zip_cd']?></td></tr>
+							<tr><th>COUNTY:</th><td><?=$data['county']?></td></tr>
+							<tr><th>RESIDENCE:</th><td><?=$data['patient_state']?></td></tr>
+							<tr><th>JURISDICTION:</th><td><?=$data['jurisdiction_nm']?></td></tr>
+							<tr><th>PREVIOUS ADDRESS LISTED:</th><td><?=$data['patient_first_nm']?></td></tr>
+							<tr><th>SOCIAL SECURITY:</th><td><?=$data['patient_ssn']?></td></tr>
+							<tr><th>RACE:</th><td><?=$data['race_concatenated_desc_txt']?></td></tr>
+							<tr><th>ETHNICITY:</th><td><?=$data['ethnic_group_ind_desc']?></td></tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary">Save changes</button>
+			</div>
+		</div>
+	</div>
+</div>
 <?php
 require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';

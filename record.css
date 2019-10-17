@@ -130,6 +130,12 @@ div.header-info {
 	text-align: center;
 }
 
+/* modal */
+.modal-body {
+	display: flex;
+	flex-direction: column;
+}
+
 /* etc */
 .symbol-font {
 	font-family: symbol;
