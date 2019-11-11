@@ -5,7 +5,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 <link rel="stylesheet" href="<?=$module->getUrl('search.css')?>"/>
 <script type="text/javascript" src="<?=$module->getUrl('search.js')?>"></script>
 
-<div id='header' class='row'>
+<div id='header' class=''>
 	<div class='logo'>
 		<span id='xdro-title'>xdro</span>
 		<img id='tdh-logo' src="<?=$module->getUrl('tdh-logo.png')?>"></img>
@@ -15,13 +15,63 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 	</div>
 </div>
 
-<div id="search" class='row col-9'>
+<div id="search" class=''>
 	<div id='search-info' class='col-4'>
 		<h5><b>Search Query</b></h5>
 		<p>Begin typing to search the registry data,<br> then click an item in the list to navigate to that record for further investigation.</p>
 	</div>
 	<div id="search-input" class='col-8'>
-		
+		<input type='text' name='user-query' class='col-7'>
+		<div class='mr-3 pr-3'>
+			<div class="spinner">
+				<img src='<?=$module->getUrl('spinner.png')?>'>
+			</div>
+			<span class='ml-2'>Searching</span>
+		</div>
+	</div>
+</div>
+
+<div id='results'>
+	<table>
+		<thead>
+			<tr>
+				<th>Record ID</th>
+				<th>Name</th>
+				<th>Date of Birth</th>
+				<th>Gender</th>
+				<th>Current Address</th>
+				<th>Match?</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>1001</td>
+				<td>Samuel Wilson</td>
+				<td>1770-04-19</td>
+				<td>Male</td>
+				<td>2201 West End Ave</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>1251</td>
+				<td>Samuel Wilson</td>
+				<td>1770-04-19</td>
+				<td>Male</td>
+				<td>221b Baker St</td>
+				<td></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+<div id='match-listed'>
+	<b><span> NO MATCH LISTED</span></b>
+</div>
+
+<div id='footer-link'>
+	<div>
+		<span class='pb-3'>Click <b><a href='http://www.tn.gov/hai/xdro'>HERE</a></b> for educational materials about XDRO organisms</span>
+		<a href='http://www.tn.gov/hai/xdro'>http://www.tn.gov/hai/xdro</a>
 	</div>
 </div>
 

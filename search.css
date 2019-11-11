@@ -29,17 +29,15 @@ div.logo img {
 	padding: 0px;
 }
 #registry-title {
-	/* display: flex; */
-	/* flex-direction: column; */
-	/* align-items: center; */
-	/* justify-content: center; */
+	position: absolute;
+	top: 162.5px;
+	left: 150px;
+	width: calc(90% - 125px);
 	background-color: #003399;
 	
 	text-align: right;
 	
 	height: 3rem;
-	padding-left: 150px;
-	margin-left: -15px;
 }
 #registry-title h1 {
 	color: white;
@@ -50,6 +48,9 @@ div.logo img {
 
 /* search query and search bar */
 #search {
+	display: flex;
+	flex-direction: row;
+	width: 92%;
 	margin-top: 60px;
 }
 #search-info {
@@ -57,5 +58,95 @@ div.logo img {
 	padding: 32px 2px 50px 8px;
 }
 #search-input {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-around;
+	
 	background-color: #eeece1;
+}
+
+#search-input input {
+	border: 1px solid #3333;
+}
+
+/* searching indicator */
+#search-input div {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	
+	visibility: hidden;
+}
+
+.spinner {
+  animation: spin 2s linear infinite;
+}
+
+.spinner img {
+	width: 32px;
+	height: 32px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* results */
+#results {
+	width: 92%;
+	margin-top: 50px;
+}
+#results table {
+	width: 100%;
+	text-align: center;
+	font-weight: 600;
+}
+
+#results thead {
+	border-bottom: 4px solid #24456d;
+}
+
+#results thead th {
+	text-align: center;
+	font-weight: 700;
+	
+	padding: 8px 0px;
+	border: 1px dashed gray;
+}
+
+#results tbody td {
+	border: 1px dashed gray;
+	padding: 8px 0px;
+}
+
+#results tbody td:nth-child(1) {
+	font-weight: 700;
+}
+
+/* NO MATCH LISTED span and footer link */
+#match-listed {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	height: 150px;
+}
+
+#footer-link {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	
+	font-weight: 600;
+	color: #24456d;
+}
+
+#footer-link div {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	
+	margin-right: 8%;
 }
