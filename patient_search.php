@@ -21,12 +21,13 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 		<p>Begin typing to search the registry data,<br> then click an item in the list to navigate to that record for further investigation.</p>
 	</div>
 	<div id="search-input" class='col-8'>
-		<input type='text' name='user-query' class='col-7'>
+		<input type='text' name='user-query' class='col-6'>
 		<div class='mr-3 pr-3'>
 			<div class="spinner">
 				<img src='<?=$module->getUrl('spinner.png')?>'>
 			</div>
 			<span class='ml-2'>Searching</span>
+			<span class='result-instructions'>Click Record ID to enter patient registry record.</span>
 		</div>
 	</div>
 </div>

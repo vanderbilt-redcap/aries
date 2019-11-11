@@ -68,6 +68,11 @@ div.logo img {
 
 #search-input input {
 	border: 1px solid #3333;
+	line-height: 2em;
+}
+
+.result-instructions {
+	visibility: hidden;
 }
 
 /* searching indicator */
