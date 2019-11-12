@@ -72,16 +72,26 @@ div.logo img {
 }
 
 .result-instructions {
-	visibility: hidden;
+	/* visibility: hidden; */
+}
+
+/* search autocomplete */
+
+#autocomplete {
+	/* display: none; */
+	flex-direction: column;
+	
+	background-color: #fff;
+	
+	position: absolute;
+	z-index: 99;
 }
 
 /* searching indicator */
-#search-input div {
+#search-feedback {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	
-	visibility: hidden;
 }
 
 .spinner {
@@ -100,6 +110,7 @@ div.logo img {
 
 /* results */
 #results {
+	visibility: hidden;
 	width: 92%;
 	margin-top: 50px;
 }
@@ -132,6 +143,7 @@ div.logo img {
 
 /* NO MATCH LISTED span and footer link */
 #match-listed {
+	visibility: hidden;
 	display: flex;
 	flex-direction: row;
 	align-items: center;

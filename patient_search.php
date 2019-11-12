@@ -4,6 +4,9 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 ?>
 <link rel="stylesheet" href="<?=$module->getUrl('search.css')?>"/>
 <script type="text/javascript" src="<?=$module->getUrl('search.js')?>"></script>
+<script type="text/javascript">
+	XDRO.moduleAddress = "<?=$module->getUrl('xdro.php')?>"
+</script>
 
 <div id='header' class=''>
 	<div class='logo'>
@@ -21,15 +24,18 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 		<p>Begin typing to search the registry data,<br> then click an item in the list to navigate to that record for further investigation.</p>
 	</div>
 	<div id="search-input" class='col-8'>
-		<input type='text' name='user-query' class='col-6'>
-		<div class='mr-3 pr-3'>
+		<div class='col-9'>
+			<input type='text' name='user-query' class='col-12'>
+			<div id="autocomplete"></div>
+		</div>
+		<div id="search-feedback" class='mr-3 pr-3 col-3'>
 			<div class="spinner">
 				<img src='<?=$module->getUrl('spinner.png')?>'>
 			</div>
-			<span class='ml-2'>Searching</span>
-			<span class='result-instructions'>Click Record ID to enter patient registry record.</span>
+			<span class='ml-2 search-indicator'>Searching</span>
 		</div>
 	</div>
+	
 </div>
 
 <div id='results'>
