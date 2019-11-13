@@ -7,20 +7,40 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	// given a user supplied string, search for records in our patient registry that might match
-	function patient_search($search_string) {
+	function autocomplete_search($search_string) {
 		return 'abc';
 	}
 }
 
 if ($_GET['action'] == 'predictPatients') {
-	// file_put_contents("C:/log.txt", "logging patient search predict:\n");
+	$module = new XDRO();
+	
+	$log_filepath = "C:/vumc/log.txt";
+	file_put_contents($log_filepath, "logging patient search predict:\n");
 	$searchString = $_GET['searchString'];
+	
+	if (empty($searchString)) {
+		echo ("[]");
+		return;
+	}
 	
 	// tokenize query
 	$tokens = explode(' ', $searchString);
 	
 	// gather record_ids that have a matching name or dob
 	$record_ids = [];
+	
+	// get all records (only some fields)
+	$params = [
+		"project_id" => $_GET['pid'],
+		"return_format" => "json",
+		"fields" => ['record_id', 'patient_dob', 'patient_first_nm', 'patient_last_nm', 'curr_sex_cd', 'street_addr_1']
+	];
+	$records = json_decode(\REDCap::getData($params), true);
+	
+	file_put_contents($log_filepath, "foudn records:\n" . print_r($records, true));
+	echo "[]";
+	return;
 	
 	foreach ($tokens as $token) {
 		// let's determine if this token is a valid date
@@ -44,6 +64,7 @@ if ($_GET['action'] == 'predictPatients') {
 			
 			// collect record IDs into $record_ids
 			foreach ($records as $rid => $record) {
+				file_put_contents($log_filepath, "record $rid matched " . $params["filterLogic"] . "\n", FILE_APPEND);
 				$record_ids[] = (int) $rid;
 			}
 		} else {
@@ -58,16 +79,25 @@ if ($_GET['action'] == 'predictPatients') {
 			
 			// collect record IDs into $record_ids
 			foreach ($records as $rid => $record) {
+				file_put_contents($log_filepath, "record $rid matched " . $params["filterLogic"] . "\n", FILE_APPEND);
 				$record_ids[] = (int) $rid;
 			}
 		}
 	}
 	
+	file_put_contents($log_filepath, "record ids: " . print_r($record_ids, true) . "\n", FILE_APPEND);
+	
 	// filter duplicate record IDs out of $record_ids
 	$record_ids = array_unique($record_ids);
 	
+	
 	// return formatted results
 	$results = [];
+	
+	if (empty($record_ids)) {
+		echo "[]";
+		return;
+	}
 	
 	$records = json_decode(\REDCap::getData($_GET['pid'], 'json', $record_ids), true);
 	foreach ($records as $rid => $record) {
@@ -81,5 +111,5 @@ if ($_GET['action'] == 'predictPatients') {
 		];
 	}
 	
-	exit(json_encode($results));
+	echo(json_encode($results));
 }

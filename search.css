@@ -92,6 +92,7 @@ div.logo img {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	visibility: hidden;
 }
 
 .spinner {

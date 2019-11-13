@@ -14,14 +14,23 @@ XDRO.shrinkSearch = function() {
 XDRO.predictPatients = function() {
 	var searchBar = $("#search-input input")
 	var searchString = searchBar.val()
+	
+	$("#search-feedback").css('visibility', 'visible')
+	
 	$.ajax({
 		url: XDRO.moduleAddress + "&action=predictPatients&searchString=" + encodeURI(searchString),
 		dataType: 'json',
 		complete: function(response) {
 			XDRO.response = response
-			if (response.responseJSON.length > 0) {
+			// console.log('response', response)
+			if (response.responseJSON && response.responseJSON.length > 0) {
 				XDRO.showPredictions(response.responseJSON)
+			} else {
+				// no results so hide predictions
+				$("#autocomplete").css('display', 'none')
 			}
+			
+			$("#search-feedback").css('visibility', 'hidden')
 		}
 	})
 }
