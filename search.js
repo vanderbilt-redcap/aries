@@ -36,11 +36,11 @@ XDRO.predictPatients = function() {
 }
 
 XDRO.showPredictions = function(predictions) {
-	console.log('predictions', predictions)
+	// console.log('predictions', predictions)
 	var items = ""
 	
 	predictions.forEach(function(patient) {
-		items += '<span>"' + patient.first_name + ' ' + patient.last_name + '" in Record ID # ' + patient.record_id + ' (DOB: ' + patient.dob + ', ' + patient.sex + ', ' + patient.address + ')</span>'
+		items += '<span>"' + patient.patient_first_nm + ' ' + patient.patient_last_nm + '" in Record ID # ' + patient.record_id + ' (DOB: ' + patient.patient_dob + ', ' + patient.curr_sex_cd + ', ' + patient.street_addr_1 + ')</span>'
 	})
 	
 	$("#autocomplete").html(items)
