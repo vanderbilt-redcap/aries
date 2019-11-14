@@ -1,5 +1,16 @@
 $(function() {
 	$("#search-input input").on('input', XDRO.predictPatients)
+	$("#autocomplete").on('mousedown', 'span', function(e) {
+		var span = $(e.target)
+		if (span.hasClass('predict-name')) {
+			span = span.parent('span')
+		}
+		var rid = span.attr('data-rid')
+		if (rid) {
+			window.location.href = XDRO.recordAddress + "&rid=" + rid
+		}
+	})
+	$("#search-input input").on('blur', function() {$("#autocomplete").hide()})
 })
 
 XDRO = {}
@@ -40,7 +51,7 @@ XDRO.showPredictions = function(predictions) {
 	var items = ""
 	
 	predictions.forEach(function(patient) {
-		items += '<span>"' + patient.patient_first_nm + ' ' + patient.patient_last_nm + '" in Record ID # ' + patient.record_id + ' (DOB: ' + patient.patient_dob + ', ' + patient.curr_sex_cd + ', ' + patient.street_addr_1 + ')</span>'
+		items += '<span data-rid="' + patient.record_id + '">"<span class="predict-name">' + patient.patient_first_nm + ' ' + patient.patient_last_nm + '</span>" in Record ID # <b>' + patient.record_id + '</b> (<i>DOB: ' + patient.patient_dob + ', ' + patient.curr_sex_cd + ', ' + patient.street_addr_1 + '</i>)</span>'
 	})
 	
 	$("#autocomplete").html(items)

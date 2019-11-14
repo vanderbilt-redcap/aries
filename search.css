@@ -78,13 +78,28 @@ div.logo img {
 /* search autocomplete */
 
 #autocomplete {
-	/* display: none; */
+	display: none;
 	flex-direction: column;
 	
 	background-color: #fff;
+	border: 1px solid #000;
 	
 	position: absolute;
+	padding: 8px 16px;
 	z-index: 99;
+}
+
+#autocomplete > span {
+	padding-bottom: 4px;
+}
+#autocomplete > span:hover {
+	background-color: #d7d5cb;
+	cursor: pointer;
+}
+
+.predict-name {
+	color: #6699ff;
+	font-weight: 700;
 }
 
 /* searching indicator */

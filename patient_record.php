@@ -3,7 +3,11 @@ require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "red
 require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 
 // get dummy data record 1
-$data = reset(reset(\REDCap::getData($module->getProjectId(), 'array', 1)));
+$rid = $_GET['rid'];
+if (empty($rid)) {
+	$rid = 1;
+}
+$data = reset(reset(\REDCap::getData($module->getProjectId(), 'array', $rid)));
 // file_put_contents("C:/log.txt", print_r($data, true));
 ?>
 <link rel="stylesheet" href="<?=$module->getUrl('record.css')?>"/>
