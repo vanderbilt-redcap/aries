@@ -1,4 +1,4 @@
-@import url(//db.onlinewebfonts.com/c/090fac32abeec01857bae0369f615f89?family=AvenirNextLTW04-Light);
+/* @import url(//db.onlinewebfonts.com/c/090fac32abeec01857bae0369f615f89?family=AvenirNextLTW04-Light); */
 
 /* header, logo, title bar */
 #header {
@@ -24,7 +24,7 @@ div.logo img {
 #xdro-title {
 	color: white;
 	font-size: 6rem;
-	font-family: AvenirNextLTW04-Light;
+	/* font-family: AvenirNextLTW04-Light; */
 	margin-top: -1.75rem;
 	padding: 0px;
 }

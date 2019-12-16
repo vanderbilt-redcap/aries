@@ -102,6 +102,31 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		
 		echo(json_encode($records));
 	}
+
+	function importFileData() {
+		file_put_contents("C:/vumc/log.txt", "logging xdro importFileData function:\n");
+		function llog($text) {
+			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
+		}
+		
+		/*
+		Steps:
+			- read file
+			- determine columns
+			- create arrays
+			- fill with data so it's basically in REDCap::saveData format
+			- execute saveData call
+		*/
+		
+		$lab_data_path = "C:/vumc/projects/xdro/ADI files/xdro_lab_data.csv";
+		$pati_data_path = "C:/vumc/projects/xdro/ADI files/xdro_pati_data.csv";
+		
+		$file_contents = file_get_contents($pati_data_path);
+		foreach(preg_split("/((\r?\n)|(\r\n?))/", $import) as $line) {
+			// convert line string to csv array
+			$lines[] = str_getcsv($line);
+		}
+	}
 }
 
 if ($_GET['action'] == 'predictPatients') {
