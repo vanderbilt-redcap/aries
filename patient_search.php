@@ -5,7 +5,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 <link rel="stylesheet" href="<?=$module->getUrl('search.css')?>"/>
 <script type="text/javascript" src="<?=$module->getUrl('search.js')?>"></script>
 <script type="text/javascript">
-	XDRO.moduleAddress = "<?=$module->getUrl('xdro.php')?>"
+	XDRO.moduleAddress = "<?=$module->getUrl('XDRO.php')?>"
 	XDRO.recordAddress = "<?=$module->getUrl('patient_record.php')?>"
 </script>
 
