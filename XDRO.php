@@ -5,6 +5,9 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	public $log_desc = "XDRO Module";
 	
 	public function __construct() {
+		if (file_exists("C:/vumc/log.txt")) {
+			file_put_contents("C:/vumc/log.txt", "constructing XDRO instance\n");
+		}
 		parent::__construct();
 	}
 	
@@ -26,7 +29,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		$params = [
 			"project_id" => $_GET['pid'],
 			"return_format" => "json",
-			"fields" => ['record_id', 'patient_dob', 'patient_first_nm', 'patient_last_nm', 'curr_sex_cd', 'street_addr_1']
+			"fields" => ['patientid', 'patient_dob', 'patient_first_name', 'patient_last_name', 'patient_current_sex_d', 'patient_street_address_1_d']
 		];
 		$records = json_decode(\REDCap::getData($params), true);
 		
@@ -52,8 +55,8 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 			
 			// add to record's score if it has a first or last name similar to token
 			foreach ($records as &$record) {
-				$first_nm = strtolower(preg_replace('/[\W\d]/', '', $record["patient_first_nm"]));
-				$last_nm = strtolower(preg_replace('/[\W\d]/', '', $record["patient_last_nm"]));
+				$first_nm = strtolower(preg_replace('/[\W\d]/', '', $record["patient_first_name"]));
+				$last_nm = strtolower(preg_replace('/[\W\d]/', '', $record["patient_last_name"]));
 				// $this->rlog("$first_nm, $last_nm, $clean_token\n");
 				if (strpos($first_nm, $clean_token) !== false and !$record['first_name_scored']) {
 					// $this->rlog("$first_nm $last_nm matched first name with token $clean_token" . "\n");
@@ -95,7 +98,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 			return $b['score'] - $a['score'];
 		});
 		
-		// $this->rlog("sorted remaining records by score:\n" . print_r($records, true) . "\n\n");
+		$this->llog("sorted remaining records by score:\n" . print_r($records, true) . "\n\n");
 		
 		echo(json_encode($records));
 	}
@@ -103,11 +106,12 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	function importFileData() {
 		/*
 		Steps:
-			- read file
-			- determine columns
+			- read file (must be valid .csv)
+			- determine columns (via mapping function)
 			- create arrays
-			- fill with data so it's basically in REDCap::saveData format
+			- fill with data so it's in REDCap::saveData format
 			- execute saveData call
+			- return results
 		*/
 		
 		$lab_data_path = "C:/vumc/projects/xdro/ADI files/xdro_lab_data.csv";
@@ -121,12 +125,13 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function llog($text) {
-		file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
+		if (file_exists("C:/vumc/log.txt")) {
+			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
+		}
 	}
 	
-	function rlog($changes, $action="") {
-		$desc = $action !== "" ? $action : $this->log_desc;
-		\REDCap::logEvent($desc, $changes);
+	function rlog($msg) {
+		\REDCap::logEvent("XDRO Module", $msg);
 	}
 }
 

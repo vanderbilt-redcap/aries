@@ -5,18 +5,17 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 // get dummy data record 1
 $rid = $_GET['rid'];
 if (empty($rid)) {
-	$rid = 1;
+	$data = reset(reset(\REDCap::getData($module->getProjectId(), 'array', $rid)));
 }
-$data = reset(reset(\REDCap::getData($module->getProjectId(), 'array', $rid)));
-// file_put_contents("C:/log.txt", print_r($data, true));
+
+
 ?>
-<link rel="stylesheet" href="<?=$module->getUrl('record.css')?>"/>
-<script type="text/javascript" src="<?=$module->getUrl('record.js')?>"></script>
+<link rel="stylesheet" href="<?=$module->getUrl('css/record.css')?>"/>
 
 <div id='header' class='row'>
 	<div class='logo column'>
 		<span id='xdro-title'>xdro</span>
-		<img id='tdh-logo' src="<?=$module->getUrl('tdh-logo.png')?>"></img>
+		<img id='tdh-logo' src="<?=$module->getUrl('res/tdh-logo.png')?>"></img>
 	</div>
 	<div class='header-info column'>
 		<div id='patient-match' class='bluefont'>

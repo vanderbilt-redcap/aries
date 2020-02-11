@@ -2,8 +2,8 @@
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 ?>
-<link rel="stylesheet" href="<?=$module->getUrl('search.css')?>"/>
-<script type="text/javascript" src="<?=$module->getUrl('search.js')?>"></script>
+<link rel="stylesheet" href="<?=$module->getUrl('css/search.css')?>"/>
+<script type="text/javascript" src="<?=$module->getUrl('js/search.js')?>"></script>
 <script type="text/javascript">
 	XDRO.moduleAddress = "<?=$module->getUrl('XDRO.php')?>"
 	XDRO.recordAddress = "<?=$module->getUrl('patient_record.php')?>"
@@ -12,7 +12,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 <div id='header' class=''>
 	<div class='logo'>
 		<span id='xdro-title'>xdro</span>
-		<img id='tdh-logo' src="<?=$module->getUrl('tdh-logo.png')?>"></img>
+		<img id='tdh-logo' src="<?=$module->getUrl('res/tdh-logo.png')?>"></img>
 	</div>
 	<div id='registry-title'>
 		<h1>Extensively Drug Resistant Organism Registry</h1>
@@ -31,7 +31,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 		</div>
 		<div id="search-feedback" class='mr-3 pr-3 col-3'>
 			<div class="spinner">
-				<img src='<?=$module->getUrl('spinner.png')?>'>
+				<img src='<?=$module->getUrl('res/spinner.png')?>'>
 			</div>
 			<span class='ml-2 search-indicator'>Searching</span>
 		</div>
