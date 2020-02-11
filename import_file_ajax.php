@@ -93,43 +93,32 @@ function checkWorkbookFile($file_param_name) {
 			$json->$errors[] = "Uploaded file size ($fileReadable) exceeds server maximum upload size of $serverReadable.";
 		}
 	}
-	/*
-		read uploaded workbook file data
-	*/
-	try {
-	} catch(\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
-		// \REDCap::logEvent("DPP import failure", "PhpSpreadsheet library errors -> " . print_r($e, true) . "\n", null, $rid, $eid, PROJECT_ID);
-		exit(json_encode([
-			"error" => true,
-			"notes" => [
-				"There was an issue loading the workbook. Make sure it is an .xlsx file with a worksheet named 'DPP Sessions'.",
-				"If you believe your file is a valid DPP Workbook file, please contact your REDCap administrator."
-			]
-		]));
+	
+	if (count($json->errors) > 0) {
+		exit(json_encode($json));
 	}
-	return $workbook;
+	
+	return true;
 }
 
-
-
-
-// connect to REDCap db
-require_once (APP_PATH_TEMP . "../redcap_connect.php");
-
-// import PHPSpreadsheet (php 5.6 version)
+// use PHPSpreadsheet (php 5.6 version)
 require "libs/PhpSpreadsheet/vendor/autoload.php";
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
+// load uploaded workbook file into memory
 try {
 	$reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader("Xlsx");
 	$reader->setReadDataOnly(TRUE);
 	$workbook = $reader->load($_FILES[$file_param_name]["tmp_name"]);
 	unlink($_FILES[$file_param_name]["tmp_name"]);
-} catch (\Exception $e) {
+} catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
 	$json->errors[] = "There was an error reading the file uploaded: $e";
 	exit(json_encode($json));
 }
+
+// connect to REDCap db
+require_once (APP_PATH_TEMP . "../redcap_connect.php");
 
 // $info = [
 	// "files" => print_r($_FILES, true),
