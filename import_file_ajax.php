@@ -101,6 +101,16 @@ function checkWorkbookFile($file_param_name) {
 	return true;
 }
 
+function get_assoc_form($field_name) {
+	// given "patient_ssn" would return "xdro_registry" -- return form name that a field belongs to
+	
+}
+
+function get_assoc_field($column_name) {
+	// use this to convert data file column names to REDCap project field names (e.g., given "ORDERING_PROVIDER_NM", returns "providername"
+	
+}
+
 // use PHPSpreadsheet (php 5.6 version)
 require "libs/PhpSpreadsheet/vendor/autoload.php";
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -117,15 +127,62 @@ try {
 	exit(json_encode($json));
 }
 
+// declare mapping arrays -- these help us map the import column names to REDCap project field names
+// $form_from_field = [
+	// "patientid" => "xdro_registry",
+	// "patient_first_name" => "xdro_registry",
+	// "patient_last_name" => "xdro_registry",
+	// "patient_dob" => "xdro_registry",
+	// "patient_current_sex" => "xdro_registry",
+	// "patient_street_address_1" => "xdro_registry",
+	// "patient_street_address_2" => "xdro_registry",
+	// "patient_city" => "xdro_registry",
+	// "patient_state" => "xdro_registry",
+	// "patient_zip" => "xdro_registry",
+	// "patient_county" => "xdro_registry",
+	// "jurisdiction_nm" => "xdro_registry",
+	// "ordering_facility" => "xdro_registry",
+	// "providername" => "xdro_registry",
+	// "provider_address" => "xdro_registry",
+	// "providerphone" => "xdro_registry",
+	// "reporting_facility" => "xdro_registry",
+	// "reportername" => "xdro_registry",
+	// "reporterphone" => "xdro_registry",
+	// "ordered_test_nm" => "xdro_registry",
+	// "specimen_desc" => "xdro_registry",
+	// "lab_test_nm" => "xdro_registry",
+	// "specimen_collection_dt" => "xdro_registry",
+	// "lab_test_status" => "xdro_registry",
+	// "resulted_dt" => "xdro_registry",
+	// "disease" => "xdro_registry",
+	// "patient_last_change_time" => "xdro_registry",
+	// "patient_first_name_d" => "xdro_registry",
+	// "patient_last_name_d" => "xdro_registry",
+	// "patient_dob_d" => "xdro_registry",
+	// "patient_current_sex_d" => "xdro_registry",
+	// "patient_phone_home" => "xdro_registry",
+	// "patient_street_address_1_d" => "xdro_registry",
+	// "patient_street_address_2_d" => "xdro_registry",
+	// "patient_city_d" => "xdro_registry",
+	// "patient_state_d" => "xdro_registry",
+	// "patient_zip_d" => "xdro_registry",
+	// "patient_county_d" => "xdro_registry",
+	// "jurisdiction_nm_d" => "xdro_registry",
+	// "patient_ssn" => "xdro_registry",
+	// "patient_race_calculated" => "xdro_registry",
+	// "patient_ethnicity" => "xdro_registry",
+	// "lab_test_nm_2" => "antimicrobial_susceptibilities_and_resistance_mech",
+	// "coded_result_val_desc" => "antimicrobial_susceptibilities_and_resistance_mech",
+	// "interpretation_flg" => "antimicrobial_susceptibilities_and_resistance_mech",
+	// "numeric_result_val" => "antimicrobial_susceptibilities_and_resistance_mech",
+	// "result_units" => "antimicrobial_susceptibilities_and_resistance_mech",
+	// "test_method_cd" => "antimicrobial_susceptibilities_and_resistance_mech"
+// ];
+
 // connect to REDCap db
 require_once (APP_PATH_TEMP . "../redcap_connect.php");
 
-// $info = [
-	// "files" => print_r($_FILES, true),
-	// "post" => print_r($_POST, true)
-// ];
 
-// $module->llog('info:\n' . print_r($info, true));
 
 $json->success = true;
 exit(json_encode($json));
