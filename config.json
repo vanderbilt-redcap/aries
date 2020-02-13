@@ -24,11 +24,6 @@
 				"name": "<i class='fas fa-file'></i> Import Lab/Patient File",
 				"icon": "file",
 				"url": "import_file.php"
-			},
-			{
-				"name": "<i class='fas fa-file'></i> XLSXReader",
-				"icon": "file",
-				"url": "xlsxreader/sample.php"
 			}
 		],
 		"control-center": []

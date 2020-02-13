@@ -5,9 +5,6 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	public $log_desc = "XDRO Module";
 	
 	public function __construct() {
-		if (file_exists("C:/vumc/log.txt")) {
-			file_put_contents("C:/vumc/log.txt", "constructing XDRO instance\n");
-		}
 		parent::__construct();
 	}
 	
@@ -121,6 +118,12 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		foreach(preg_split("/((\r?\n)|(\r\n?))/", $import) as $line) {
 			// convert line string to csv array
 			$lines[] = str_getcsv($line);
+		}
+	}
+	
+	function nlog() {
+		if (file_exists("C:/vumc/log.txt")) {
+			file_put_contents("C:/vumc/log.txt", "constructing XDRO instance\n");
 		}
 	}
 	
