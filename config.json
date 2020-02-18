@@ -16,13 +16,13 @@
 	"links": {
 		"project": [
 			{
-				"name": "<i class='fas fa-search'></i> Patient Search",
-				"icon": "search",
+				"name": "Patient Search",
+				"icon": "arrow_right",
 				"url": "patient_search.php"
 			},
 			{
-				"name": "<i class='fas fa-file'></i> Import Lab/Patient File",
-				"icon": "file",
+				"name": "Import Lab/Patient File",
+				"icon": "arrow_right",
 				"url": "import_file.php"
 			}
 		],

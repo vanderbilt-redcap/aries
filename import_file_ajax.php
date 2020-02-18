@@ -283,7 +283,7 @@ function import_data_row($row) {
 	$errors = [];
 	
 	foreach ($row as $i => $value) {
-		if ($value == "NULL")
+		if (strcasecmp($value, "NULL") == 0)
 			continue;
 		
 		$column_name = $headers[$i];
@@ -337,6 +337,38 @@ function import_data_row($row) {
 	// $module->llog("data for row: " . print_r($data, true));
 	return $errors;
 }
+
+function send_lots_of_errors() {
+	global $json;
+	
+	// this function should be used to help test/build the client side error reporting functionality
+	// $json->errors[] = "Please attach a workbook file before clicking 'Upload'.";
+	// $json->errors[] = "File names can only contain alphabet, digit, period, space, hyphen, and parentheses characters.";
+	// $json->errors[] = "Uploaded file has a name that exceeds the limit of 127 characters.";
+	$json->row_error_arrays = [];
+	$json->row_error_arrays[1] = [[1, "No patient ID found -- make sure patient_ID or PATIENT_LOCAL_ID column isn't empty"]];
+	$json->row_error_arrays[2] = [[1, "No patient ID found -- make sure patient_ID or PATIENT_LOCAL_ID column isn't empty"]];
+	$json->row_error_arrays[3] = [];
+	$json->row_error_arrays[4] = [
+		[0, "no associated field for column PATIENT_COUNTRY"],
+		[0, "no associated field for column BAD_COL_NAME"],
+		[0, "no associated field for column BAD_COL_NAME2"]
+	];
+	$json->row_error_arrays[5] = [
+		[0, "no associated field for column PATIENT_COUNTRY"],
+		[0, "no associated field for column BAD_COL_NAME"],
+		[0, "no associated field for column BAD_COL_NAME2"]
+	];
+	$json->row_error_arrays[6] = [];
+	$json->row_error_arrays[7] = [[1, "No patient ID found -- make sure patient_ID or PATIENT_LOCAL_ID column isn't empty"]];
+	$json->row_error_arrays[8] = [];
+	$json->row_error_arrays[9] = [];
+	$json->row_error_arrays[10] = [];
+	$json->row_error_arrays[11] = [];
+	exit(json_encode($json));
+}
+
+send_lots_of_errors();
 
 // use PHPSpreadsheet (php 5.6 | 7.x version)
 require "libs/PhpSpreadsheet/vendor/autoload.php";

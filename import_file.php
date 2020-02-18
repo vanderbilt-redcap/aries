@@ -2,6 +2,8 @@
 require_once (APP_PATH_TEMP . "../redcap_connect.php");
 require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 ?>
+<script type='text/javascript' src="//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<link rel='stylesheet' href='//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css'>
 
 <script type="text/javascript">
 	XDRO = {
@@ -16,11 +18,19 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 			<label class="custom-file-label" for="import_file">Choose import file</label>
 		</div>
 		<div class="input-group-append">
-			<button class="btn btn-outline-primary" type="button" id="import_file">Import</button>
+			<button class="btn btn-outline-primary" type="button" id="submit_file">Import</button>
 		</div>
 	</div>
 </div>
 <div role="alert" id="notes"></div>
+<table id="results">
+	<thead>
+		<th>Row #</th>
+		<th>Notes</th>
+	</thead>
+	<tbody>
+	</tbody>
+</table>
 
 <script type="text/javascript" src="<?=$module->getUrl('js/import_file.js')?>"></script>
 <link rel="stylesheet" href="<?=$module->getUrl('css/import_file.css')?>"/>
