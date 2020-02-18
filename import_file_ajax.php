@@ -22,8 +22,8 @@ $module->nlog();
 $json = new \stdClass();
 $json->errors = [];
 
-$module->llog("post: " . print_r($_POST, true));
-$module->llog("files: " . print_r($_FILES, true));
+// $module->llog("post: " . print_r($_POST, true));
+// $module->llog("files: " . print_r($_FILES, true));
 
 /*
 	function definitions
@@ -128,6 +128,8 @@ function checkWorkbookFile($file_param_name) {
 function get_assoc_form($column_name) {
 	// given "patient_ssn" would return "xdro_registry" -- return form name that a field belongs to
 	$forms = [
+		"patientID" => "xdro_registry",
+		"PATIENT_LOCAL_ID" => "xdro_registry",
 		"PATIENT_FIRST_NAME" => "xdro_registry",
 		"PATIENT_LAST_NAME" => "xdro_registry",
 		"PATIENT_DOB" => "xdro_registry",
@@ -187,6 +189,8 @@ function get_assoc_form($column_name) {
 function get_assoc_field($column_name) {
 	// use this to convert data file column names to REDCap project field names (e.g., given "ORDERING_PROVIDER_NM", returns "providername"
 	$fields = [
+		"patientID" => "patientid",
+		"PATIENT_LOCAL_ID" => "patientid",
 		"PATIENT_FIRST_NAME" => "patient_first_name",
 		"PATIENT_LAST_NAME" => "patient_last_name",
 		"PATIENT_DOB" => "patient_dob",
@@ -243,28 +247,40 @@ function get_assoc_field($column_name) {
 	}
 }
 
+function get_next_instance($record, $form_name) {
+	global $module;
+	$pid = $module->framework->getProjectId();
+	$eid = $module->getFirstEventId($pid);
+	
+	if (empty($record["repeat_instances"][$eid][$form_name])) {
+		return 1;
+	} else {
+		return max(array_keys($record["repeat_instances"][$eid][$form_name])) + 1;
+	}
+}
+
 function import_data_row($row) {
 	global $module;
 	global $headers;
 	global $headers_flipped;
-	global $records;
+	
+	$pid = $module->framework->getProjectId();
+	$eid = $module->getFirstEventId($pid);
 	
 	// goal is to create an array for each form that needs importing, then $module->saveData or $module->saveInstanceData
-	$module->llog("row: " . print_r($row, true));
+	// $module->llog("row: " . print_r($row, true));
 	
 	/*
-		get patientid value (which acts as record ID)
-			will either be in column "patientID" or "PATIENT_LOCAL_ID"
-		make form arrays as applicable
-			one for: xdro_registry (non-instanced), demographics, antimicrobial_susceptibilities_and_resistance_mech
-		save them w/ saveData or saveInstanceData
-		collect/collate save results for response to client
+		build $data array that we will fill with imported field values (from row of workbook)
+		then we will call `$result = saveData(... $data)`
+		collect/collate $result["errors"] for response to client
 	*/
-	$data = [];
-	$data["xdro_registry"] = [];
-	$data["demographics"] = [];
-	$data["antimicrobial_susceptibilities_and_resistance_mech"] = [];
-	$data["errors"] = [];
+	$imported = [];
+	$imported["xdro_registry"] = [];
+	$imported["demographics"] = [];
+	$imported["antimicrobial_susceptibilities_and_resistance_mech"] = [];
+	
+	$errors = [];
 	
 	foreach ($row as $i => $value) {
 		if ($value == "NULL")
@@ -274,30 +290,52 @@ function import_data_row($row) {
 		
 		// either add error to return array or set assoc_form to be form string value
 		$assoc_form = get_assoc_form($column_name);
-		if (!$assoc_form[0])
-			$ret[] = [false, $assoc_form[1]];
-		$assoc_form = $assoc_form[1];
-		
-		
-		$assoc_field = get_assoc_field($column_name);
-		if (!$assoc_field[0])
-			$ret[] = [false, $assoc_field[1]];
-		$assoc_form = $assoc_field[1];
-		
-		// return errors if we've collected any
-		if (count($ret) > 0) {
-			$module->llog("ret: " . print_r($ret, true));
-			return $ret;
+		if (!$assoc_form[0]) {
+			$errors[] = [0, $assoc_form[1]];
+		} else {
+			$assoc_form = $assoc_form[1];
 		}
 		
-		$module->llog("\$column_name: $column_name");
-		$module->llog("\$assoc_form: $assoc_form");
-		$module->llog("\$assoc_field: $assoc_field");
-		$data[$assoc_form][$assoc_field] = $value;
+		$assoc_field = get_assoc_field($column_name);
+		if (!$assoc_field[0]) {
+			$errors[] = [0, $assoc_field[1]];
+		} else {
+			$assoc_field = $assoc_field[1];
+		}
+		
+		if (!empty($assoc_form) && !empty($assoc_field)) {
+			$imported[$assoc_form][$assoc_field] = $value;
+		}
+		unset($column_name, $assoc_form, $assoc_field);
 	}
 	
-	$module->llog("data for row: " . print_r($data, true));
-	// do insert/update via $module->saveData / saveInstanceData
+	$pati_id = $imported["xdro_registry"]["patientid"];
+	if (empty($pati_id)) {
+		$errors[] = [1, "No patient ID found -- make sure patient_ID or PATIENT_LOCAL_ID column isn't empty"];
+	} else {
+		$data = \REDCap::getData($pid, 'array', $pati_id);
+		$next_demographics_instance = get_next_instance(reset($data), "demographics");
+		$next_antimicrobial_instance = get_next_instance(reset($data), "antimicrobial_susceptibilities_and_resistance_mech");
+		
+		// overwrite xdro_registry form values (if imported values)
+		if (!empty($imported["xdro_registry"]))
+			$data[$pati_id][$eid] = $imported["xdro_registry"];
+		// add instances to repeatable forms (if imported values)
+		if (!empty($imported["demographics"]))
+			$data[$pati_id]["repeat_instances"][$eid]["demographics"][$next_demographics_instance] = $imported["demographics"];
+		if (!empty($imported["antimicrobial_susceptibilities_and_resistance_mech"]))
+			$data[$pati_id]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"][$next_demographics_instance] = $imported["antimicrobial_susceptibilities_and_resistance_mech"];
+		
+		// try to save
+		$result = \REDCap::saveData($pid, 'array', $data);
+		// $module->llog("$pati_id saveData \$result: " . print_r($result, true));
+		foreach($result["errors"] as $err) {
+			$errors[] = [1, $err];
+		}
+	}
+	
+	// $module->llog("data for row: " . print_r($data, true));
+	return $errors;
 }
 
 // use PHPSpreadsheet (php 5.6 | 7.x version)
@@ -314,6 +352,7 @@ try {
 	$reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader("Xlsx");
 	$reader->setReadDataOnly(TRUE);
 	$workbook = $reader->load($upload_path);
+	$sheet = $workbook->getActiveSheet();
 	
 	// cleanup
 	unlink($upload_path);
@@ -323,18 +362,8 @@ try {
 	exit(json_encode($json));
 }
 
-$rid_field = $module->framework->getRecordIdField($pid);
-$getdata = json_decode(\REDCap::getData($pid, 'json', null, [$rid_field, "patient_first_name_d"]));
-$records = [];
-foreach($getdata as $rec) {
-	$records[$rec->$rid_field] = $rec;
-}
-
-$module->llog("records: " . print_r($records, true));
-// exit("{}");
-
-$sheet = $workbook->getActiveSheet();
 $headers = [];
+$json->row_error_arrays = [];
 foreach ($sheet->getRowIterator() as $i => $row) {
 	if ($i == 1) {
 		// build headers array for future referencing
@@ -346,7 +375,8 @@ foreach ($sheet->getRowIterator() as $i => $row) {
 		// $module->llog("headers: " . print_r($headers, true));
 	} else {
 		$range = "A$i:" . number_to_column(count($headers)) . "$i";
-		import_data_row(reset($sheet->rangeToArray($range)));
+		$json->row_error_arrays[$i] = import_data_row(reset($sheet->rangeToArray($range)));
+		$module->llog("row errors for row $i: " . print_r($row_errors, true));
 	}
 }
 

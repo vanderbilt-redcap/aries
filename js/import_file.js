@@ -1,5 +1,4 @@
 XDRO.import_file_done = function(response) {
-	console.log('ajax received')
 	console.log('import response', response)
 }
 
