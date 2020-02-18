@@ -13,18 +13,17 @@
 	
 	todo make sure we accept xlsx and csv
 */
+// connect to REDCap
+require_once (APP_PATH_TEMP . "../redcap_connect.php");
+$pid = $module->getProjectId();
 $module->nlog();
 
 // make object that will hold our response
 $json = new \stdClass();
 $json->errors = [];
 
-// connect to REDCap
-require_once (APP_PATH_TEMP . "../redcap_connect.php");
-$pid = $module->getProjectId();
-
-// $module->llog("post: " . print_r($_POST, true));
-// $module->llog("files: " . print_r($_FILES, true));
+$module->llog("post: " . print_r($_POST, true));
+$module->llog("files: " . print_r($_FILES, true));
 
 /*
 	function definitions
@@ -249,10 +248,8 @@ function import_data_row($row) {
 	global $headers;
 	global $headers_flipped;
 	global $records;
-	$ret = [];
 	
 	// goal is to create an array for each form that needs importing, then $module->saveData or $module->saveInstanceData
-	
 	$module->llog("row: " . print_r($row, true));
 	
 	/*
@@ -267,6 +264,7 @@ function import_data_row($row) {
 	$data["xdro_registry"] = [];
 	$data["demographics"] = [];
 	$data["antimicrobial_susceptibilities_and_resistance_mech"] = [];
+	$data["errors"] = [];
 	
 	foreach ($row as $i => $value) {
 		if ($value == "NULL")
@@ -298,11 +296,8 @@ function import_data_row($row) {
 		$data[$assoc_form][$assoc_field] = $value;
 	}
 	
-	
-	
 	$module->llog("data for row: " . print_r($data, true));
-	
-	return $ret;
+	// do insert/update via $module->saveData / saveInstanceData
 }
 
 // use PHPSpreadsheet (php 5.6 | 7.x version)
@@ -329,13 +324,13 @@ try {
 }
 
 $rid_field = $module->framework->getRecordIdField($pid);
-$getdata = json_decode(\REDCap::getData($pid, 'json', null, $rid_field));
+$getdata = json_decode(\REDCap::getData($pid, 'json', null, [$rid_field, "patient_first_name_d"]));
 $records = [];
 foreach($getdata as $rec) {
 	$records[$rec->$rid_field] = $rec;
 }
 
-// $module->llog("records: " . print_r($records, true));
+$module->llog("records: " . print_r($records, true));
 // exit("{}");
 
 $sheet = $workbook->getActiveSheet();
@@ -348,7 +343,7 @@ foreach ($sheet->getRowIterator() as $i => $row) {
 			$headers[] = $cell->getValue();
 		}
 		$headers_flipped = array_flip($headers);
-		$module->llog("headers: " . print_r($headers, true));
+		// $module->llog("headers: " . print_r($headers, true));
 	} else {
 		$range = "A$i:" . number_to_column(count($headers)) . "$i";
 		import_data_row(reset($sheet->rangeToArray($range)));
