@@ -368,7 +368,7 @@ function send_lots_of_errors() {
 	exit(json_encode($json));
 }
 
-send_lots_of_errors();
+// send_lots_of_errors();
 
 // use PHPSpreadsheet (php 5.6 | 7.x version)
 require "libs/PhpSpreadsheet/vendor/autoload.php";

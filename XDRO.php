@@ -95,24 +95,24 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 			return $b['score'] - $a['score'];
 		});
 		
-		$this->llog("sorted remaining records by score:\n" . print_r($records, true) . "\n\n");
+		// $this->llog("sorted remaining records by score:\n" . print_r($records, true) . "\n\n");
 		
 		echo(json_encode($records));
 	}
 
-	private function nlog() {
+	function nlog() {
 		if (file_exists("C:/vumc/log.txt")) {
 			file_put_contents("C:/vumc/log.txt", "constructing XDRO instance\n");
 		}
 	}
 	
-	private function llog($text) {
+	function llog($text) {
 		if (file_exists("C:/vumc/log.txt")) {
 			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
 		}
 	}
 	
-	private function rlog($msg) {
+	function rlog($msg) {
 		\REDCap::logEvent("XDRO Module", $msg);
 	}
 }
