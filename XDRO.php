@@ -100,45 +100,23 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		echo(json_encode($records));
 	}
 
-	function importFileData() {
-		/*
-		Steps:
-			- read file (must be valid .csv)
-			- determine columns (via mapping function)
-			- create arrays
-			- fill with data so it's in REDCap::saveData format
-			- execute saveData call
-			- return results
-		*/
-		
-		$lab_data_path = "C:/vumc/projects/xdro/ADI files/xdro_lab_data.csv";
-		$pati_data_path = "C:/vumc/projects/xdro/ADI files/xdro_pati_data.csv";
-		
-		$file_contents = file_get_contents($pati_data_path);
-		foreach(preg_split("/((\r?\n)|(\r\n?))/", $import) as $line) {
-			// convert line string to csv array
-			$lines[] = str_getcsv($line);
-		}
-	}
-	
-	function nlog() {
+	private function nlog() {
 		if (file_exists("C:/vumc/log.txt")) {
 			file_put_contents("C:/vumc/log.txt", "constructing XDRO instance\n");
 		}
 	}
 	
-	function llog($text) {
+	private function llog($text) {
 		if (file_exists("C:/vumc/log.txt")) {
 			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
 		}
 	}
 	
-	function rlog($msg) {
+	private function rlog($msg) {
 		\REDCap::logEvent("XDRO Module", $msg);
 	}
 }
 
-// file_put_contents("C:/vumc/log.txt", "logging xdro function:\n");
 if ($_GET['action'] == 'predictPatients') {
 	$module = new XDRO();
 	$module->autocomplete_search();

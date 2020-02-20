@@ -50,6 +50,9 @@ XDRO.showMessage = function(txt, alert_class, wide) {
 
 $(function() {
 	XDRO.results_table = $("table#results").DataTable({
+		columnDefs: [
+			{className: "dt-center", target: "_all"}
+		],
 		pageLength: 50
 	});
 	XDRO.reset()

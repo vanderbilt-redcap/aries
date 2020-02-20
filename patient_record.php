@@ -2,12 +2,10 @@
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 
-// get dummy data record 1
 $rid = $_GET['rid'];
 if (empty($rid)) {
 	$data = reset(reset(\REDCap::getData($module->getProjectId(), 'array', $rid)));
 }
-
 
 ?>
 <link rel="stylesheet" href="<?=$module->getUrl('css/record.css')?>"/>
