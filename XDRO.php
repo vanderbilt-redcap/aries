@@ -99,7 +99,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		
 		echo(json_encode($records));
 	}
-
+	
 	function nlog() {
 		if (file_exists("C:/vumc/log.txt")) {
 			file_put_contents("C:/vumc/log.txt", "constructing XDRO instance\n");
@@ -120,4 +120,19 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 if ($_GET['action'] == 'predictPatients') {
 	$module = new XDRO();
 	$module->autocomplete_search();
+} elseif ($_GET['action'] == 'get_demographics') {
+	$form = filter_var($_GET['form'], FILTER_SANITIZE_STRING);
+	$record = filter_var($_GET['record'], FILTER_SANITIZE_STRING);
+	$instance = (int) $_GET['instance'];
+	
+	$module = new XDRO();
+	$module->nlog();
+	$module->llog("about to get instance data with args: $record, $form, $instance");
+	
+	$pid = $module->getProjectId();
+	$project = new \Project($pid);
+	$eid = $project->firstEventId;
+	$data = \REDCap::getData($pid, 'array', $record);
+	$demo = $data[$record]["repeat_instances"][$eid][$form][$instance];
+	exit(json_encode($demo));
 }

@@ -17,6 +17,8 @@ if (empty($rid)) {
 	
 	// allow for easier access to specific form values
 	$xdro_registry = $record[$rid][$eid];
+	$demo_inst_count = count($record[$rid]["repeat_instances"][$eid]["demographics"]);
+	
 	$last_index = max(array_keys($record[$rid]["repeat_instances"][$eid]["demographics"]));
 	$demographics = $record[$rid]["repeat_instances"][$eid]["demographics"][$last_index];
 }
@@ -24,6 +26,11 @@ if (empty($rid)) {
 ?>
 <link rel="stylesheet" href="<?=$module->getUrl('css/record.css')?>"/>
 <script type="text/javascript" src="<?=$module->getUrl('js/patient_record.js')?>"></script>
+<script type="text/javascript" >
+	XDRO.demographics.instance_count = <?php echo $demo_inst_count; ?>;
+	XDRO.moduleAddress = "<?=$module->getUrl('XDRO.php')?>";
+	XDRO.record_id = "<?php echo $rid;?>";
+</script>
 
 <div id='header' class='row'>
 	<div class='logo column'>
@@ -49,8 +56,8 @@ if (empty($rid)) {
 	<div class='column'>
 		<div id='patient-info'>
 			<table class='mb-3 mt-1 simpletable'>
-				<tr><th>FIRST NAME: </th><td><?=$xdro_registry["patient_first_nm"]?></td></tr>
-				<tr><th>LAST NAME: </th><td><?=$xdro_registry["patient_last_nm"]?></td></tr>
+				<tr><th>FIRST NAME: </th><td><?=$xdro_registry["patient_first_name"]?></td></tr>
+				<tr><th>LAST NAME: </th><td><?=$xdro_registry["patient_last_name"]?></td></tr>
 				<tr><th>DATE OF BIRTH: </th><td><?=$xdro_registry["patient_dob"]?></td></tr>
 				<tr><th>GENDER: </th><td><?=$xdro_registry["curr_sex_cd"]?></td></tr>
 				<tr><th>ADDRESS: </th><td><?=$xdro_registry["street_addr_1"] . $xdro_registry["street_addr_2"] . "<br>&emsp;" . $xdro_registry["city_desc"] . ", " . $xdro_registry["state_desc"] . " " . $xdro_registry["zip_cd"]?></td></tr>
@@ -58,7 +65,7 @@ if (empty($rid)) {
 				<tr><th>RESIDENCE: </th><td><?=$xdro_registry["patient_state"]?></td></tr>
 				<tr><th>JURISDICTION: </th><td><?=$xdro_registry["jurisdiction_nm"]?></td></tr>
 			</table>
-			<span class='px-3 mb-3'>Click <a href='' data-toggle='modal' data-target='.modal'><b>HERE</b></a> for more demographic information</span>
+			<span class='px-3 mb-3'>Click <a href='' id="modal_link" data-toggle='modal' data-target='.modal'><b>HERE</b></a> for more demographic information</span>
 		</div>
 		<div id='lab-info' class='mb-3 mt-3'>
 			<table class='mb-3 mt-1 simpletable'>
@@ -171,7 +178,7 @@ if (empty($rid)) {
 		</div>
 	</div>
 </div>
-<div class="modal" tabindex="-1" role="dialog">
+<div id="demographics" class="modal" tabindex="-1" role="dialog">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -184,27 +191,32 @@ if (empty($rid)) {
 				<p><b>DEMOGRAPHIC INFORMATION AS OF: </b><?=$xdro_registry['patient_last_change_time']?></p>
 				<table class='simpletable'>
 					<tbody>
-							<tr><th>FIRST NAME:</th><td><?=$jurisdiction['patient_first_name_d']?></td></tr>
-							<tr><th>LAST NAME:</th><td><?=$jurisdiction['patient_last_name_d']?></td></tr>
-							<tr><th>DATE OF BIRTH:</th><td><?=$jurisdiction['patient_dob_d']?></td></tr>
-							<tr><th>CURRENT GENDER:</th><td><?=$jurisdiction['patient_current_sex_d']?></td></tr>
-							<tr><th>PHONE:</th><td><?=$jurisdiction['patient_phone_home']?></td></tr>
-							<tr><th>ADDRESS:</th><td><?=$jurisdiction['street_addr_1_d']?><br><?=$jurisdiction['street_addr_2_d']?></td></tr>
-							<tr><th>CITY:</th><td><?=$jurisdiction['patient_city_d']?></td></tr>
-							<tr><th>STATE:</th><td><?=$jurisdiction['patient_state_d']?></td></tr>
-							<tr><th>ZIP:</th><td><?=$jurisdiction['patient_zip_d']?></td></tr>
-							<tr><th>COUNTY:</th><td><?=$jurisdiction['patient_county_d']?></td></tr>
-							<tr><th>RESIDENCE:</th><td><?=$jurisdiction['patient_state_d']?></td></tr>
-							<tr><th>JURISDICTION:</th><td><?=$jurisdiction['jurisdiction_nm_d']?></td></tr>
+							<tr><th>FIRST NAME:</th><td data-field="patient_first_name_d"><?=$demographics['patient_first_name_d']?></td></tr>
+							<tr><th>LAST NAME:</th><td data-field="patient_last_name_d"><?=$demographics['patient_last_name_d']?></td></tr>
+							<tr><th>DATE OF BIRTH:</th><td data-field="patient_dob_d"><?=$demographics['patient_dob_d']?></td></tr>
+							<tr><th>CURRENT GENDER:</th><td data-field="patient_current_sex_d"><?=$demographics['patient_current_sex_d']?></td></tr>
+							<tr><th>PHONE:</th><td data-field="patient_phone_home"><?=$demographics['patient_phone_home']?></td></tr>
+							<tr><th>ADDRESS:</th><td data-field="street_addr_1_d"><?=$demographics['street_addr_1_d']?></td></tr>
+							<tr><th></th><td data-field="street_addr_2_d"><?=$demographics['street_addr_2_d']?></td></tr>
+							<tr><th>CITY:</th><td data-field="patient_city_d"><?=$demographics['patient_city_d']?></td></tr>
+							<tr><th>STATE:</th><td data-field="patient_state_d"><?=$demographics['patient_state_d']?></td></tr>
+							<tr><th>ZIP:</th><td data-field="patient_zip_d"><?=$demographics['patient_zip_d']?></td></tr>
+							<tr><th>COUNTY:</th><td data-field="patient_county_d"><?=$demographics['patient_county_d']?></td></tr>
+							<tr><th>RESIDENCE:</th><td data-field="patient_state_d"><?=$demographics['patient_state_d']?></td></tr>
+							<tr><th>JURISDICTION:</th><td data-field="jurisdiction_nm_d"><?=$demographics['jurisdiction_nm_d']?></td></tr>
 							<tr><th>SOCIAL SECURITY:</th><td><?=$xdro_registry['patient_ssn']?></td></tr>
 							<tr><th>RACE:</th><td><?=$xdro_registry['patient_race_calculated']?></td></tr>
 							<tr><th>ETHNICITY:</th><td><?=$xdro_registry['patient_ethnicity']?></td></tr>
 					</tbody>
 				</table>
+				<div class="mt-3" id="demo_buttons">
+					<button id="prev_demo_inst" type="button" class="btn btn-primary">Back</button>
+					<span id="demo_instance"></span>
+					<button id="next_demo_inst" type="button" class="btn btn-primary">Next</button>
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary">Save changes</button>
 			</div>
 		</div>
 	</div>

@@ -135,6 +135,14 @@ div.header-info {
 	display: flex;
 	flex-direction: column;
 }
+#demo_buttons {
+	display: flex;
+	justify-content: space-around
+}
+#demo_instance {
+	font-size: 1.5em;
+	font-weight: 600;
+}
 
 /* etc */
 .symbol-font {
