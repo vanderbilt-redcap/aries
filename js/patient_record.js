@@ -32,4 +32,5 @@ XDRO.update_demographics = function(demo_index) {
 		var fieldname = $(e).attr('data-field')
 		$(e).text(demographics[fieldname])
 	})
+	$("#demographics #last_change_time").text(String(demographics["patient_last_change_time"]))
 }

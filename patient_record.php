@@ -28,15 +28,15 @@ if (empty($rid)) {
 	$xdro_registry = $record[$rid][$eid];
 	
 	// sort demographics by [patient_last_change_time]
-	$module->llog("before sort:");
-	foreach($record[$rid]["repeat_instances"][$eid]["demographics"] as $demo) {
-		$module->llog($demo["patient_last_change_time"]);
-	}
+	// $module->llog("before sort:");
+	// foreach($record[$rid]["repeat_instances"][$eid]["demographics"] as $demo) {
+		// $module->llog($demo["patient_last_change_time"]);
+	// }
 	usort($record[$rid]["repeat_instances"][$eid]["demographics"], "sort_demographics");
-	$module->llog("after sort:");
-	foreach($record[$rid]["repeat_instances"][$eid]["demographics"] as $demo) {
-		$module->llog($demo["patient_last_change_time"]);
-	}
+	// $module->llog("after sort:");
+	// foreach($record[$rid]["repeat_instances"][$eid]["demographics"] as $demo) {
+		// $module->llog($demo["patient_last_change_time"]);
+	// }
 	
 	$last_demo_index = max(array_keys($record[$rid]["repeat_instances"][$eid]["demographics"]));
 	$last_demo = $record[$rid]["repeat_instances"][$eid]["demographics"][$last_demo_index];
@@ -200,7 +200,7 @@ if (empty($rid)) {
 				</button>
 			</div>
 			<div class="modal-body">
-				<p data-field="patient_last_change_time"><b>DEMOGRAPHIC INFORMATION AS OF: </b><?=$last_demo['patient_last_change_time']?></p>
+				<p><b>DEMOGRAPHIC INFORMATION AS OF: </b><span id="last_change_time"><?=$last_demo['patient_last_change_time']?></span></p>
 				<table class='simpletable'>
 					<tbody>
 							<tr><th>FIRST NAME:</th><td data-field="patient_first_name"><?=$last_demo['patient_first_name']?></td></tr>
