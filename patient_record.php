@@ -13,7 +13,7 @@ if (empty($rid)) {
 	$project = new \Project($pid);
 	$eid = $project->firstEventId;
 	$record = \REDCap::getData($pid, 'array', $rid);
-	$module->llog("data: " . print_r($record, true));
+	// $module->llog("data: " . print_r($record, true));
 	
 	// allow for easier access to specific form values
 	$xdro_registry = $record[$rid][$eid];
@@ -24,9 +24,10 @@ if (empty($rid)) {
 	
 	$anti_inst_count = count($record[$rid]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"]);
 	$last_anti_index = max(array_keys($record[$rid]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"]));
-	$labs = $record[$rid]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"][$last_anti_index];
+	$last_lab = $record[$rid]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"][$last_anti_index];
 	
-	$all_demographics = json_encode($record[$rid]["repeat_instances"][$eid]["demographics"]);
+	$all_labs = $record[$rid]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"];
+	$all_demographics = $record[$rid]["repeat_instances"][$eid]["demographics"];
 	
 	$address_td = "";
 	if (!empty($demographics["patient_street_address_1"]))
@@ -43,7 +44,7 @@ if (empty($rid)) {
 	XDRO.pid = "<?php echo $pid;?>";
 	XDRO.rid = "<?php echo $rid;?>";
 	XDRO.eid = "<?php echo $eid;?>";
-	XDRO.demographics = '<?php echo $all_demographics;?>';
+	XDRO.demographics = '<?php echo json_encode($all_demographics);?>';
 </script>
 
 <div id='header' class='row'>
@@ -58,11 +59,11 @@ if (empty($rid)) {
 		<p id='ip-blurb' class='bluefont pt-2'>Please consider an Infectious Disease consult and make sure facility Infection Preventionist is aware.</p>
 		<br>
 		<div id='registry-title'><h1>Extensively Drug Resistant Organism Registry</h1></div>
-		<span><b>RESULT DATE:</b> <?=$labs["resulted_dt"]?></span>
+		<span><b>RESULT DATE:</b> <?=$last_lab["resulted_dt"]?></span>
 		<div id='test-results'>
 			<span><b>TEST RESULTS</b></span>
-			<span class='redfont'><b>ALERT: <?=$labs["disease"]?></b></span>
-			<span><b>ORGANISM: </b><i><?=$labs["lab_test_nm"]?></i></span>
+			<span class='redfont'><b>ALERT: <?=$last_lab["disease"]?></b></span>
+			<span><b>ORGANISM: </b><i><?=$last_lab["lab_test_nm"]?></i></span>
 		</div>
 	</div>
 </div>
@@ -83,17 +84,17 @@ if (empty($rid)) {
 		</div>
 		<div id='lab-info' class='mb-3 mt-3'>
 			<table class='mb-3 mt-1 simpletable'>
-				<tr><th>ORDERING FACILITY: </th><td><?=$labs["ordering_facility"]?></td></tr>
-				<tr><th>ORDERING PROVIDER: </th><td><?=$labs["providername"] . "<br>&emsp;" . $labs["provider_address"] . "<br>&emsp;" . $labs["providerphone"]?></td></tr>
+				<tr><th>ORDERING FACILITY: </th><td><?=$last_lab["ordering_facility"]?></td></tr>
+				<tr><th>ORDERING PROVIDER: </th><td><?=$last_lab["providername"] . "<br>&emsp;" . $last_lab["provider_address"] . "<br>&emsp;" . $last_lab["providerphone"]?></td></tr>
 				<tr><th>PERFORMING FACILITY: </th><td class='redfont'></td></tr>
-				<tr><th>REPORTING FACILITY: </th><td class='redfont'><?=$labs["reporting_facility"] . "<br>&emsp;" . $labs["reportername"] . "<br>&emsp;" . $labs["reporterphone"]?></td></tr>
+				<tr><th>REPORTING FACILITY: </th><td class='redfont'><?=$last_lab["reporting_facility"] . "<br>&emsp;" . $last_lab["reportername"] . "<br>&emsp;" . $last_lab["reporterphone"]?></td></tr>
 			</table>
 		
-			<span><b>ORDERED TEST: </b> <?=$labs["ordered_test_nm"]?></span>
-			<span><b>SPECIMEN SOURCE: </b> <?=$labs["specimen_desc"]?></span>
-			<span><b>RESULTED TEST: </b> <?=$labs["lab_test_nm"]?></span>
-			<span><b>DATE SPECIMEN COLLECTED: </b> <?=$labs["specimen_collection_dt"]?></span>
-			<span><b>STATUS: </b> <?=$labs["lab_test_status"]?></span>
+			<span><b>ORDERED TEST: </b> <?=$last_lab["ordered_test_nm"]?></span>
+			<span><b>SPECIMEN SOURCE: </b> <?=$last_lab["specimen_desc"]?></span>
+			<span><b>RESULTED TEST: </b> <?=$last_lab["lab_test_nm"]?></span>
+			<span><b>DATE SPECIMEN COLLECTED: </b> <?=$last_lab["specimen_collection_dt"]?></span>
+			<span><b>STATUS: </b> <?=$last_lab["lab_test_status"]?></span>
 		</div>
 		<div id='action-items' class='bluefont'>
 			<span class='text-center d-block mb-2 mt-1'><b><u>Action Items for <?=$xdro_registry["condition_alert"]?>:</b></u></span>
@@ -127,24 +128,35 @@ if (empty($rid)) {
 				</thead>
 				<tbody>
 					<?php
-						for ($i = 1; $i <= 30; $i++) {
-							$test = $xdro_registry["lab_test_nm_$i"];
-							$result = $xdro_registry["lab_result_txt_val_$i"];
-							$sir = $xdro_registry["sir_$i"];
-							$mic_kb = $xdro_registry["numeric_result_val_$i"];
-							if ($mic_kb == ">=4") {
+						///////////
+						foreach ($all_labs as $lab_i => $lab) {
+							$test = $lab["lab_test_nm_2"];
+							$result = $lab["coded_result_val_desc"];
+							$sir = $lab["interpretation_flg"];
+							$val_1 = $lab["numeric_result_val"];
+							$val_2 = $lab["result_units"];
+							$val_3 = $lab["test_method_cd"];
+							$val = "";
+							if (!empty($val_1))
+								$val .= "<br>" . $val_1;
+							if (!empty($val_2))
+								$val .= "<br>" . $val_2;
+							if (!empty($val_3))
+								$val .= "<br>" . $val_3;
+							
+							if ($sir == "R" || strpos($val, ">=4") != FALSE) {
 								$class = " class='redfont font-weight-bold'";
 							}
-							if (!empty($test) or !empty($result) or !empty($sir) or !empty($mic_kb))
-								echo "
+							echo "
 					<tr$class>
 						<td>$test</td>
 						<td>$result</td>
 						<td>$sir</td>
-						<td>$mic_kb</td>
+						<td>$val</td>
 					</tr>";
-							unset($test, $result, $sir, $mic_kb, $class);
+							unset($test, $result, $sir, $val_1, $val_2, $val_3, $val, $class);
 						}
+						
 					?>
 				</tbody>
 			</table>

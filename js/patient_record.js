@@ -2,9 +2,9 @@ XDRO = {}
 
 $(function() {
 	XDRO.demographics = JSON.parse(XDRO.demographics)
-	// console.log('data', XDRO.patient_record)
 	
 	console.log("demographics", XDRO.demographics)
+	// console.log("
 })
 
 $('body').on('click', '#modal_link', function (e) {
