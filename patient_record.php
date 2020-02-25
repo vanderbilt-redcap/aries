@@ -6,6 +6,16 @@ $module->nlog();
 $rid = $_GET['rid'];
 $module->llog("fetching patient_record for rid: $rid");
 
+function sort_demographics($a, $b) {
+	// global $module;
+	// $module->llog("\$a[\"patient_last_change_time\"]: " . print_r($a["patient_last_change_time"], true));
+	if (strtotime($a["patient_last_change_time"]) > strtotime($b["patient_last_change_time"]))
+		return 1;
+	if (strtotime($a["patient_last_change_time"]) < strtotime($b["patient_last_change_time"]))
+		return -1;
+	return 0;
+}
+
 if (empty($rid)) {
 	// TODO what to show when wrong Record ID or missing??
 } else {
@@ -13,14 +23,23 @@ if (empty($rid)) {
 	$project = new \Project($pid);
 	$eid = $project->firstEventId;
 	$record = \REDCap::getData($pid, 'array', $rid);
-	// $module->llog("data: " . print_r($record, true));
 	
 	// allow for easier access to specific form values
 	$xdro_registry = $record[$rid][$eid];
 	
-	$demo_inst_count = count($record[$rid]["repeat_instances"][$eid]["demographics"]);
+	// sort demographics by [patient_last_change_time]
+	$module->llog("before sort:");
+	foreach($record[$rid]["repeat_instances"][$eid]["demographics"] as $demo) {
+		$module->llog($demo["patient_last_change_time"]);
+	}
+	usort($record[$rid]["repeat_instances"][$eid]["demographics"], "sort_demographics");
+	$module->llog("after sort:");
+	foreach($record[$rid]["repeat_instances"][$eid]["demographics"] as $demo) {
+		$module->llog($demo["patient_last_change_time"]);
+	}
+	
 	$last_demo_index = max(array_keys($record[$rid]["repeat_instances"][$eid]["demographics"]));
-	$demographics = $record[$rid]["repeat_instances"][$eid]["demographics"][$last_demo_index];
+	$last_demo = $record[$rid]["repeat_instances"][$eid]["demographics"][$last_demo_index];
 	
 	$anti_inst_count = count($record[$rid]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"]);
 	$last_anti_index = max(array_keys($record[$rid]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"]));
@@ -30,11 +49,11 @@ if (empty($rid)) {
 	$all_demographics = $record[$rid]["repeat_instances"][$eid]["demographics"];
 	
 	$address_td = "";
-	if (!empty($demographics["patient_street_address_1"]))
-		$address_td .= $demographics["patient_street_address_1"];
-	if (!empty($demographics["patient_street_address_2"]))
-		$address_td .= "<br>" . $demographics["patient_street_address_2"];
-	$address_td .= "<br>" . $demographics["patient_city"] . ", " . $demographics["patient_state"] . " " . $demographics["patient_zip"];
+	if (!empty($last_demo["patient_street_address_1"]))
+		$address_td .= $last_demo["patient_street_address_1"];
+	if (!empty($last_demo["patient_street_address_2"]))
+		$address_td .= "<br>" . $last_demo["patient_street_address_2"];
+	$address_td .= "<br>" . $last_demo["patient_city"] . ", " . $last_demo["patient_state"] . " " . $last_demo["patient_zip"];
 }
 
 ?>
@@ -71,14 +90,14 @@ if (empty($rid)) {
 	<div class='column'>
 		<div id='patient-info'>
 			<table class='mb-3 mt-1 simpletable'>
-				<tr><th>FIRST NAME: </th><td><?=$demographics["patient_first_name"]?></td></tr>
-				<tr><th>LAST NAME: </th><td><?=$demographics["patient_last_name"]?></td></tr>
+				<tr><th>FIRST NAME: </th><td><?=$last_demo["patient_first_name"]?></td></tr>
+				<tr><th>LAST NAME: </th><td><?=$last_demo["patient_last_name"]?></td></tr>
 				<tr><th>DATE OF BIRTH: </th><td><?=$xdro_registry["patient_dob"]?></td></tr>
-				<tr><th>GENDER: </th><td><?=$demographics["patient_current_sex"]?></td></tr>
+				<tr><th>GENDER: </th><td><?=$last_demo["patient_current_sex"]?></td></tr>
 				<tr><th>ADDRESS: </th><td><?=$address_td?></td></tr>
-				<tr><th>COUNTY: </th><td><?=$demographics["patient_county"]?></td></tr>
-				<tr><th>RESIDENCE: </th><td><?=$demographics["patient_state"]?></td></tr>
-				<tr><th>JURISDICTION: </th><td><?=$demographics["jurisdiction_nm"]?></td></tr>
+				<tr><th>COUNTY: </th><td><?=$last_demo["patient_county"]?></td></tr>
+				<tr><th>RESIDENCE: </th><td><?=$last_demo["patient_state"]?></td></tr>
+				<tr><th>JURISDICTION: </th><td><?=$last_demo["jurisdiction_nm"]?></td></tr>
 			</table>
 			<span class='px-3 mb-3'>Click <a href='' id="modal_link" data-toggle='modal' data-target='.modal'><b>HERE</b></a> for more demographic information</span>
 		</div>
@@ -131,6 +150,9 @@ if (empty($rid)) {
 						///////////
 						foreach ($all_labs as $lab_i => $lab) {
 							$test = $lab["lab_test_nm_2"];
+							if (empty($test))
+								continue;
+							
 							$result = $lab["coded_result_val_desc"];
 							$sir = $lab["interpretation_flg"];
 							$val_1 = $lab["numeric_result_val"];
@@ -178,31 +200,31 @@ if (empty($rid)) {
 				</button>
 			</div>
 			<div class="modal-body">
-				<p><b>DEMOGRAPHIC INFORMATION AS OF: </b><?=$demographics['patient_last_change_time']?></p>
+				<p data-field="patient_last_change_time"><b>DEMOGRAPHIC INFORMATION AS OF: </b><?=$last_demo['patient_last_change_time']?></p>
 				<table class='simpletable'>
 					<tbody>
-							<tr><th>FIRST NAME:</th><td data-field="patient_first_name_d"><?=$demographics['patient_first_name']?></td></tr>
-							<tr><th>LAST NAME:</th><td data-field="patient_last_name_d"><?=$demographics['patient_last_name']?></td></tr>
-							<tr><th>DATE OF BIRTH:</th><td data-field="patient_dob_d"><?=$demographics['patient_dob']?></td></tr>
-							<tr><th>CURRENT GENDER:</th><td data-field="patient_current_sex_d"><?=$demographics['patient_current_sex']?></td></tr>
-							<tr><th>PHONE:</th><td data-field="patient_phone_home"><?=$demographics['patient_phone_home']?></td></tr>
-							<tr><th>ADDRESS:</th><td data-field="street_addr_1_d"><?=$demographics['patient_street_address_1']?></td></tr>
-							<tr><th></th><td data-field="street_addr_2_d"><?=$demographics['patient_street_address_2']?></td></tr>
-							<tr><th>CITY:</th><td data-field="patient_city_d"><?=$demographics['patient_city']?></td></tr>
-							<tr><th>STATE:</th><td data-field="patient_state_d"><?=$demographics['patient_state']?></td></tr>
-							<tr><th>ZIP:</th><td data-field="patient_zip_d"><?=$demographics['patient_zip']?></td></tr>
-							<tr><th>COUNTY:</th><td data-field="patient_county_d"><?=$demographics['patient_county']?></td></tr>
-							<tr><th>RESIDENCE:</th><td data-field="patient_state_d"><?=$demographics['patient_state']?></td></tr>
-							<tr><th>JURISDICTION:</th><td data-field="jurisdiction_nm_d"><?=$demographics['jurisdiction_nm']?></td></tr>
+							<tr><th>FIRST NAME:</th><td data-field="patient_first_name"><?=$last_demo['patient_first_name']?></td></tr>
+							<tr><th>LAST NAME:</th><td data-field="patient_last_name"><?=$last_demo['patient_last_name']?></td></tr>
+							<tr><th>DATE OF BIRTH:</th><td><?=$xdro_registry['patient_dob']?></td></tr>
+							<tr><th>CURRENT GENDER:</th><td data-field="patient_current_sex"><?=$last_demo['patient_current_sex']?></td></tr>
+							<tr><th>PHONE:</th><td data-field="patient_phone_home"><?=$last_demo['patient_phone_home']?></td></tr>
+							<tr><th>ADDRESS:</th><td data-field="patient_street_address_1"><?=$last_demo['patient_street_address_1']?></td></tr>
+							<tr><th></th><td data-field="patient_street_address_2"><?=$last_demo['patient_street_address_2']?></td></tr>
+							<tr><th>CITY:</th><td data-field="patient_city"><?=$last_demo['patient_city']?></td></tr>
+							<tr><th>STATE:</th><td data-field="patient_state"><?=$last_demo['patient_state']?></td></tr>
+							<tr><th>ZIP:</th><td data-field="patient_zip"><?=$last_demo['patient_zip']?></td></tr>
+							<tr><th>COUNTY:</th><td data-field="patient_county"><?=$last_demo['patient_county']?></td></tr>
+							<tr><th>RESIDENCE:</th><td data-field="patient_state"><?=$last_demo['patient_state']?></td></tr>
+							<tr><th>JURISDICTION:</th><td data-field="jurisdiction_nm"><?=$last_demo['jurisdiction_nm']?></td></tr>
 							<tr><th>SOCIAL SECURITY:</th><td><?=$xdro_registry['patient_ssn']?></td></tr>
 							<tr><th>RACE:</th><td><?=$xdro_registry['patient_race_calculated']?></td></tr>
 							<tr><th>ETHNICITY:</th><td><?=$xdro_registry['patient_ethnicity']?></td></tr>
 					</tbody>
 				</table>
 				<div class="mt-3" id="demo_buttons">
-					<button id="prev_demo_inst" type="button" class="btn btn-primary">Back</button>
+					<button id="prev_demo_inst" type="button" class="btn btn-primary">Older <i class="fa fa-arrow-left"></i></button>
 					<span id="demo_instance"></span>
-					<button id="next_demo_inst" type="button" class="btn btn-primary">Next</button>
+					<button id="next_demo_inst" type="button" class="btn btn-primary" disabled>Newer <i class="fa fa-arrow-right"></i></button>
 				</div>
 			</div>
 			<div class="modal-footer">

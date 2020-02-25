@@ -2,47 +2,34 @@ XDRO = {}
 
 $(function() {
 	XDRO.demographics = JSON.parse(XDRO.demographics)
-	
-	console.log("demographics", XDRO.demographics)
-	// console.log("
+	XDRO.demo_index = XDRO.demographics.length
+	$("#demo_instance").text(XDRO.demographics.length + " / " + XDRO.demographics.length)
 })
 
-$('body').on('click', '#modal_link', function (e) {
-	$("#demo_instance").text(XDRO.demographics.instance_current + " / " + XDRO.demographics.instance_count)
-})
 $('body').on('click', '#prev_demo_inst', function (e) {
-	var inst = XDRO.demographics.instance_current
-	if (inst == 1)
-		return
+	XDRO.demo_index -= 1
+	if (XDRO.demo_index == 1)
+		$(this).attr('disabled', true)
+	$("button#next_demo_inst").removeAttr('disabled')
 	
-	// var url = XDRO.moduleAddress + "&action=get_demographics&record=" + XDRO.record_id + "&form=demographics&instance=" + (inst - 1)
-	// console.log('sending ajax to ' + url)
-	// $.ajax({
-		// url: url
-	// }).done(function(response) {
-		// response.instance = inst
-		// XDRO.update_demographics(response)
-	// })
+	$("#demo_instance").text(XDRO.demo_index + " / " + XDRO.demographics.length)
+	XDRO.update_demographics(XDRO.demo_index)
 })
 $('body').on('click', '#next_demo_inst', function (e) {
-	var inst = XDRO.demographics.instance_current
-	if (inst == XDRO.demographics.instance_count)
-		return
+	XDRO.demo_index += 1
+	if (XDRO.demo_index == XDRO.demographics.length)
+		$(this).attr('disabled', true)
+	$("button#prev_demo_inst").removeAttr('disabled')
 	
-	// var url = XDRO.moduleAddress + "&action=get_demographics&record=" + XDRO.record_id + "&form=demographics&instance=" + (inst + 1)
-	// console.log('sending ajax to ' + url)
-	// $.ajax({
-		// url: url
-	// }).done(function(response) {
-		// response.instance = inst
-		// XDRO.update_demographics(response)
-	// })
+	$("#demo_instance").text(XDRO.demo_index + " / " + XDRO.demographics.length)
+	XDRO.update_demographics(XDRO.demo_index)
 })
 
-XDRO.update_demographics = function(demographics) {
-	console.log('updating demographics modal')
+XDRO.update_demographics = function(demo_index) {
+	var demographics = XDRO.demographics[demo_index-1]
+	
 	$("#demographics tbody td[data-field]").each(function(i, e) {
 		var fieldname = $(e).attr('data-field')
-		e.text(demographics[fieldname])
+		$(e).text(demographics[fieldname])
 	})
 }
