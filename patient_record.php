@@ -17,19 +17,33 @@ if (empty($rid)) {
 	
 	// allow for easier access to specific form values
 	$xdro_registry = $record[$rid][$eid];
-	$demo_inst_count = count($record[$rid]["repeat_instances"][$eid]["demographics"]);
 	
-	$last_index = max(array_keys($record[$rid]["repeat_instances"][$eid]["demographics"]));
-	$demographics = $record[$rid]["repeat_instances"][$eid]["demographics"][$last_index];
+	$demo_inst_count = count($record[$rid]["repeat_instances"][$eid]["demographics"]);
+	$last_demo_index = max(array_keys($record[$rid]["repeat_instances"][$eid]["demographics"]));
+	$demographics = $record[$rid]["repeat_instances"][$eid]["demographics"][$last_demo_index];
+	
+	$anti_inst_count = count($record[$rid]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"]);
+	$last_anti_index = max(array_keys($record[$rid]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"]));
+	$labs = $record[$rid]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"][$last_anti_index];
+	
+	$all_demographics = json_encode($record[$rid]["repeat_instances"][$eid]["demographics"]);
+	
+	$address_td = "";
+	if (!empty($demographics["patient_street_address_1"]))
+		$address_td .= $demographics["patient_street_address_1"];
+	if (!empty($demographics["patient_street_address_2"]))
+		$address_td .= "<br>" . $demographics["patient_street_address_2"];
+	$address_td .= "<br>" . $demographics["patient_city"] . ", " . $demographics["patient_state"] . " " . $demographics["patient_zip"];
 }
 
 ?>
 <link rel="stylesheet" href="<?=$module->getUrl('css/record.css')?>"/>
 <script type="text/javascript" src="<?=$module->getUrl('js/patient_record.js')?>"></script>
 <script type="text/javascript" >
-	XDRO.demographics.instance_count = <?php echo $demo_inst_count; ?>;
-	XDRO.moduleAddress = "<?=$module->getUrl('XDRO.php')?>";
-	XDRO.record_id = "<?php echo $rid;?>";
+	XDRO.pid = "<?php echo $pid;?>";
+	XDRO.rid = "<?php echo $rid;?>";
+	XDRO.eid = "<?php echo $eid;?>";
+	XDRO.demographics = '<?php echo $all_demographics;?>';
 </script>
 
 <div id='header' class='row'>
@@ -44,11 +58,11 @@ if (empty($rid)) {
 		<p id='ip-blurb' class='bluefont pt-2'>Please consider an Infectious Disease consult and make sure facility Infection Preventionist is aware.</p>
 		<br>
 		<div id='registry-title'><h1>Extensively Drug Resistant Organism Registry</h1></div>
-		<span><b>RESULT DATE:</b> <?=$xdro_registry["resulted_dt"]?></span>
+		<span><b>RESULT DATE:</b> <?=$labs["resulted_dt"]?></span>
 		<div id='test-results'>
 			<span><b>TEST RESULTS</b></span>
-			<span class='redfont'><b>ALERT: <?=$xdro_registry["disease"]?></b></span>
-			<span><b>ORGANISM: </b><i><?=$xdro_registry["lab_test_nm"]?></i></span>
+			<span class='redfont'><b>ALERT: <?=$labs["disease"]?></b></span>
+			<span><b>ORGANISM: </b><i><?=$labs["lab_test_nm"]?></i></span>
 		</div>
 	</div>
 </div>
@@ -56,30 +70,30 @@ if (empty($rid)) {
 	<div class='column'>
 		<div id='patient-info'>
 			<table class='mb-3 mt-1 simpletable'>
-				<tr><th>FIRST NAME: </th><td><?=$xdro_registry["patient_first_name"]?></td></tr>
-				<tr><th>LAST NAME: </th><td><?=$xdro_registry["patient_last_name"]?></td></tr>
+				<tr><th>FIRST NAME: </th><td><?=$demographics["patient_first_name"]?></td></tr>
+				<tr><th>LAST NAME: </th><td><?=$demographics["patient_last_name"]?></td></tr>
 				<tr><th>DATE OF BIRTH: </th><td><?=$xdro_registry["patient_dob"]?></td></tr>
-				<tr><th>GENDER: </th><td><?=$xdro_registry["curr_sex_cd"]?></td></tr>
-				<tr><th>ADDRESS: </th><td><?=$xdro_registry["street_addr_1"] . $xdro_registry["street_addr_2"] . "<br>&emsp;" . $xdro_registry["city_desc"] . ", " . $xdro_registry["state_desc"] . " " . $xdro_registry["zip_cd"]?></td></tr>
-				<tr><th>COUNTY: </th><td><?=$xdro_registry["county"]?></td></tr>
-				<tr><th>RESIDENCE: </th><td><?=$xdro_registry["patient_state"]?></td></tr>
-				<tr><th>JURISDICTION: </th><td><?=$xdro_registry["jurisdiction_nm"]?></td></tr>
+				<tr><th>GENDER: </th><td><?=$demographics["patient_current_sex"]?></td></tr>
+				<tr><th>ADDRESS: </th><td><?=$address_td?></td></tr>
+				<tr><th>COUNTY: </th><td><?=$demographics["patient_county"]?></td></tr>
+				<tr><th>RESIDENCE: </th><td><?=$demographics["patient_state"]?></td></tr>
+				<tr><th>JURISDICTION: </th><td><?=$demographics["jurisdiction_nm"]?></td></tr>
 			</table>
 			<span class='px-3 mb-3'>Click <a href='' id="modal_link" data-toggle='modal' data-target='.modal'><b>HERE</b></a> for more demographic information</span>
 		</div>
 		<div id='lab-info' class='mb-3 mt-3'>
 			<table class='mb-3 mt-1 simpletable'>
-				<tr><th>ORDERING FACILITY: </th><td><?=$xdro_registry["ordering_facility"]?></td></tr>
-				<tr><th>ORDERING PROVIDER: </th><td><?=$xdro_registry["providername"] . "<br>&emsp;" . $xdro_registry["provider_address"] . "<br>&emsp;" . $xdro_registry["providerphone"]?></td></tr>
-				<tr><th>PERFORMING FACILITY: </th><td class='redfont'><?=$xdro_registry["performing_facility"] . "<br>&emsp;" . $xdro_registry["performing_address"]?></td></tr>
-				<tr><th>REPORTING FACILITY: </th><td class='redfont'><?=$xdro_registry["reporting_facility"] . "<br>&emsp;" . $xdro_registry["reportername"] . "<br>&emsp;" . $xdro_registry["reporterphone"]?></td></tr>
+				<tr><th>ORDERING FACILITY: </th><td><?=$labs["ordering_facility"]?></td></tr>
+				<tr><th>ORDERING PROVIDER: </th><td><?=$labs["providername"] . "<br>&emsp;" . $labs["provider_address"] . "<br>&emsp;" . $labs["providerphone"]?></td></tr>
+				<tr><th>PERFORMING FACILITY: </th><td class='redfont'></td></tr>
+				<tr><th>REPORTING FACILITY: </th><td class='redfont'><?=$labs["reporting_facility"] . "<br>&emsp;" . $labs["reportername"] . "<br>&emsp;" . $labs["reporterphone"]?></td></tr>
 			</table>
 		
-			<span><b>ORDERED TEST: </b> <?=$xdro_registry["ordered_test_nm"]?></span>
-			<span><b>SPECIMEN SOURCE: </b> <?=$xdro_registry["specimen_src"]?></span>
-			<span><b>RESULTED TEST: </b> <?=$xdro_registry["resulted_lab_test_cd_desc"]?></span>
-			<span><b>DATE SPECIMEN COLLECTED: </b> <?=$xdro_registry["specimen_collection_dt"]?></span>
-			<span><b>STATUS: </b> <?=$xdro_registry["lab_test_status"]?></span>
+			<span><b>ORDERED TEST: </b> <?=$labs["ordered_test_nm"]?></span>
+			<span><b>SPECIMEN SOURCE: </b> <?=$labs["specimen_desc"]?></span>
+			<span><b>RESULTED TEST: </b> <?=$labs["lab_test_nm"]?></span>
+			<span><b>DATE SPECIMEN COLLECTED: </b> <?=$labs["specimen_collection_dt"]?></span>
+			<span><b>STATUS: </b> <?=$labs["lab_test_status"]?></span>
 		</div>
 		<div id='action-items' class='bluefont'>
 			<span class='text-center d-block mb-2 mt-1'><b><u>Action Items for <?=$xdro_registry["condition_alert"]?>:</b></u></span>
@@ -93,42 +107,6 @@ if (empty($rid)) {
 	</div>
 	<div class='column'>
 		<span id='please-note' class='bluefont d-block text-right mt-3 mb-3'><li><b>Please note other tests performed on this patient.</b></li></span>
-		<div id='resistances' class='text-right mt-1 mb-3'>
-			<span><b>RESISTANCE MECHANISMS & CARBAPENEMASE PRODUCTION:</b></span>
-			<table class='text-left'>
-				<tbody>
-					<?php
-						$mechs = [
-							'mcim' => 'mCIM',
-							'carbanp' => 'CARBA NP',
-							'kpc' => 'KPC',
-							'ndm' => 'NDM',
-							'oxa48' => 'OXA-48',
-							'vim' => 'VIM',
-							'imp' => 'IMP',
-							'oxa23' => 'OXA-23',
-							'mcr1' => 'MCR-1',
-							'mcr2' => 'MCR-2'
-						];
-						foreach ($mechs as $field => $abbrev) {
-							if ($xdro_registry[$field] == "POSITIVE") {
-								$class = " class='redfont font-weight-bold'";
-								// $b_tag_start = "<b>";
-								// $b_tag_end = "</b>";
-							}
-							echo "
-							<tr$class>
-								<th$class>$abbrev:</th>
-								<td class='pr-2'>" . $xdro_registry[$field] . "</td>
-							</tr>";
-							unset($class);
-							unset($b_tag_start);
-							unset($b_tag_end);
-						}
-					?>
-				</tbody>
-			</table>
-		</div>
 		<div class='captions text-right mb-1'>
 			<span><i>S/I/R interpretation are baased on CLSI breakpoints.</i></span><br>
 			<span><i>MIC (μg/ml) results are directly from lab report.</i></span><br>
@@ -188,22 +166,22 @@ if (empty($rid)) {
 				</button>
 			</div>
 			<div class="modal-body">
-				<p><b>DEMOGRAPHIC INFORMATION AS OF: </b><?=$xdro_registry['patient_last_change_time']?></p>
+				<p><b>DEMOGRAPHIC INFORMATION AS OF: </b><?=$demographics['patient_last_change_time']?></p>
 				<table class='simpletable'>
 					<tbody>
-							<tr><th>FIRST NAME:</th><td data-field="patient_first_name_d"><?=$demographics['patient_first_name_d']?></td></tr>
-							<tr><th>LAST NAME:</th><td data-field="patient_last_name_d"><?=$demographics['patient_last_name_d']?></td></tr>
-							<tr><th>DATE OF BIRTH:</th><td data-field="patient_dob_d"><?=$demographics['patient_dob_d']?></td></tr>
-							<tr><th>CURRENT GENDER:</th><td data-field="patient_current_sex_d"><?=$demographics['patient_current_sex_d']?></td></tr>
+							<tr><th>FIRST NAME:</th><td data-field="patient_first_name_d"><?=$demographics['patient_first_name']?></td></tr>
+							<tr><th>LAST NAME:</th><td data-field="patient_last_name_d"><?=$demographics['patient_last_name']?></td></tr>
+							<tr><th>DATE OF BIRTH:</th><td data-field="patient_dob_d"><?=$demographics['patient_dob']?></td></tr>
+							<tr><th>CURRENT GENDER:</th><td data-field="patient_current_sex_d"><?=$demographics['patient_current_sex']?></td></tr>
 							<tr><th>PHONE:</th><td data-field="patient_phone_home"><?=$demographics['patient_phone_home']?></td></tr>
-							<tr><th>ADDRESS:</th><td data-field="street_addr_1_d"><?=$demographics['street_addr_1_d']?></td></tr>
-							<tr><th></th><td data-field="street_addr_2_d"><?=$demographics['street_addr_2_d']?></td></tr>
-							<tr><th>CITY:</th><td data-field="patient_city_d"><?=$demographics['patient_city_d']?></td></tr>
-							<tr><th>STATE:</th><td data-field="patient_state_d"><?=$demographics['patient_state_d']?></td></tr>
-							<tr><th>ZIP:</th><td data-field="patient_zip_d"><?=$demographics['patient_zip_d']?></td></tr>
-							<tr><th>COUNTY:</th><td data-field="patient_county_d"><?=$demographics['patient_county_d']?></td></tr>
-							<tr><th>RESIDENCE:</th><td data-field="patient_state_d"><?=$demographics['patient_state_d']?></td></tr>
-							<tr><th>JURISDICTION:</th><td data-field="jurisdiction_nm_d"><?=$demographics['jurisdiction_nm_d']?></td></tr>
+							<tr><th>ADDRESS:</th><td data-field="street_addr_1_d"><?=$demographics['patient_street_address_1']?></td></tr>
+							<tr><th></th><td data-field="street_addr_2_d"><?=$demographics['patient_street_address_2']?></td></tr>
+							<tr><th>CITY:</th><td data-field="patient_city_d"><?=$demographics['patient_city']?></td></tr>
+							<tr><th>STATE:</th><td data-field="patient_state_d"><?=$demographics['patient_state']?></td></tr>
+							<tr><th>ZIP:</th><td data-field="patient_zip_d"><?=$demographics['patient_zip']?></td></tr>
+							<tr><th>COUNTY:</th><td data-field="patient_county_d"><?=$demographics['patient_county']?></td></tr>
+							<tr><th>RESIDENCE:</th><td data-field="patient_state_d"><?=$demographics['patient_state']?></td></tr>
+							<tr><th>JURISDICTION:</th><td data-field="jurisdiction_nm_d"><?=$demographics['jurisdiction_nm']?></td></tr>
 							<tr><th>SOCIAL SECURITY:</th><td><?=$xdro_registry['patient_ssn']?></td></tr>
 							<tr><th>RACE:</th><td><?=$xdro_registry['patient_race_calculated']?></td></tr>
 							<tr><th>ETHNICITY:</th><td><?=$xdro_registry['patient_ethnicity']?></td></tr>
