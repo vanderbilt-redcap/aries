@@ -51,7 +51,7 @@ XDRO.showPredictions = function(predictions) {
 	var items = ""
 	
 	predictions.forEach(function(patient) {
-		items += '<span data-rid="' + patient.patientid + '">"<span class="predict-name">' + patient.patient_first_name + ' ' + patient.patient_last_name + '</span>" in record with Patient ID: # <b>' + patient.patientid + '</b> (<i>DOB: ' + patient.patient_dob + ', ' + patient.patient_current_sex_d + ', ' + patient.patient_street_address_1_d + '</i>)</span>'
+		items += '<span data-rid="' + patient.patientid + '">"<span class="predict-name">' + patient.patient_first_name + ' ' + patient.patient_last_name + '</span>" in record with Patient ID: # <b>' + patient.patientid + '</b> (<i>DOB: ' + patient.patient_dob + ', ' + patient.patient_current_sex + ', ' + patient.patient_street_address_1 + '</i>)</span>'
 	})
 	
 	$("#autocomplete").html(items)

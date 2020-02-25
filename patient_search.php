@@ -25,18 +25,52 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 		<p>Begin typing to search the registry data,<br> then click an item in the list to navigate to that record for further investigation.</p>
 	</div>
 	<div id="search-input" class='col-8'>
-		<div class='col-9'>
+		<div class='col-8'>
 			<input type='text' name='user-query' class='col-12'>
 			<div id="autocomplete"></div>
 		</div>
-		<div id="search-feedback" class='mr-3 pr-3 col-3'>
+		<div class='mx-2 px-2 col-2'>
+			<button id="submit-search" type="button" class="btn btn-primary">Search</button>
+		</div>
+		<div id="search-feedback" class='mr-3 pr-3 col-2'>
 			<div class="spinner">
 				<img src='<?=$module->getUrl('res/spinner.png')?>'>
 			</div>
 			<span class='ml-2 search-indicator'>Searching</span>
 		</div>
 	</div>
-	
+</div>
+
+<div id="file-search" class=''>
+	<div id='file-search-info' class='col-4'>
+		<h5><b>Upload Patient List</b></h5>
+		<p>Click the 'Browse' button to choose a file to upload, then click 'Search'.</p>
+		<div class="alert alert-dark ml-3 w-75 dark-border" role="alert">
+			A CSV is a type of file. You can save any spreadsheet in Excel as a CSV. When 'Saving As,' underneath the field for 'File name', there is a field for 'Save as type' which will open a drop-down menu. Select CSV (Comma delimited) and save.
+		</div>
+	</div>
+	<div id="file-search-input" class='col-8'>
+		<div class="input-group col-8">
+			<div class="custom-file">
+				<input type="file" class="custom-file-input" id="upload_csv" aria-describedby="upload_csv">
+				<label class="custom-file-label" for="upload_csv">Upload a CSV</label>
+			</div>
+			<div id="autocomplete"></div>
+		</div>
+		<!--<div class='col-8'>
+			<input type='text' name='user-query' class='col-12'>
+			<div id="autocomplete"></div>
+		</div>-->
+		<div class='mx-2 px-2 col-2'>
+			<button id="file-submit-search" type="button" class="btn btn-primary">Search</button>
+		</div>
+		<div id="file-search-feedback" class='mr-3 pr-3 col-2'>
+			<div class="spinner">
+				<img src='<?=$module->getUrl('res/spinner.png')?>'>
+			</div>
+			<span class='ml-2 search-indicator'>Searching</span>
+		</div>
+	</div>
 </div>
 
 <div id='results'>

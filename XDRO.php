@@ -25,10 +25,21 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		// get all records (only some fields though)
 		$params = [
 			"project_id" => $_GET['pid'],
-			"return_format" => "json",
-			"fields" => ['patientid', 'patient_dob', 'patient_first_name', 'patient_last_name', 'patient_current_sex_d', 'patient_street_address_1_d']
+			// "return_format" => "json",
+			"return_format" => "array",
+			"fields" => [
+				'patientid',
+				'patient_dob',
+				'patient_first_name',
+				'patient_last_name',
+				'patient_current_sex',
+				'patient_street_address_1',
+				'patient_last_change_time'
+			]
 		];
-		$records = json_decode(\REDCap::getData($params), true);
+		// $records = json_decode(\REDCap::getData($params), true);
+		$records = \REDCap::getData($params);
+		$records = $this->squish_demographics($records);
 		
 		// add search score value to each record
 		foreach ($records as &$record) {
@@ -100,6 +111,43 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		echo(json_encode($records));
 	}
 	
+	//	return array of flat arrays -- each flat array is a $record that also has values from latest demographics instance
+	function squish_demographics($records) {
+		$ret_array = [];
+		$eid = $this->getFirstEventId();
+		$this->llog("eid... $eid");
+		foreach($records as $rid => $record) {
+			// first lets find the most recent demographics instance
+			$last_instance = null;
+			$last_instance_date = null;
+			foreach($record["repeat_instances"][$eid]["demographics"] as $demo_index => $demo) {
+				if (empty($last_instance_date)) {
+					$last_instance = $demo;
+					$last_instance_date = $demo["patient_last_change_time"];
+				} elseif (strtotime($demo["patient_last_change_time"]) > strtotime($last_instance_date)) {
+					$last_instance = $demo;
+					$last_instance_date = $demo["patient_last_change_time"];
+				}
+			}
+			if (empty($last_instance))
+				continue;
+			
+			// add values to $record array
+			$flat_array = [];
+			foreach($record[$eid] as $key => $val) {
+				$flat_array[$key] = $val;
+				// $this->llog("setting \$flat_array[$key] = $val");
+			}
+			foreach($last_instance as $key => $val) {
+				if (!empty($val))
+					$flat_array[$key] = $val;
+				// $this->llog("setting \$flat_array[$key] = $val");
+			}
+			$ret_array[] = $flat_array;
+		}
+		return $ret_array;
+	}
+	
 	function nlog() {
 		if (file_exists("C:/vumc/log.txt")) {
 			file_put_contents("C:/vumc/log.txt", "constructing XDRO instance\n");
@@ -120,19 +168,4 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 if ($_GET['action'] == 'predictPatients') {
 	$module = new XDRO();
 	$module->autocomplete_search();
-} elseif ($_GET['action'] == 'get_demographics') {
-	$form = filter_var($_GET['form'], FILTER_SANITIZE_STRING);
-	$record = filter_var($_GET['record'], FILTER_SANITIZE_STRING);
-	$instance = (int) $_GET['instance'];
-	
-	$module = new XDRO();
-	$module->nlog();
-	$module->llog("about to get instance data with args: $record, $form, $instance");
-	
-	$pid = $module->getProjectId();
-	$project = new \Project($pid);
-	$eid = $project->firstEventId;
-	$data = \REDCap::getData($pid, 'array', $record);
-	$demo = $data[$record]["repeat_instances"][$eid][$form][$instance];
-	exit(json_encode($demo));
 }
