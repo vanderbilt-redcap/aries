@@ -75,6 +75,12 @@ div.logo img {
 	/* visibility: hidden; */
 }
 
+#error_alert {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
 /* search autocomplete */
 
 #autocomplete {
@@ -135,35 +141,43 @@ div.logo img {
 /* results */
 #results {
 	visibility: hidden;
-	width: 92%;
+	/* width: 92%; */
 	margin-top: 50px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
-#results table {
-	width: 100%;
+#results .dataTables_wrapper {
+	width: 85%;
 	text-align: center;
 	font-weight: 600;
+	margin-left: -10%;
+}
+
+#results table {
+	width: 100%;
 }
 
 #results thead {
 	border-bottom: 4px solid #24456d;
 }
 
-#results thead th {
-	text-align: center;
-	font-weight: 700;
+/* #results thead th { */
+	/* text-align: center; */
+	/* font-weight: 700; */
 	
-	padding: 8px 0px;
-	border: 1px dashed gray;
-}
+	/* padding: 8px 0px; */
+	/* border: 1px dashed gray; */
+/* } */
 
-#results tbody td {
-	border: 1px dashed gray;
-	padding: 8px 0px;
-}
+/* #results tbody td { */
+	/* border: 1px dashed gray; */
+	/* padding: 8px 0px; */
+/* } */
 
-#results tbody td:nth-child(1) {
-	font-weight: 700;
-}
+/* #results tbody td:nth-child(1) { */
+	/* font-weight: 700; */
+/* } */
 
 /* NO MATCH LISTED span and footer link */
 #match-listed {

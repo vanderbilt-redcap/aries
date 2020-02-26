@@ -30,7 +30,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 			<div id="autocomplete"></div>
 		</div>
 		<div class='mx-2 px-2 col-2'>
-			<button id="submit-search" type="button" class="btn btn-primary">Search</button>
+			<button id="submit-search" type="button" class="btn btn-primary" onclick="XDRO.submit_manual_query()">Search</button>
 		</div>
 		<div id="search-feedback" class='mr-3 pr-3 col-2'>
 			<div class="spinner">
@@ -38,6 +38,12 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 			</div>
 			<span class='ml-2 search-indicator'>Searching</span>
 		</div>
+	</div>
+</div>
+
+<div id="error_alert">
+	<div class="alert alert-primary dark-border mt-3" role="alert">
+		Your query for "<span></span>" yielded 0 results.
 	</div>
 </div>
 

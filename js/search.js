@@ -6,6 +6,9 @@ XDRO.shrinkSearch = function() {
 	$("#search-info").removeClass('col-4').addClass('col-2')
 	$("#search-input").removeClass('col-8').addClass('col-10')
 	$(".result-instructions").css('visibility', 'visible')
+	$("#file-search").hide()
+	$("#results").css('visibility', 'visible')
+	$("#error_alert").hide()
 }
 
 XDRO.predictPatients = function() {
@@ -48,11 +51,65 @@ XDRO.showPredictions = function(predictions) {
 	$("#autocomplete").css('left', search.position().left + 'px')
 }
 
+XDRO.submit_manual_query = function() {
+	var searchBar = $("#search-input input")
+	var searchString = searchBar.val()
+	XDRO.query_string = searchString
+	$("#search-feedback").css('visibility', 'visible')
+	
+	$.ajax({
+		url: XDRO.moduleAddress + "&action=manualQuery&searchString=" + encodeURI(searchString),
+		dataType: 'json',
+		complete: function(response) {
+			XDRO.response = response
+			
+			// remove all rows from results table
+			var table = $("div#results table").DataTable()
+			table.rows().remove()
+			
+			if (response.responseJSON) {
+				var records = response.responseJSON
+				if (records.length == 0) {
+					$("#error_alert span").text(XDRO.query_string)
+					$("#error_alert").show()
+				} else {
+					XDRO.make_results_table(records)
+					XDRO.shrinkSearch()
+				}
+			}
+			
+			// update/re-draw results table
+			table.draw()
+			
+			$("#search-feedback").css('visibility', 'hidden')
+		}
+	})
+}
+
+XDRO.make_results_table = function(records) {
+	var table = $("div#results table").DataTable()
+	
+	records.forEach(function (record, i) {
+		table.row.add([
+			record.patientid,
+			record.patient_first_name + " " + record.patient_last_name,
+			record.patient_dob,
+			record.patient_current_sex,
+			record.patient_street_address_1,
+			"<input class='cbox' data-rid='" + record.patientid + "' type='checkbox'>",
+		])
+	})
+}
+
 $(function() {
+	// autocomplete prediction stuff
 	$("#search-input input").on('input', function() {
 		clearTimeout(XDRO.predict_timer)
+		$("#error_alert").hide()
 		XDRO.predict_timer = setTimeout(XDRO.predictPatients, 500)
 	})
+	
+	// forward to patient record on prediction clicked
 	$("#autocomplete").on('mousedown', 'span', function(e) {
 		var span = $(e.target)
 		if (span.hasClass('predict-name')) {
@@ -63,6 +120,24 @@ $(function() {
 			window.location.href = XDRO.recordAddress + "&rid=" + rid
 		}
 	})
+	
+	// hide autocomplete predictions
 	$("#search-input input").on('blur', function() {$("#autocomplete").hide()})
+	
+	$("#error_alert").hide()
+	
+	// make results table a DataTables table
+	$("div#results table").DataTable({
+		columnDefs: [
+			{
+				targets: [5],
+				orderable: false
+			},
+			{
+				className: "dt-center", 
+				targets: "_all"
+			}
+		],
+		pageLength: 15
+	});
 })
-

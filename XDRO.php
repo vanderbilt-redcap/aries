@@ -9,12 +9,12 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	// given a user supplied string, search for records in our patient registry that might match
-	function autocomplete_search() {
-		$searchString = $_GET['searchString'];
+	function search($query_string, $limit) {
+		// $searchString = $_GET['searchString'];
+		$searchString = $query_string;
 		
 		if (empty($searchString)) {
-			echo ("[]");
-			return;
+			return [];
 		}
 		
 		// tokenize query
@@ -97,8 +97,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		// $this->rlog("removed records with score < 0:\n" . print_r($records, true) . "\n\n");
 		
 		if (empty($records)) {
-			echo "[]";
-			return;
+			return [];
 		}
 		
 		// sort remaining records by score descending
@@ -106,16 +105,18 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 			return $b['score'] - $a['score'];
 		});
 		
-		// $this->llog("sorted remaining records by score:\n" . print_r($records, true) . "\n\n");
-		
-		echo(json_encode($records));
+		if (empty($limit)) {
+			return $records;
+		} else {
+			return array_slice($records, 0, $limit);
+		}
+		return [];
 	}
 	
 	//	return array of flat arrays -- each flat array is a $record that also has values from latest demographics instance
 	function squish_demographics($records) {
 		$ret_array = [];
 		$eid = $this->getFirstEventId();
-		$this->llog("eid... $eid");
 		foreach($records as $rid => $record) {
 			// first lets find the most recent demographics instance
 			$last_instance = null;
@@ -167,5 +168,15 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 
 if ($_GET['action'] == 'predictPatients') {
 	$module = new XDRO();
-	$module->autocomplete_search();
+	$query = filter_var($_GET['searchString'], FILTER_SANITIZE_STRING);
+	$recs = $module->search($query, 7);	// limit to 7 records for autocomplete
+	echo(json_encode($recs));
+}elseif ($_GET['action'] == 'manualQuery') {
+	$module = new XDRO();
+	$module->nlog();
+	$query = filter_var($_GET['searchString'], FILTER_SANITIZE_STRING);
+	$recs = $module->search($query);
+	$module->llog("\$recs:\n", print_r($recs, true));
+	
+	echo(json_encode($recs));
 }
