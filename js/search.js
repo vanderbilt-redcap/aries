@@ -1,17 +1,3 @@
-$(function() {
-	$("#search-input input").on('input', XDRO.predictPatients)
-	$("#autocomplete").on('mousedown', 'span', function(e) {
-		var span = $(e.target)
-		if (span.hasClass('predict-name')) {
-			span = span.parent('span')
-		}
-		var rid = span.attr('data-rid')
-		if (rid) {
-			window.location.href = XDRO.recordAddress + "&rid=" + rid
-		}
-	})
-	$("#search-input input").on('blur', function() {$("#autocomplete").hide()})
-})
 
 XDRO = {}
 XDRO.shrinkSearch = function() {
@@ -61,3 +47,22 @@ XDRO.showPredictions = function(predictions) {
 	$("#autocomplete").css('top', search.position().top + search.height() + 'px')
 	$("#autocomplete").css('left', search.position().left + 'px')
 }
+
+$(function() {
+	$("#search-input input").on('input', function() {
+		clearTimeout(XDRO.predict_timer)
+		XDRO.predict_timer = setTimeout(XDRO.predictPatients, 500)
+	})
+	$("#autocomplete").on('mousedown', 'span', function(e) {
+		var span = $(e.target)
+		if (span.hasClass('predict-name')) {
+			span = span.parent('span')
+		}
+		var rid = span.attr('data-rid')
+		if (rid) {
+			window.location.href = XDRO.recordAddress + "&rid=" + rid
+		}
+	})
+	$("#search-input input").on('blur', function() {$("#autocomplete").hide()})
+})
+
