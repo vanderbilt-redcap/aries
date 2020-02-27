@@ -90,14 +90,16 @@ XDRO.make_results_table = function(records) {
 	var table = $("div#results table").DataTable()
 	
 	records.forEach(function (record, i) {
-		table.row.add([
+		var node = table.row.add([
 			record.patientid,
 			record.patient_first_name + " " + record.patient_last_name,
 			record.patient_dob,
 			record.patient_current_sex,
 			record.patient_street_address_1,
 			"<input class='cbox' data-rid='" + record.patientid + "' type='checkbox'>",
-		])
+		]).node()
+		
+		$(node).addClass('highlightable').attr('data-rid', record.patientid)
 	})
 }
 
@@ -141,3 +143,18 @@ $(function() {
 		pageLength: 15
 	});
 })
+
+// hide autocomplete predictions when click outside autocomplete div
+$(document).mouseup(function (e){
+	var container = $("#autocomplete");
+	if (!container.is(e.target) && container.has(e.target).length === 0){
+		container.hide();
+	}
+}); 
+
+$("body").on("click", ".highlightable", function(e) {
+	var rid = $(this).attr('data-rid')
+	if (rid)
+		window.location.href = XDRO.recordAddress + "&rid=" + rid;
+})
+

@@ -162,6 +162,10 @@ div.logo img {
 	border-bottom: 4px solid #24456d;
 }
 
+tr.highlightable:hover {
+	background-color: #cff !important;
+}
+
 /* #results thead th { */
 	/* text-align: center; */
 	/* font-weight: 700; */

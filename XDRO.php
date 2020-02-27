@@ -113,6 +113,78 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		return [];
 	}
 	
+	function score_record_by_array(&$record, $tokens_arr) {
+		$score = 0;
+		$sum = 0;
+		foreach($record as $field => $value) {
+			$a = strtolower(strval($value));
+			if (empty($tokens_arr[$field]))
+				continue;
+			$b = strtolower(strval($tokens_arr[$field]));
+			$lev_dist = levenshtein($a, $b);
+			if ($lev_dist == -1)
+				break;
+			$len = max(strlen($a), strlen($b));
+			$similarity = ($len - $lev_dist) / $len;
+			$score += $similarity;
+			// $this->llog("similarity for $a vs $b: $similarity");
+			$sum++;
+		}
+		
+		if ($sum > 0)
+			$score = $score / $sum;
+		
+		$record["score"] = $score;	// score should be in range [0, 1], 0 if no matching params, 1 if all match exactly
+		// $this->llog("\$record after inserting score: " . print_r($record, true));
+	}
+	
+	function score_record_by_string(&$record, $tokens_str) {
+		$score = 0;
+		$sum = 0;
+		
+		// tokenize query
+		$tokens = explode(' ', $tokens_str);
+		
+		foreach($tokens as $token) {
+			// if it's a date, compare to dob
+			try {
+				$date = new \DateTime($token);
+			} catch (\Exception $e) {
+				$date = null;
+			}
+			if (!empty($date)) {
+				// $this->llog("processing token $token as date:\n");
+				$mdyDateString = $date->format("m/d/Y");
+				
+				if ($record['patient_dob'] == $mdyDateString) {
+					$record['dob_scored'] = true;
+					$record['score']++;
+				}
+			}
+		}
+		
+		foreach($record as $field => $value) {
+			$a = strtolower(strval($value));
+			if (empty($tokens_arr[$field]))
+				continue;
+			$b = strtolower(strval($tokens_arr[$field]));
+			$lev_dist = levenshtein($a, $b);
+			if ($lev_dist == -1)
+				break;
+			$len = max(strlen($a), strlen($b));
+			$similarity = ($len - $lev_dist) / $len;
+			$score += $similarity;
+			// $this->llog("similarity for $a vs $b: $similarity");
+			$sum++;
+		}
+		
+		if ($sum > 0)
+			$score = $score / $sum;
+		
+		$record["score"] = $score;	// score should be in range [0, 1], 0 if no matching params, 1 if all match exactly
+		// $this->llog("\$record after inserting score: " . print_r($record, true));
+	}
+	
 	//	return array of flat arrays -- each flat array is a $record that also has values from latest demographics instance
 	function squish_demographics($records) {
 		$ret_array = [];
@@ -176,7 +248,5 @@ if ($_GET['action'] == 'predictPatients') {
 	$module->nlog();
 	$query = filter_var($_GET['searchString'], FILTER_SANITIZE_STRING);
 	$recs = $module->search($query);
-	$module->llog("\$recs:\n", print_r($recs, true));
-	
 	echo(json_encode($recs));
 }
