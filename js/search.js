@@ -86,6 +86,31 @@ XDRO.submit_manual_query = function() {
 	})
 }
 
+XDRO.submit_file_query = function () {
+	if (!$("#upload_csv").prop('files'))
+		return
+	if (!$("#upload_csv").prop('files')[0])
+		return
+	
+	console.log('sending file query ajax')
+	var form_data = new FormData()
+	form_data.append('client_file', $("#upload_csv").prop('files')[0])
+	$.ajax({
+		type: "POST",
+		url: XDRO.CSVSearchAddress,
+		data: form_data,
+		success: XDRO.file_search_done,
+		dataType: 'json',
+		cache: false,
+		contentType: false,
+		processData: false
+	})
+}
+
+XDRO.file_search_done = function(response) {
+	console.log('response', response)
+}
+
 XDRO.make_results_table = function(records) {
 	var table = $("div#results table").DataTable()
 	
@@ -158,3 +183,7 @@ $("body").on("click", ".highlightable", function(e) {
 		window.location.href = XDRO.recordAddress + "&rid=" + rid;
 })
 
+$('body').on('change', ".custom-file-input", function() {
+	var fileName = $(this).val().split('\\').pop()
+	$('.custom-file-label').html(fileName)
+})

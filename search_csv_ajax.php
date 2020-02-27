@@ -112,9 +112,9 @@ function checkFile($file_param_name) {
 	}
 
 	// have file, so check name, size
-	if (preg_match("/[^A-Za-z0-9. ()-]/", $_FILES[$file_param_name]["name"])) {
+	if (preg_match("/[^A-Za-z0-9. ()-_]/", $_FILES[$file_param_name]["name"])) {
 		$json->errors[] = "File names can only contain alphabet, digit, period, space, hyphen, and parentheses characters.";
-		$json->errors[] = "	Allowed characters: A-Z a-z 0-9 . ( ) -";
+		$json->errors[] = "	Allowed characters: A-Z a-z 0-9 . ( ) - _";
 	}
 	if (strlen($_FILES[$file_param_name]["name"]) > 127) {
 		$json->errors[] = "Uploaded file has a name that exceeds the limit of 127 characters.";
@@ -132,6 +132,14 @@ function checkFile($file_param_name) {
 	}
 	
 	return true;
+}
+
+function removeBomUtf8($s){
+	if(substr($s,0,3)==chr(hexdec('EF')).chr(hexdec('BB')).chr(hexdec('BF'))){
+		return substr($s,3);
+	}else{
+		return $s;
+	}
 }
 
 // check workbook file, load if ok
@@ -158,10 +166,29 @@ try {
 	global $FIELDS;
 	$header_map = [];
 	$found_at_least_one_usable_header = false;
-	foreach($data[0] as $header) {
-		if ($key = array_search(strtolower($header), $FIELDS) !== FALSE) {
-			$found_at_least_one_usable_header = true;
-			$header_map[$header] = $key;
+	$module->llog("row 0: " . print_r($data[0], true));
+	foreach($data[0] as $col => $header) {
+		$module->llog("col/header : $col / $header");
+		if ($col === 0)
+			$header = removeBomUtf8($header);
+		// $key = array_search(strtolower($header), $FIELDS);
+		// if ($key !== FALSE) {
+			// $module->llog("\$header found in col: $col");
+			// $found_at_least_one_usable_header = true;
+			// $header_map[$header] = $col;
+		// }
+		foreach($FIELDS as $fieldname) {
+			// $hex1 = bin2hex($fieldname);
+			// $hex2 = bin2hex($header);
+			// $module->llog("compare $hex1 | $hex2");
+			$module->llog("strtolower($fieldname) == strtolower($header) : " . strval(strtolower($fieldname) == strtolower($header)));
+			// $module->llog("strcasecmp($fieldname, $header) : " . strcasecmp($fieldname, $header));
+			// if (strcasecmp($fieldname, $header) == 0) {
+			if (strtolower($fieldname) == strtolower($header)) {
+				// $module->llog("\$header_map[$header] = $col");
+				$header_map[$header] = $col;
+				$found_at_least_one_usable_header = true;
+			}
 		}
 	}
 	
@@ -198,14 +225,31 @@ $params = [
 $records = \REDCap::getData($params);
 $records = $module->squish_demographics($records);
 
-$json->rows = [];
+$module->llog("header_map: " . print_r($header_map, true));
+exit("{}");
+$json->rows = [];		// each row will get query, results
 foreach ($data as $i => $row) {
 	// skip header row of course
 	if ($i === 0)
 		continue;
 	
+	$module->llog("processing file row: $i" . "\n -- row: " . print_r($row, true));
+	$query_array = [];
 	foreach($header_map as $header => $key) {
-		$val = $row[$key];
+		if (!empty($row[$key]))
+			$query_array[$header] = $row[$key];
+	}
+	
+	$row = new stdClass();
+	$row->query = $query_array;
+	$row->results = [];
+	
+	$module->llog("\$query_array: " . print_r($query_array, true));
+	foreach($records as $record) {
+		$module->score_record_by_array($record, $query_array);
+		$module->llog("record: " . print_r($record, true));
+		if ($record["score"] > 0.2)
+			$row->results[] = $record;
 	}
 }
 

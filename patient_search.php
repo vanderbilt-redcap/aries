@@ -7,6 +7,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 <script type="text/javascript">
 	XDRO.moduleAddress = "<?=$module->getUrl('XDRO.php')?>"
 	XDRO.recordAddress = "<?=$module->getUrl('patient_record.php')?>"
+	XDRO.CSVSearchAddress = "<?=$module->getUrl('search_csv_ajax.php')?>"
 </script>
 
 <div id='header' class=''>
@@ -68,7 +69,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 			<div id="autocomplete"></div>
 		</div>-->
 		<div class='mx-2 px-2 col-2'>
-			<button id="file-submit-search" type="button" class="btn btn-primary">Search</button>
+			<button id="file-submit-search" type="button" class="btn btn-primary" onclick="XDRO.submit_file_query()">Search</button>
 		</div>
 		<div id="file-search-feedback" class='mr-3 pr-3 col-2'>
 			<div class="spinner">
