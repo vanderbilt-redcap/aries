@@ -63,23 +63,17 @@ XDRO.submit_manual_query = function() {
 		complete: function(response) {
 			XDRO.response = response
 			
-			// remove all rows from results table
-			var table = $("div#results table").DataTable()
-			table.rows().remove()
-			
 			if (response.responseJSON) {
 				var records = response.responseJSON
-				if (records.length == 0) {
-					$("#error_alert span").text(XDRO.query_string)
-					$("#error_alert").show()
-				} else {
-					XDRO.make_results_table(records)
-					XDRO.shrinkSearch()
-				}
+				XDRO.make_results_table(records)
+				XDRO.shrinkSearch()
 			}
 			
 			// update/re-draw results table
 			table.draw()
+			if (records.length == 0) {
+				$(".dataTables_empty").text("Search for '" + XDRO.query_string + "' yielded no record results")
+			}
 			
 			$("#search-feedback").css('visibility', 'hidden')
 		}
@@ -109,11 +103,23 @@ XDRO.submit_file_query = function () {
 
 XDRO.file_search_done = function(response) {
 	console.log('response', response)
+	XDRO.response = response
+	
+	XDRO.shrinkSearch()
+	
+	// add record iterator buttons and info div
+	XDRO.add_file_interface()
+	// update results table
+	XDRO.show_results_for_row_query(0)
 }
 
 XDRO.make_results_table = function(records) {
+	// remove all rows from results table
 	var table = $("div#results table").DataTable()
+	table.rows().remove()
 	
+	var table = $("div#results table").DataTable()
+	console.log('records seen by make_results_table', records)
 	records.forEach(function (record, i) {
 		var node = table.row.add([
 			record.patientid,
@@ -126,6 +132,78 @@ XDRO.make_results_table = function(records) {
 		
 		$(node).addClass('highlightable').attr('data-rid', record.patientid)
 	})
+}
+
+XDRO.add_file_interface = function() {
+	// add buttons
+	first = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="XDRO.first_query()"><i class="fas fa-angle-double-left"></i></button>'
+	prev = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="XDRO.prev_query()"><i class="fas fa-chevron-left"></i></button>'
+	next = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="XDRO.next_query()"><i class="fas fa-chevron-right"></i></button>'
+	last = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="XDRO.last_query()"><i class="fas fa-angle-double-right"></i></button>'
+	$("#search-input div:eq(0)").prepend(prev)
+	$("#search-input div:eq(0)").prepend(first)
+	$("#search-input div:eq(0)").append(next)
+	$("#search-input div:eq(0)").append(last)
+	
+	// show file queries alert
+	$("#file-queries").show()
+	$("#file-queries .filename").text(XDRO.filename)
+	$("#search").css('margin-top', '10px')
+}
+
+XDRO.prev_query = function() {
+	XDRO.row_query_index -= 1
+	XDRO.show_results_for_row_query(XDRO.row_query_index)
+}
+
+XDRO.next_query = function() {
+	XDRO.row_query_index += 1
+	XDRO.show_results_for_row_query(XDRO.row_query_index)
+}
+
+XDRO.first_query = function() {
+	XDRO.row_query_index = 0
+	XDRO.show_results_for_row_query(XDRO.row_query_index)
+}
+
+XDRO.last_query = function() {
+	XDRO.row_query_index = XDRO.response.responseJSON.rows.length-1
+	XDRO.show_results_for_row_query(XDRO.row_query_index)
+}
+
+XDRO.show_results_for_row_query = function(index) {
+	XDRO.row_query_index = index
+	
+	// enable/disable seek buttons
+	if (XDRO.row_query_index == XDRO.response.rows.length-1) {
+		$(".pos_iter").attr('disabled', true)
+	} else {
+		$(".pos_iter").attr('disabled', false)
+	}
+	if (XDRO.row_query_index == 0) {
+		$(".neg_iter").attr('disabled', true)
+	} else {
+		$(".neg_iter").attr('disabled', false)
+	}
+	
+	var rows = XDRO.response.rows
+	XDRO.make_results_table(rows[index].results)
+	
+	var query_string = ""
+	for (const name in rows[index].query) {
+		query_string += String(rows[index].query[name]) + " "
+	}
+	query_string = query_string.trimEnd()
+	
+	// update file queries area
+	$("span.records").text(String(XDRO.row_query_index + 1) + " / " + String(rows.length))
+	$("#search-input input").val(query_string)
+	console.log('query_string', query_string)
+	
+	$("div#results table").DataTable().draw()
+	if (rows[index].results.length == 0) {
+		$(".dataTables_empty").text("Search for '" + query_string + "' yielded no record results")
+	}
 }
 
 $(function() {
@@ -152,6 +230,7 @@ $(function() {
 	$("#search-input input").on('blur', function() {$("#autocomplete").hide()})
 	
 	$("#error_alert").hide()
+	$("#file-queries").hide()
 	
 	// make results table a DataTables table
 	$("div#results table").DataTable({
@@ -167,6 +246,9 @@ $(function() {
 		],
 		pageLength: 15
 	});
+	
+	// XDRO.shrinkSearch()
+	// XDRO.add_file_interface()
 })
 
 // hide autocomplete predictions when click outside autocomplete div
@@ -186,4 +268,5 @@ $("body").on("click", ".highlightable", function(e) {
 $('body').on('change', ".custom-file-input", function() {
 	var fileName = $(this).val().split('\\').pop()
 	$('.custom-file-label').html(fileName)
+	XDRO.filename = fileName
 })

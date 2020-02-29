@@ -1,7 +1,7 @@
 <?php
 namespace Vanderbilt\XDRO;
-
 class XDRO extends \ExternalModules\AbstractExternalModule {
+
 	public $log_desc = "XDRO Module";
 	
 	public function __construct() {
@@ -9,7 +9,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	// given a user supplied string, search for records in our patient registry that might match
-	function search($query_string, $limit) {
+	function search($query_string, $limit = null) {
 		// $searchString = $_GET['searchString'];
 		$searchString = $query_string;
 		

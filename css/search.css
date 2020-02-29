@@ -66,9 +66,29 @@ div.logo img {
 	background-color: #eeece1;
 }
 
+#search-input div:first-child {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
 #file-search-input input, #search-input input {
 	border: 1px solid #3333;
 	line-height: 2em;
+}
+
+#file-queries {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
+.btn-primary.disabled, .btn-primary:disabled {
+    color: #fff;
+    background-color: #303033;
+    border-color: #202022;
 }
 
 .result-instructions {

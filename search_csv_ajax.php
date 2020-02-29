@@ -168,7 +168,7 @@ try {
 	$found_at_least_one_usable_header = false;
 	$module->llog("row 0: " . print_r($data[0], true));
 	foreach($data[0] as $col => $header) {
-		$module->llog("col/header : $col / $header");
+		// $module->llog("col/header : $col / $header");
 		if ($col === 0)
 			$header = removeBomUtf8($header);
 		// $key = array_search(strtolower($header), $FIELDS);
@@ -181,11 +181,11 @@ try {
 			// $hex1 = bin2hex($fieldname);
 			// $hex2 = bin2hex($header);
 			// $module->llog("compare $hex1 | $hex2");
-			$module->llog("strtolower($fieldname) == strtolower($header) : " . strval(strtolower($fieldname) == strtolower($header)));
+			// $module->llog("strtolower($fieldname) == strtolower($header) : " . strval(strtolower($fieldname) == strtolower($header)));
 			// $module->llog("strcasecmp($fieldname, $header) : " . strcasecmp($fieldname, $header));
 			// if (strcasecmp($fieldname, $header) == 0) {
 			if (strtolower($fieldname) == strtolower($header)) {
-				// $module->llog("\$header_map[$header] = $col");
+				$module->llog("\$header_map[$header] = $col");
 				$header_map[$header] = $col;
 				$found_at_least_one_usable_header = true;
 			}
@@ -225,15 +225,13 @@ $params = [
 $records = \REDCap::getData($params);
 $records = $module->squish_demographics($records);
 
-$module->llog("header_map: " . print_r($header_map, true));
-exit("{}");
 $json->rows = [];		// each row will get query, results
 foreach ($data as $i => $row) {
 	// skip header row of course
 	if ($i === 0)
 		continue;
 	
-	$module->llog("processing file row: $i" . "\n -- row: " . print_r($row, true));
+	// $module->llog("processing file row: $i" . "\n -- row: " . print_r($row, true));
 	$query_array = [];
 	foreach($header_map as $header => $key) {
 		if (!empty($row[$key]))
@@ -247,10 +245,19 @@ foreach ($data as $i => $row) {
 	$module->llog("\$query_array: " . print_r($query_array, true));
 	foreach($records as $record) {
 		$module->score_record_by_array($record, $query_array);
-		$module->llog("record: " . print_r($record, true));
-		if ($record["score"] > 0.2)
+		// $module->llog("record: " . print_r($record, true));
+		if ($record["score"] > 0.5)
 			$row->results[] = $record;
 	}
+	
+	// sort records by score
+	usort($row->results, function($a, $b) {
+		return $b['score'] - $a['score'];
+	});
+	
+	$module->llog("\$row->results after sorting: " . print_r($row->results, true));
+	
+	$json->rows[] = $row;
 }
 
 $json->success = true;

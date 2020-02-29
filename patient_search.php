@@ -20,6 +20,13 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 	</div>
 </div>
 
+<div id="file-queries">
+	<div class="alert alert-primary dark-border m-3" role="alert">
+		<p>File uploaded: <span class="filename"></span></p>
+		<p>Showing results for row <span class="records"></span></p>
+	</div>
+</div>
+
 <div id="search" class=''>
 	<div id='search-info' class='col-4'>
 		<h5><b>Search Query</b></h5>
@@ -27,7 +34,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 	</div>
 	<div id="search-input" class='col-8'>
 		<div class='col-8'>
-			<input type='text' name='user-query' class='col-12'>
+			<input type='text' name='user-query' class='w-100'>
 			<div id="autocomplete"></div>
 		</div>
 		<div class='mx-2 px-2 col-2'>
@@ -93,22 +100,6 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 			</tr>
 		</thead>
 		<tbody>
-			<tr>
-				<td>1001</td>
-				<td>Samuel Wilson</td>
-				<td>1770-04-19</td>
-				<td>Male</td>
-				<td>2201 West End Ave</td>
-				<td></td>
-			</tr>
-			<tr>
-				<td>1251</td>
-				<td>Samuel Wilson</td>
-				<td>1770-04-19</td>
-				<td>Male</td>
-				<td>221b Baker St</td>
-				<td></td>
-			</tr>
 		</tbody>
 	</table>
 </div>
