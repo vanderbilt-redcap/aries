@@ -24,6 +24,17 @@ $('body').on('click', '#next_demo_inst', function (e) {
 	$("#demo_instance").text(XDRO.demo_index + " / " + XDRO.demographics.length)
 	XDRO.update_demographics(XDRO.demo_index)
 })
+$('body').on('click', '#no_cbox', function (e) {
+	console.log('def')
+})
+$('body').on('click', '#yes_cbox', function (e) {
+	$("#metrics").modal('show')
+})
+$('body').on('click', '.dropdown-menu a', function() {
+	let dd = $(this).parent().siblings("button");
+	dd.text($(this).text());
+	$(".btn:first-child").val($(this).text());
+})
 
 XDRO.update_demographics = function(demo_index) {
 	var demographics = XDRO.demographics[demo_index-1]
