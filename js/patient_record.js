@@ -24,10 +24,7 @@ $('body').on('click', '#next_demo_inst', function (e) {
 	$("#demo_instance").text(XDRO.demo_index + " / " + XDRO.demographics.length)
 	XDRO.update_demographics(XDRO.demo_index)
 })
-$('body').on('click', '#no_cbox', function (e) {
-	console.log('def')
-})
-$('body').on('click', '#yes_cbox', function (e) {
+$('body').on('click', '#header_radio_1', function (e) {
 	$("#metrics").modal('show')
 })
 $('body').on('click', '.dropdown-menu a', function() {

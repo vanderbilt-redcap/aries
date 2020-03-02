@@ -1,6 +1,6 @@
 <?php
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
-require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
+// require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 
 $module->nlog();
 $rid = $_GET['rid'];
@@ -57,6 +57,33 @@ if (empty($rid)) {
 }
 
 ?>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>XDRO | REDCap</title>
+	<meta name="googlebot" content="noindex, noarchive, nofollow, nosnippet">
+	<meta name="robots" content="noindex, noarchive, nofollow">
+	<meta name="slurp" content="noindex, noarchive, nofollow, noodp, noydir">
+	<meta name="msnbot" content="noindex, noarchive, nofollow, noodp">
+	<meta http-equiv="Cache-Control" content="no-cache">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="expires" content="0">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--[if IE 9]>
+	<link rel="stylesheet" type="text/css" href="/redcap/redcap_v9.5.14/Resources/css/bootstrap-ie9.min.css">
+	<script type="text/javascript">$(function(){ie9FormFix()});</script>
+	<!--<![endif]-->
+</head>
+<body>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
 <link rel="stylesheet" href="<?=$module->getUrl('css/record.css')?>"/>
 <script type="text/javascript" src="<?=$module->getUrl('js/patient_record.js')?>"></script>
 <script type="text/javascript" >
@@ -65,7 +92,7 @@ if (empty($rid)) {
 	XDRO.eid = "<?php echo $eid;?>";
 	XDRO.demographics = '<?php echo json_encode($all_demographics);?>';
 </script>
-
+<div id="main">
 <div id='header' class='row'>
 	<div class='logo column'>
 		<span id='xdro-title'>xdro</span>
@@ -73,10 +100,17 @@ if (empty($rid)) {
 	</div>
 	<div class='header-info column'>
 		<div id='patient-match' class='bluefont'>
-			<span>Is this patient a match?</span><span class='symbol-font'><?=$xdro_registry['match'] ? "X" : ""?></span> YES <span class='symbol-font'><?=$xdro_registry['match'] ? "" : "X"?></span> NO
+			<span>Is this patient a match?</span>
+			<div class="form-check">
+				<input class="form-check-input" type="radio" name="header_radios" id="header_radio_1" value="1">
+				<label class="form-check-label" for="header_radios">Yes</label>
+			</div>
+			<div class="form-check">
+				<input class="form-check-input" type="radio" name="header_radios" id="header_radio_0" value="0">
+				<label class="form-check-label" for="header_radios">No</label>
+			</div>
 		</div>
 		<p id='ip-blurb' class='bluefont pt-2'>Please consider an Infectious Disease consult and make sure facility Infection Preventionist is aware.</p>
-		<br>
 		<div id='registry-title'><h1>Extensively Drug Resistant Organism Registry</h1></div>
 		<span><b>RESULT DATE:</b> <?=$last_lab["resulted_dt"]?></span>
 		<div id='test-results'>
@@ -86,7 +120,7 @@ if (empty($rid)) {
 		</div>
 	</div>
 </div>
-<div id='record' class='row'>
+<div id='record'>
 	<div class='column'>
 		<div id='patient-info'>
 			<table class='mb-3 mt-1 simpletable'>
@@ -233,5 +267,86 @@ if (empty($rid)) {
 		</div>
 	</div>
 </div>
-<?php
-require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
+
+<div id="metrics" class="modal" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Patient Match</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-8">
+						<span>Is this patient a match?</span>
+					</div>
+					<div class="col-4">
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="match_radios" id="match_radio_1" value="1">
+							<label class="form-check-label" for="match_radios">Yes</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="match_radios" id="match_radio_0" value="0">
+							<label class="form-check-label" for="match_radios">No</label>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-8">
+						<span>Were you aware that this patient should be on contact precautions prior to searching the registry?</span>
+					</div>
+					<div class="col-4">
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="aware_radios" id="aware_radio_1" value="1">
+							<label class="form-check-label" for="aware_radios">Yes</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="aware_radios" id="aware_radio_0" value="0">
+							<label class="form-check-label" for="aware_radios">No</label>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-8">
+						<span>Is this patient already on contact precautions?</span>
+					</div>
+					<div class="col-4">
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="already_radios" id="already_radio_1" value="1">
+							<label class="form-check-label" for="already_radios">Yes</label>
+						</div>
+						<div class="form-check">
+							<input class="form-check-input" type="radio" name="already_radios" id="already_radio_0" value="0">
+							<label class="form-check-label" for="already_radios">No</label>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-8">
+						<span>What facility is this patient admitted to?</span>
+					</div>
+					<div class="col-4">
+						<div class='dropdown'>
+							<button class='btn btn-outline-primary dropdown-toggle' type='button' id='facility-dd' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Facility</button>
+							<div class='dropdown-menu' aria-labelledby='facility-dd'>
+								<a class='dropdown-item' href='#'>Facility A</a>
+								<a class='dropdown-item' href='#'>Facility B</a>
+								<a class='dropdown-item' href='#'>Facility C</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button id="save-metrics" type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
+			</divS
+		</div>
+	</div>
+</div>
+
+</div>
+</body>
+</html>
+

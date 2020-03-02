@@ -1,5 +1,13 @@
 /* @import url(//db.onlinewebfonts.com/c/090fac32abeec01857bae0369f615f89?family=AvenirNextLTW04-Light); */
 
+#main {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	margin-top: 2em;
+}
+
 div.logo {
 	display: flex;
 	flex-direction: column;
@@ -29,21 +37,22 @@ div.header-info {
 	font-size: 1.25rem;
 }
 #patient-match {
-	display: inline;
-	border: 2.25px solid #c0504d;
-	width: 500px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	align-items: center;
 	
-	text-align: right;
+	padding: 0.5em;
+	max-width: 400px;
+	margin-left: auto;
+	border: 2.25px solid #c0504d;
 	font-weight: 700;
 	font-size: 1rem;
-	
-	padding: 4px;
-	margin-right: 0px;
 }
-#patient-match span {
-	margin-left: 40px;
-	margin-right: 4px;
+#patient-match {
+	/* padding: 1em; */
 }
+
 #ip-blurb {
 	text-align: right;
 }
@@ -68,9 +77,14 @@ div.header-info {
 
 #record {
 	padding: 16px;
+	
+    display: flex;
+    flex-direction: row;
+	justify-content: space-around;
 }
-#record div:first-child {
-	margin-right: 16px;
+#record .column {
+	padding: 2em;
+	margin: 1em;
 }
 
 /* column 1 */
@@ -111,6 +125,10 @@ div.header-info {
 	padding-left: 70px;
 	font-size: .9375rem;
 }
+
+#susceptibilities th {
+	padding: .5em;
+}
 #susceptibilities table, #susceptibilities tr, #susceptibilities th, #susceptibilities td {
 	border: 1px dashed #888;
 }
@@ -144,6 +162,24 @@ div.header-info {
 	font-weight: 600;
 }
 
+#metrics {
+	padding: .5rem;
+}
+#metrics.modal-body {
+	padding: 20px;
+}
+
+#metrics .row {
+	padding: 2%;
+	margin: 0px 4%;
+	margin-bottom: .5em;
+	border: 1px solid #ccc;
+}
+
+#metrics .col-8 {
+	font-weight: 600;
+}
+
 /* etc */
 .symbol-font {
 	font-family: symbol;
@@ -158,7 +194,7 @@ div.header-info {
 /* @media only screen and (min-width: 1151px) { */
 	#registry-title {
 		padding-left: 150px;
-		margin-left: -5px;
+		margin-left: -100px;
 	}
 	#test-results {
 		padding-left: 166px;
