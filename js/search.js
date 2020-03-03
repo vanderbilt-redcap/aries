@@ -240,10 +240,6 @@ $(function() {
 			{
 				targets: [5],
 				orderable: false
-			},
-			{
-				className: "dt-center", 
-				targets: "_all"
 			}
 		],
 		pageLength: 15

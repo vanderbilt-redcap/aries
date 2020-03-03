@@ -1,8 +1,48 @@
 <?php
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
-require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 ?>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>XDRO | REDCap</title>
+	<meta name="googlebot" content="noindex, noarchive, nofollow, nosnippet">
+	<meta name="robots" content="noindex, noarchive, nofollow">
+	<meta name="slurp" content="noindex, noarchive, nofollow, noodp, noydir">
+	<meta name="msnbot" content="noindex, noarchive, nofollow, noodp">
+	<meta http-equiv="Cache-Control" content="no-cache">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="expires" content="0">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--[if IE 9]>
+	<link rel="stylesheet" type="text/css" href="/redcap/redcap_v9.5.14/Resources/css/bootstrap-ie9.min.css">
+	<script type="text/javascript">$(function(){ie9FormFix()});</script>
+	<!--<![endif]-->
+</head>
+<body>
+
+<!-- jquery 3.4 -->
+<script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+
+<!-- bootstrap 4.4 -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+<!-- datatables 1.10 -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css"/>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+
+<!-- page js/css -->
 <link rel="stylesheet" href="<?=$module->getUrl('css/search.css')?>"/>
+<link rel="stylesheet" href="<?=$module->getUrl('css/search_datatable.css')?>"/>
 <script type="text/javascript" src="<?=$module->getUrl('js/search.js')?>"></script>
 <script type="text/javascript">
 	XDRO.moduleAddress = "<?=$module->getUrl('XDRO.php')?>"
@@ -10,6 +50,9 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 	XDRO.CSVSearchAddress = "<?=$module->getUrl('search_csv_ajax.php')?>"
 </script>
 
+
+<!-- page contents -->
+<div id="main">
 <div id='header' class=''>
 	<div class='logo'>
 		<span id='xdro-title'>xdro</span>
@@ -88,7 +131,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 </div>
 
 <div id='results'>
-	<table>
+	<table class='display cell-border'>
 		<thead>
 			<tr>
 				<th>Record ID</th>
@@ -114,6 +157,6 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 		<a href='http://www.tn.gov/hai/xdro'>http://www.tn.gov/hai/xdro</a>
 	</div>
 </div>
-
-<?php
-require_once APP_PATH_DOCROOT . 'ProjectGeneral/footer.php';
+</div>
+</body>
+</html>

@@ -1,9 +1,19 @@
 /* @import url(//db.onlinewebfonts.com/c/090fac32abeec01857bae0369f615f89?family=AvenirNextLTW04-Light); */
 
 /* header, logo, title bar */
+#main {
+	display: flex;
+	flex-direction: column;
+	/* align-items: center; */
+	justify-content: center;
+	padding: 2rem 4rem;
+	margin-left: 6rem;
+}
+
 #header {
 	display: flex;
 	align-items: center;
+	margin-left: -6rem;
 }
 div.logo {
 	display: flex;
@@ -55,7 +65,7 @@ div.logo img {
 }
 #file-search-info, #search-info {
 	background-color: #d7d5cb;
-	padding: 32px 2px 50px 8px;
+	padding: 32px 2px 32px 32px;
 }
 #file-search-input, #search-input {
 	display: flex;
@@ -76,6 +86,7 @@ div.logo img {
 #file-search-input input, #search-input input {
 	border: 1px solid #3333;
 	line-height: 2em;
+	padding-left: 8px;
 }
 
 #file-queries {
@@ -161,17 +172,13 @@ div.logo img {
 /* results */
 #results {
 	visibility: hidden;
-	/* width: 92%; */
-	margin-top: 50px;
+	margin-top: 42px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
 #results .dataTables_wrapper {
-	width: 85%;
-	text-align: center;
-	font-weight: 600;
-	margin-left: -10%;
+	width: 92%;
 }
 
 #results table {
@@ -183,7 +190,7 @@ div.logo img {
 }
 
 tr.highlightable:hover {
-	background-color: #cff !important;
+	background-color: #e3e3ff !important;
 }
 
 /* #results thead th { */
