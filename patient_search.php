@@ -1,5 +1,6 @@
 <?php
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
+$fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -17,6 +18,10 @@ require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "red
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<!-- font awesome icons -->
+	<link rel="stylesheet" href="<?=$fa_path?>">
+	
 	<!--[if IE 9]>
 	<link rel="stylesheet" type="text/css" href="/redcap/redcap_v9.5.14/Resources/css/bootstrap-ie9.min.css">
 	<script type="text/javascript">$(function(){ie9FormFix()});</script>
@@ -49,7 +54,6 @@ require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "red
 	XDRO.recordAddress = "<?=$module->getUrl('patient_record.php')?>"
 	XDRO.CSVSearchAddress = "<?=$module->getUrl('search_csv_ajax.php')?>"
 </script>
-
 
 <!-- page contents -->
 <div id="main">

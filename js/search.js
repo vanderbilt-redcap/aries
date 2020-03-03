@@ -169,7 +169,7 @@ XDRO.first_query = function() {
 }
 
 XDRO.last_query = function() {
-	XDRO.row_query_index = XDRO.response.responseJSON.rows.length-1
+	XDRO.row_query_index = XDRO.response.rows.length-1
 	XDRO.show_results_for_row_query(XDRO.row_query_index)
 }
 
