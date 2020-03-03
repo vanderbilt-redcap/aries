@@ -70,7 +70,7 @@ XDRO.submit_manual_query = function() {
 			}
 			
 			// update/re-draw results table
-			table.draw()
+			// table.draw()
 			if (records.length == 0) {
 				$(".dataTables_empty").text("Search for '" + XDRO.query_string + "' yielded no record results")
 			}
@@ -132,6 +132,8 @@ XDRO.make_results_table = function(records) {
 		
 		$(node).addClass('highlightable').attr('data-rid', record.patientid)
 	})
+	
+	table.draw()
 }
 
 XDRO.add_file_interface = function() {
