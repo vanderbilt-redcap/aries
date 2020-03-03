@@ -1,0 +1,52 @@
+
+div.logo {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	
+	width: 250px;
+	height: 250px;
+	
+	background-color: #003399;
+	border-radius: 50%;
+	z-index: 2;
+}
+div.logo img {
+	width: 67%;
+	z-index: 2;
+}
+#xdro-title {
+	color: white;
+	font-size: 6rem;
+	/* font-family: AvenirNextLTW04-Light; */
+	margin-top: -1.75rem;
+	padding: 0px;
+	z-index: 2;
+}
+#registry-title {
+	position: absolute;
+	top: 125px;
+	left: 150px;
+	width: calc(90% - 80px);
+	background-color: #003399;
+	
+	text-align: right;
+	height: 3rem;
+	z-index: 1;
+}
+#registry-title h1 {
+	color: white;
+	font-size: 1.25rem;
+	font-weight: 100;
+	padding: 12px;
+	z-index: 2;
+}
+
+.card {
+	margin-top: 5%;
+}
+
+.card-body {
+	margin: 1% 20%;
+}
