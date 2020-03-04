@@ -1,0 +1,33 @@
+#users {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-width: 50%;
+}
+
+#users .dataTables_wrapper {
+	width: 100%;
+}
+#users table {
+	width: 100%;
+}
+
+div.row.users {
+	justify-content: center;
+}
+
+div.row #cards {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-evenly;
+	align-items: flex-start;
+}
+
+.form-control::placeholder {
+	color: #ccc;
+}
+
+#add-user, #facilities {
+	margin-top: 2rem;
+}

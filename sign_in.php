@@ -69,7 +69,7 @@ $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 					<div class="input-group-prepend">
 						<span class="input-group-text" id="password">Password</span>
 					</div>
-					<input type="text" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="password">
+					<input type="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="password">
 				</div>
 				
 				<a href="#" data-toggle="modal" data-target="#forgot" class="card-link">Forgot your password?</a>
