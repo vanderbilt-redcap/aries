@@ -24,6 +24,11 @@
 				"name": "Import Lab/Patient File",
 				"icon": "arrow_right",
 				"url": "import_file.php"
+			},
+			{
+				"name": "User Administration",
+				"icon": "arrow_right",
+				"url": "user_admin.php"
 			}
 		],
 		"control-center": []

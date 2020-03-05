@@ -31,3 +31,7 @@ div.row #cards {
 #add-user, #facilities {
 	margin-top: 2rem;
 }
+
+.alert-primary {
+	border-color: #dde !important;
+}

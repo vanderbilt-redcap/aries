@@ -6,6 +6,8 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	
 	public function __construct() {
 		parent::__construct();
+		$this->auth_data_raw = $this->framework->getSystemSetting('auth_data');
+		$this->auth_data = json_decode($this->auth_data_raw);
 	}
 	
 	// given a user supplied string, search for records in our patient registry that might match
@@ -221,6 +223,20 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		return $ret_array;
 	}
 	
+	
+	function save_auth_data() {
+		$this->framework->setSystemSetting('auth_data', json_encode($this->auth_data));
+		$this->llog("saved auth_data: " . print_r($this->auth_data, true));
+	}
+	
+	function get_next_user_id() {
+		$maxid = 1;
+		foreach($this->auth_data->users as $user) {
+			$maxid = max($user->id, $maxid);
+		}
+		return $maxid;
+	}
+	
 	function nlog() {
 		if (file_exists("C:/vumc/log.txt")) {
 			file_put_contents("C:/vumc/log.txt", "constructing XDRO instance\n");
@@ -237,6 +253,8 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		\REDCap::logEvent("XDRO Module", $msg);
 	}
 }
+
+$module = new XDRO();
 
 if ($_GET['action'] == 'predictPatients') {
 	$module = new XDRO();

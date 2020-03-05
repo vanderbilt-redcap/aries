@@ -1,10 +1,18 @@
 <?php
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
-$fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 ?>
+
+<script type="text/javascript">
+	XDRO = JSON.parse('<?=$module->auth_data_raw?>')
+	var ajax_address = "<?=$module->getUrl('user_admin_ajax.php')?>"
+</script>
+
+<script type="text/javascript" src="<?=$module->getUrl('js/moment.js')?>"></script>
+
 <link rel="stylesheet" href="<?=$module->getUrl('css/user_admin.css')?>"/>
 <script type="text/javascript" src="<?=$module->getUrl('js/user_admin.js')?>"></script>
+
 
 <div class="row users">
 	<div id="users" class="col-auto card p-3">
@@ -49,19 +57,16 @@ $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 				<label for="username">Pick a username for this user</label>
 				<input type="text" class="form-control" id="username" placeholder="john_smith_1" required>
 			</div>
-			<button type="submit" class="btn btn-primary mb-3">Create New User</button>
+			<button type="button" class="btn btn-primary mb-3" onclick="XDRO.add_user()">Create New User</button>
 		</form>
 	</div>
 	<div id="facilities" class="card col-4">
 		<h5 class="card-title mt-3">Add/Remove Facilities</h5>
 		<select class="fac-list custom-select mb-3" multiple>
-			<option value="1">Facility X</option>
-			<option value="2">Facility Y</option>
-			<option value="3">Facility Z</option>
 		</select>
 		<div class="facility-actions mb-3">
 			<button type="button" class="btn btn-primary">Rename</button>
-			<button type="button" class="btn btn-primary" disabled>Remove</button>
+			<button type="button" class="btn btn-danger">Remove</button>
 		</div>
 		<div class="alert alert-primary mb-3" role="alert">
 			There are 6 users associated with the selected facility.
