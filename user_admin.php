@@ -74,7 +74,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 		<div class="form-group" class="mb-3">
 			<label for="add-facility">Enter a facility name</label>
 			<input type="text" class="form-control mb-3" id="add-facility" placeholder="ABC Medical" required>
-			<button type="submit" class="btn btn-primary">Add Facility</button>
+			<button type="submit" class="btn btn-primary" onclick="XDRO.add_facility()">Add Facility</button>
 		</div>
 	</div>
 </div>

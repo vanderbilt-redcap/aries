@@ -7,6 +7,9 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	public function __construct() {
 		parent::__construct();
 		$this->auth_data_raw = $this->framework->getSystemSetting('auth_data');
+		if (empty($this->auth_data_raw)) {
+			$this->auth_data_raw = "{}";
+		}
 		$this->auth_data = json_decode($this->auth_data_raw);
 	}
 	
@@ -232,7 +235,15 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	function get_next_user_id() {
 		$maxid = 1;
 		foreach($this->auth_data->users as $user) {
-			$maxid = max($user->id, $maxid);
+			$maxid = max($user->id + 1, $maxid);
+		}
+		return $maxid;
+	}
+	
+	function get_next_facility_id() {
+		$maxid = 1;
+		foreach($this->auth_data->facilities as $fac) {
+			$maxid = max($fac->id + 1, $maxid);
 		}
 		return $maxid;
 	}

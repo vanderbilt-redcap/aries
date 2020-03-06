@@ -35,3 +35,18 @@ div.row #cards {
 .alert-primary {
 	border-color: #dde !important;
 }
+
+#users tr:hover {
+	background-color: #dff !important
+}
+#users tr.selected td {
+	border-bottom: 2px solid #58f !important;
+	border-top: 2px solid #58f !important;
+	background-color: #dff !important;
+}
+#users tr.selected td:first-child {
+	border-left: 2px solid #58f !important;
+}
+#users tr.selected td:last-child {
+	border-right: 2px solid #58f !important;
+}

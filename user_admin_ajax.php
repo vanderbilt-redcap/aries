@@ -19,6 +19,7 @@ if ($action == 'add_user') {
 		$new_pw = bin2hex(openssl_random_pseudo_bytes(8));
 		$data->user->pw_hash = password_hash($new_pw, PASSWORD_DEFAULT);
 		$data->user->id = $module->get_next_user_id();
+		
 		$module->auth_data->users[] = $data->user;
 		
 		// send email to new user
@@ -42,6 +43,9 @@ http://localhost/redcap/external_modules/?prefix=xdro&page=sign_in&pid=68");
 		$json->error = "Failed to send email with password to newly registered user.";
 		exit(json_encode($json));
 	}
+	
+	unset($data->user->pw_hash);
+	$json->user = $data->user;
 } elseif ($action == 'delete_user') {
 	
 } elseif ($action == 'assign_facilities') {
@@ -53,12 +57,14 @@ http://localhost/redcap/external_modules/?prefix=xdro&page=sign_in&pid=68");
 } elseif ($action == 'add_facility') {
 	try {
 		$data->facility->id = $module->get_next_facility_id();
-		$module->auth_data->users[] = $data->user;
+		$module->auth_data->facilities[] = $data->facility;
 		$module->save_auth_data();
 	} catch (\Exception $e) {
 		$json->error = $e;
 		\REDCap::logEvent("XDRO Module", "Error occurred when adding new user: " . print_r($data, true) . " -- (exception): " . print_r($e, true));
 	}
+	
+	$json->facility = $data->facility;
 } elseif ($action == 'remove_facility') {
 	
 } elseif ($action == 'rename_facility') {
