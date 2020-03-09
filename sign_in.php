@@ -1,6 +1,8 @@
 <?php
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
+
+$pid = $module->getProjectId();
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -42,7 +44,13 @@ $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 	
 	<!-- xdro sign in js -->
+	<script type="text/javascript">
+		var XDRO = {project_id: <?=$pid?>}
+		var ajax_address = "<?=$module->getUrl('sign_in_ajax.php')?>"
+		var search_address = "<?=$module->getUrl('patient_search.php')?>"
+	</script>
 	<script type="text/javascript" src="<?=$module->getUrl('js/sign_in.js')?>"></script>
+	
 	
 	<div class="main container">
 		<div class="card">
@@ -61,17 +69,19 @@ $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 				
 				<div class="input-group mb-3">
 					<div class="input-group-prepend">
-						<span class="input-group-text" id="username">Username</span>
+						<span class="input-group-text">Username</span>
 					</div>
-					<input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="username">
+					<input id="username" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="username">
 				</div>
 				<div class="input-group mb-3">
 					<div class="input-group-prepend">
-						<span class="input-group-text" id="password">Password</span>
+						<span class="input-group-text">Password</span>
 					</div>
-					<input type="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="password">
+					<input id="password" type="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="password">
 				</div>
 				
+				<button type="button" id="sign-in" class="btn btn-primary mb-2" onclick="XDRO.sign_in()">Sign In</button>
+				<br>
 				<a href="#" data-toggle="modal" data-target="#forgot" class="card-link">Forgot your password?</a>
 			</div>
 		</div>
