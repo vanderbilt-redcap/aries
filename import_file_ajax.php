@@ -130,38 +130,23 @@ function get_assoc_form($column_name) {
 	$forms = [
 		"patientID" => "xdro_registry",
 		"PATIENT_LOCAL_ID" => "xdro_registry",
-		"PATIENT_FIRST_NAME" => "xdro_registry",
-		"PATIENT_LAST_NAME" => "xdro_registry",
 		"PATIENT_DOB" => "xdro_registry",
-		"PATIENT_CURRENT_SEX" => "xdro_registry",
-		"PATIENT_STREET_ADDRESS_1" => "xdro_registry",
-		"PATIENT_STREET_ADDRESS_2" => "xdro_registry",
-		"PATIENT_CITY" => "xdro_registry",
-		"PATIENT_STATE" => "xdro_registry",
-		"PATIENT_ZIP" => "xdro_registry",
-		"PATIENT_COUNTY" => "xdro_registry",
-		"JURISDICTION_NM" => "xdro_registry",
-		"ordering_facility" => "xdro_registry",
-		"ORDERING_PROVIDER_NM" => "xdro_registry",
-		"PROVIDER_ADDRESS" => "xdro_registry",
-		"PROVIDER_PHONE" => "xdro_registry",
-		"reporting_facility" => "xdro_registry",
-		"reporterName" => "xdro_registry",
-		"reporterPhone" => "xdro_registry",
-		"ordered_test_nm" => "xdro_registry",
-		"SPECIMEN_DESC" => "xdro_registry",
-		"lab_test_nm" => "xdro_registry",
-		"SPECIMEN_COLLECTION_DT" => "xdro_registry",
-		"LAB_TEST_STATUS" => "xdro_registry",
-		"resulted_dt" => "xdro_registry",
-		"DISEASE" => "xdro_registry",
-		"PATIENT_LAST_CHANGE_TIME" => "xdro_registry",
 		"PATIENT_SSN" => "xdro_registry",
 		"PATIENT_RACE_CALCULATED" => "xdro_registry",
 		"PATIENT_ETHNICITY" => "xdro_registry",
 		"PATIENT_FIRST_NAME" => "demographics",
 		"PATIENT_LAST_NAME" => "demographics",
-		"PATIENT_DOB" => "demographics",
+		"PATIENT_CURRENT_SEX" => "demographics",
+		"PATIENT_STREET_ADDRESS_1" => "demographics",
+		"PATIENT_STREET_ADDRESS_2" => "demographics",
+		"PATIENT_CITY" => "demographics",
+		"PATIENT_STATE" => "demographics",
+		"PATIENT_ZIP" => "demographics",
+		"PATIENT_COUNTY" => "demographics",
+		"JURISDICTION_NM" => "demographics",
+		"PATIENT_LAST_CHANGE_TIME" => "demographics",
+		"PATIENT_FIRST_NAME" => "demographics",
+		"PATIENT_LAST_NAME" => "demographics",
 		"PATIENT_CURRENT_SEX" => "demographics",
 		"PATIENT_PHONE_HOME" => "demographics",
 		"PATIENT_STREET_ADDRESS_1" => "demographics",
@@ -171,7 +156,22 @@ function get_assoc_form($column_name) {
 		"PATIENT_ZIP" => "demographics",
 		"PATIENT_COUNTY" => "demographics",
 		"JURISDICTION_NM" => "demographics",
+		"ordering_facility" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"ORDERING_PROVIDER_NM" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"PROVIDER_ADDRESS" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"PROVIDER_PHONE" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"reporting_facility" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"reporterName" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"reporterPhone" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"ordered_test_nm" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"SPECIMEN_DESC" => "antimicrobial_susceptibilities_and_resistance_mech",
 		"lab_test_nm" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"SPECIMEN_COLLECTION_DT" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"LAB_TEST_STATUS" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"resulted_dt" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"DISEASE" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"DISEASE_CD" => "antimicrobial_susceptibilities_and_resistance_mech",
+		"lab_test_nm_2" => "antimicrobial_susceptibilities_and_resistance_mech",
 		"coded_result_val_desc" => "antimicrobial_susceptibilities_and_resistance_mech",
 		"interpretation_flg" => "antimicrobial_susceptibilities_and_resistance_mech",
 		"numeric_result_val" => "antimicrobial_susceptibilities_and_resistance_mech",
@@ -191,17 +191,6 @@ function get_assoc_field($column_name) {
 	$fields = [
 		"patientID" => "patientid",
 		"PATIENT_LOCAL_ID" => "patientid",
-		"PATIENT_FIRST_NAME" => "patient_first_name",
-		"PATIENT_LAST_NAME" => "patient_last_name",
-		"PATIENT_DOB" => "patient_dob",
-		"PATIENT_CURRENT_SEX" => "patient_current_sex",
-		"PATIENT_STREET_ADDRESS_1" => "patient_street_address_1",
-		"PATIENT_STREET_ADDRESS_2" => "patient_street_address_2",
-		"PATIENT_CITY" => "patient_city",
-		"PATIENT_STATE" => "patient_state",
-		"PATIENT_ZIP" => "patient_zip",
-		"PATIENT_COUNTY" => "patient_county",
-		"JURISDICTION_NM" => "jurisdiction_nm",
 		"ordering_facility" => "ordering_facility",
 		"ORDERING_PROVIDER_NM" => "providername",
 		"PROVIDER_ADDRESS" => "provider_address",
@@ -211,7 +200,6 @@ function get_assoc_field($column_name) {
 		"reporterPhone" => "reporterphone",
 		"ordered_test_nm" => "ordered_test_nm",
 		"SPECIMEN_DESC" => "specimen_desc",
-		"lab_test_nm" => "lab_test_nm",
 		"SPECIMEN_COLLECTION_DT" => "specimen_collection_dt",
 		"LAB_TEST_STATUS" => "lab_test_status",
 		"resulted_dt" => "resulted_dt",
@@ -220,18 +208,18 @@ function get_assoc_field($column_name) {
 		"PATIENT_SSN" => "patient_ssn",
 		"PATIENT_RACE_CALCULATED" => "patient_race_calculated",
 		"PATIENT_ETHNICITY" => "patient_ethnicity",
-		"PATIENT_FIRST_NAME" => "patient_first_name_d",
-		"PATIENT_LAST_NAME" => "patient_last_name_d",
-		"PATIENT_DOB" => "patient_dob_d",
-		"PATIENT_CURRENT_SEX" => "patient_current_sex_d",
+		"PATIENT_FIRST_NAME" => "patient_first_name",
+		"PATIENT_LAST_NAME" => "patient_last_name",
+		"PATIENT_DOB" => "patient_dob",
+		"PATIENT_CURRENT_SEX" => "patient_current_sex",
 		"PATIENT_PHONE_HOME" => "patient_phone_home",
-		"PATIENT_STREET_ADDRESS_1" => "patient_street_address_1_d",
-		"PATIENT_STREET_ADDRESS_2" => "patient_street_address_2_d",
-		"PATIENT_CITY" => "patient_city_d",
-		"PATIENT_STATE" => "patient_state_d",
-		"PATIENT_ZIP" => "patient_zip_d",
-		"PATIENT_COUNTY" => "patient_county_d",
-		"JURISDICTION_NM" => "jurisdiction_nm_d",
+		"PATIENT_STREET_ADDRESS_1" => "patient_street_address_1",
+		"PATIENT_STREET_ADDRESS_2" => "patient_street_address_2",
+		"PATIENT_CITY" => "patient_city",
+		"PATIENT_STATE" => "patient_state",
+		"PATIENT_ZIP" => "patient_zip",
+		"PATIENT_COUNTY" => "patient_county",
+		"JURISDICTION_NM" => "jurisdiction_nm",
 		"lab_test_nm" => "lab_test_nm_2",
 		"coded_result_val_desc" => "coded_result_val_desc",
 		"interpretation_flg" => "interpretation_flg",
@@ -263,6 +251,8 @@ function import_data_row($row) {
 	global $module;
 	global $headers;
 	global $headers_flipped;
+	global $mode;
+	global $lab_obj;
 	
 	$pid = $module->framework->getProjectId();
 	$eid = $module->getFirstEventId($pid);
@@ -309,6 +299,11 @@ function import_data_row($row) {
 		unset($column_name, $assoc_form, $assoc_field);
 	}
 	
+	if ($mode != "x") {
+		$module->llog("imported for row 2: " . print_r($imported, true));
+	}
+	
+	// save to redcap
 	$pati_id = $imported["xdro_registry"]["patientid"];
 	if (empty($pati_id)) {
 		$errors[] = [1, "No patient ID found -- make sure patient_ID or PATIENT_LOCAL_ID column isn't empty"];
@@ -328,12 +323,21 @@ function import_data_row($row) {
 		
 		// try to save
 		$result = \REDCap::saveData($pid, 'array', $data);
-		// $module->llog("$pati_id saveData \$result: " . print_r($result, true));
+		if ($mode != "x")
+			$module->llog("$pati_id saveData \$result: " . print_r($result, true));
+		
+		if (gettype($result["errors"]) == "string")
+			$errors[] = $result["errors"];
 		foreach($result["errors"] as $err) {
+			$module->llog("saveData err: $err");
 			$errors[] = [1, $err];
 		}
+		
+		// if ($mode != "x")
+			// $module->llog("\$errors: " . print_r($errors, true));
 	}
 	
+	$mode = "x";
 	// $module->llog("data for row: " . print_r($data, true));
 	return $errors;
 }
@@ -394,6 +398,9 @@ try {
 	exit(json_encode($json));
 }
 
+// this obj will lab order values that span across multiple rows (per PATIENT_LOCAL_ID)
+$lab_obj = new \stdClass();
+
 $headers = [];
 $json->row_error_arrays = [];
 foreach ($sheet->getRowIterator() as $i => $row) {
@@ -404,13 +411,41 @@ foreach ($sheet->getRowIterator() as $i => $row) {
 			$headers[] = $cell->getValue();
 		}
 		$headers_flipped = array_flip($headers);
-		// $module->llog("headers: " . print_r($headers, true));
+		
+		$module->llog("headers: " . print_r($headers, true));
+		$module->llog("headers_flipped: " . print_r($headers_flipped, true));
+		
+		// found out if this file is a lab import or patient file
+		$mode = "patient";
+		foreach ($headers as $header) {
+			if (strtolower($header) == "lab_test_type")
+				$mode = "lab";
+		}
 	} else {
 		$range = "A$i:" . number_to_column(count($headers)) . "$i";
 		$json->row_error_arrays[$i] = import_data_row(reset($sheet->rangeToArray($range)));
-		$module->llog("row errors for row $i: " . print_r($row_errors, true));
+		if (!empty($row_errors))
+			$module->llog("row errors for row $i: " . print_r($row_errors, true));
 	}
 }
 
 $json->success = true;
 exit(json_encode($json));
+
+
+/*
+	If LAB_TEST_TYPE != "r_result"
+	lab_obj->lab_test_nm = lab_test_nm
+	 ' ' jurisdiction_nm
+	 ' ' resulted_dt
+	 ' ' lab_test_status
+	 ' ' specimen_desc
+	 ' ' disease
+	 ' ' disease_cd
+	 ' ' reporting_facility
+	 ' ' ordering_facility
+	Finally, lab_obj->patientid = PATIENT_LOCAL_ID
+	
+	LATER, when LAB_TEST_TYPE == "r_result"
+		lab_test_nm convert to lab_test_nm_2		(this is actually taken care of by get_assoc_field
+*/
