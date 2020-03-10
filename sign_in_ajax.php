@@ -8,13 +8,16 @@ $json = new stdClass();
 // make objects, not arrays
 $data = json_decode(json_encode($_POST));
 
+$json->error = "Couldn't find user with username '{$data->username}'";
 // see if there is a user with this user/pass
 foreach($module->auth_data->users as $i => $user) {
 	if ($user->username == $data->username) {
 		$module->llog('found user');
 		if (password_verify($data->password, $user->pw_hash)) {
 			$json->authenticated = true;
+			unset($json->error);
 		} else {
+			$json->error = "Found username but password doesn't match, please try again.";
 			$json->authenticated = false;
 		}
 	}
