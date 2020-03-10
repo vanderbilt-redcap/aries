@@ -254,6 +254,16 @@ function import_data_row($row) {
 	global $mode;
 	global $lab_obj;
 	
+	// handle if this is a non "r_result" row of a lab file:
+	if ($mode == 'lab') {
+		$lab_row_type = strtolower($row[$headers_flipped["lab_test_type"]]);
+		$module->llog("lab row type: $lab_row_type");
+		if ($lab_row_type != "r_result") {
+			// $lab_obj->
+			return;
+		}
+	}
+	return;
 	$pid = $module->framework->getProjectId();
 	$eid = $module->getFirstEventId($pid);
 	
@@ -410,7 +420,7 @@ foreach ($sheet->getRowIterator() as $i => $row) {
 		foreach($cell_iter as $cell) {
 			$headers[] = $cell->getValue();
 		}
-		$headers_flipped = array_flip($headers);
+		$headers_flipped = array_flip(array_map('strtolower', $headers));
 		
 		$module->llog("headers: " . print_r($headers, true));
 		$module->llog("headers_flipped: " . print_r($headers_flipped, true));
