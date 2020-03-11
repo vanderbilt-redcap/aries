@@ -134,6 +134,8 @@ function get_assoc_form($column_name) {
 		"PATIENT_SSN" => "xdro_registry",
 		"PATIENT_RACE_CALCULATED" => "xdro_registry",
 		"PATIENT_ETHNICITY" => "xdro_registry",
+		"reporterName" => "xdro_registry",
+		"reporterPhone" => "xdro_registry",
 		"PATIENT_FIRST_NAME" => "demographics",
 		"PATIENT_LAST_NAME" => "demographics",
 		"PATIENT_CURRENT_SEX" => "demographics",
@@ -178,9 +180,10 @@ function get_assoc_form($column_name) {
 		"result_units" => "antimicrobial_susceptibilities_and_resistance_mech",
 		"test_method_cd" => "antimicrobial_susceptibilities_and_resistance_mech"
 	];
+	$forms = array_change_key_case($forms);
 	
-	if (!empty($forms[$column_name])) {
-		return [1, $forms[$column_name]];
+	if (!empty($forms[strtolower($column_name)])) {
+		return [1, $forms[strtolower($column_name)]];
 	} else {
 		return [0, "no associated form for column $column_name"];
 	}
@@ -227,9 +230,10 @@ function get_assoc_field($column_name) {
 		"result_units" => "result_units",
 		"test_method_cd" => "test_method_cd"
 	];
+	$fields = array_change_key_case($fields);
 	
-	if (!empty($fields[$column_name])) {
-		return [1, $fields[$column_name]];
+	if (!empty($fields[strtolower($column_name)])) {
+		return [1, $fields[strtolower($column_name)]];
 	} else {
 		return [0, "no associated field for column $column_name"];
 	}
@@ -247,6 +251,7 @@ function get_next_instance($record, $form_name) {
 	}
 }
 
+
 function import_data_row($row) {
 	global $module;
 	global $headers;
@@ -254,16 +259,41 @@ function import_data_row($row) {
 	global $mode;
 	global $lab_obj;
 	
+	$lab_multi = [
+		"lab_test_nm",
+		"jurisdiction_nm",
+		"resulted_dt",
+		"lab_test_status",
+		"specimen_desc",
+		"disease",
+		"disease_cd",
+		"reporting_facility",
+		"ordering_facility",
+		"patient_local_id"
+	];
+	
 	// handle if this is a non "r_result" row of a lab file:
 	if ($mode == 'lab') {
 		$lab_row_type = strtolower($row[$headers_flipped["lab_test_type"]]);
-		$module->llog("lab row type: $lab_row_type");
+		
 		if ($lab_row_type != "r_result") {
-			// $lab_obj->
-			return;
+			// delete lab_obj info if we're in a different row group now
+			if (!empty($lab_obj->patient_local_id) and $row[$headers_flipped["patient_local_id"]] != $lab_obj->patient_local_id) {
+				$module->llog("clearing lab_obj data");
+				$lab_obj = new stdClass();
+			}
+			
+			foreach($lab_multi as $field) {
+				$col_index = $headers_flipped[$field];
+				$value = $row[$col_index];
+				if (!empty($value) and strtolower($value) != "null" and strtolower($value) != "no information given")
+					$lab_obj->$field = $value;
+			}
+			return [];
 		}
+		
 	}
-	return;
+	
 	$pid = $module->framework->getProjectId();
 	$eid = $module->getFirstEventId($pid);
 	
@@ -292,25 +322,29 @@ function import_data_row($row) {
 		$assoc_form = get_assoc_form($column_name);
 		if (!$assoc_form[0]) {
 			$errors[] = [0, $assoc_form[1]];
+			unset($assoc_form);
 		} else {
 			$assoc_form = $assoc_form[1];
 		}
 		
 		$assoc_field = get_assoc_field($column_name);
 		if (!$assoc_field[0]) {
+			// uncomment to allow reporting of non-used columns as errors
 			$errors[] = [0, $assoc_field[1]];
+			unset($assoc_field);
 		} else {
 			$assoc_field = $assoc_field[1];
 		}
 		
 		if (!empty($assoc_form) && !empty($assoc_field)) {
 			$imported[$assoc_form][$assoc_field] = $value;
+			
+			if ($mode == 'lab') {
+				if (!empty($lab_obj->$assoc_field) and $assoc_field != "patient_local_id")
+					$imported[$assoc_form][$assoc_field] = $lab_obj_->$assoc_field;
+			}
 		}
 		unset($column_name, $assoc_form, $assoc_field);
-	}
-	
-	if ($mode != "x") {
-		$module->llog("imported for row 2: " . print_r($imported, true));
 	}
 	
 	// save to redcap
@@ -331,10 +365,11 @@ function import_data_row($row) {
 		if (!empty($imported["antimicrobial_susceptibilities_and_resistance_mech"]))
 			$data[$pati_id]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"][$next_demographics_instance] = $imported["antimicrobial_susceptibilities_and_resistance_mech"];
 		
+		$module->llog('printing data:' . print_r($data, true));
+		
 		// try to save
 		$result = \REDCap::saveData($pid, 'array', $data);
-		if ($mode != "x")
-			$module->llog("$pati_id saveData \$result: " . print_r($result, true));
+		$module->llog("$pati_id saveData \$result: " . print_r($result, true));
 		
 		if (gettype($result["errors"]) == "string")
 			$errors[] = $result["errors"];
@@ -342,13 +377,7 @@ function import_data_row($row) {
 			$module->llog("saveData err: $err");
 			$errors[] = [1, $err];
 		}
-		
-		// if ($mode != "x")
-			// $module->llog("\$errors: " . print_r($errors, true));
 	}
-	
-	$mode = "x";
-	// $module->llog("data for row: " . print_r($data, true));
 	return $errors;
 }
 

@@ -4,6 +4,11 @@ $(function() {
 	XDRO.demographics = JSON.parse(XDRO.demographics)
 	XDRO.demo_index = XDRO.demographics.length
 	$("#demo_instance").text(XDRO.demographics.length + " / " + XDRO.demographics.length)
+	
+	if (XDRO.demographics.length < 2){
+		$("button#prev_demo_inst").attr('disabled', true)
+		$("button#next_demo_inst").attr('disabled', true)
+	}
 })
 
 $('body').on('click', '#prev_demo_inst', function (e) {
