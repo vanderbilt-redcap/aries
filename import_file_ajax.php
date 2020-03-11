@@ -136,6 +136,7 @@ function get_assoc_form($column_name) {
 		"PATIENT_ETHNICITY" => "xdro_registry",
 		"reporterName" => "xdro_registry",
 		"reporterPhone" => "xdro_registry",
+		"JURISDICTION_NM" => "xdro_registry",
 		"PATIENT_FIRST_NAME" => "demographics",
 		"PATIENT_LAST_NAME" => "demographics",
 		"PATIENT_CURRENT_SEX" => "demographics",
@@ -145,7 +146,6 @@ function get_assoc_form($column_name) {
 		"PATIENT_STATE" => "demographics",
 		"PATIENT_ZIP" => "demographics",
 		"PATIENT_COUNTY" => "demographics",
-		"JURISDICTION_NM" => "demographics",
 		"PATIENT_LAST_CHANGE_TIME" => "demographics",
 		"PATIENT_FIRST_NAME" => "demographics",
 		"PATIENT_LAST_NAME" => "demographics",
@@ -157,14 +157,11 @@ function get_assoc_form($column_name) {
 		"PATIENT_STATE" => "demographics",
 		"PATIENT_ZIP" => "demographics",
 		"PATIENT_COUNTY" => "demographics",
-		"JURISDICTION_NM" => "demographics",
 		"ordering_facility" => "antimicrobial_susceptibilities_and_resistance_mech",
 		"ORDERING_PROVIDER_NM" => "antimicrobial_susceptibilities_and_resistance_mech",
 		"PROVIDER_ADDRESS" => "antimicrobial_susceptibilities_and_resistance_mech",
 		"PROVIDER_PHONE" => "antimicrobial_susceptibilities_and_resistance_mech",
 		"reporting_facility" => "antimicrobial_susceptibilities_and_resistance_mech",
-		"reporterName" => "antimicrobial_susceptibilities_and_resistance_mech",
-		"reporterPhone" => "antimicrobial_susceptibilities_and_resistance_mech",
 		"ordered_test_nm" => "antimicrobial_susceptibilities_and_resistance_mech",
 		"SPECIMEN_DESC" => "antimicrobial_susceptibilities_and_resistance_mech",
 		"lab_test_nm" => "antimicrobial_susceptibilities_and_resistance_mech",
@@ -279,7 +276,6 @@ function import_data_row($row) {
 		if ($lab_row_type != "r_result") {
 			// delete lab_obj info if we're in a different row group now
 			if (!empty($lab_obj->patient_local_id) and $row[$headers_flipped["patient_local_id"]] != $lab_obj->patient_local_id) {
-				$module->llog("clearing lab_obj data");
 				$lab_obj = new stdClass();
 			}
 			
@@ -359,22 +355,24 @@ function import_data_row($row) {
 		// overwrite xdro_registry form values (if imported values)
 		if (!empty($imported["xdro_registry"]))
 			$data[$pati_id][$eid] = $imported["xdro_registry"];
+		
 		// add instances to repeatable forms (if imported values)
 		if (!empty($imported["demographics"]))
 			$data[$pati_id]["repeat_instances"][$eid]["demographics"][$next_demographics_instance] = $imported["demographics"];
-		if (!empty($imported["antimicrobial_susceptibilities_and_resistance_mech"]))
-			$data[$pati_id]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"][$next_demographics_instance] = $imported["antimicrobial_susceptibilities_and_resistance_mech"];
 		
-		$module->llog('printing data:' . print_r($data, true));
+		if (!empty($imported["antimicrobial_susceptibilities_and_resistance_mech"]))
+			$data[$pati_id]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"][$next_antimicrobial_instance] = $imported["antimicrobial_susceptibilities_and_resistance_mech"];
+		
+		// $module->llog('printing data:' . print_r($data, true));
 		
 		// try to save
 		$result = \REDCap::saveData($pid, 'array', $data);
-		$module->llog("$pati_id saveData \$result: " . print_r($result, true));
+		// $module->llog("$pati_id saveData \$result: " . print_r($result, true));
 		
 		if (gettype($result["errors"]) == "string")
 			$errors[] = $result["errors"];
 		foreach($result["errors"] as $err) {
-			$module->llog("saveData err: $err");
+			// $module->llog("saveData err: $err");
 			$errors[] = [1, $err];
 		}
 	}
@@ -451,9 +449,6 @@ foreach ($sheet->getRowIterator() as $i => $row) {
 		}
 		$headers_flipped = array_flip(array_map('strtolower', $headers));
 		
-		$module->llog("headers: " . print_r($headers, true));
-		$module->llog("headers_flipped: " . print_r($headers_flipped, true));
-		
 		// found out if this file is a lab import or patient file
 		$mode = "patient";
 		foreach ($headers as $header) {
@@ -463,8 +458,8 @@ foreach ($sheet->getRowIterator() as $i => $row) {
 	} else {
 		$range = "A$i:" . number_to_column(count($headers)) . "$i";
 		$json->row_error_arrays[$i] = import_data_row(reset($sheet->rangeToArray($range)));
-		if (!empty($row_errors))
-			$module->llog("row errors for row $i: " . print_r($row_errors, true));
+		// if (!empty($row_errors))
+			// $module->llog("row errors for row $i: " . print_r($row_errors, true));
 	}
 }
 
