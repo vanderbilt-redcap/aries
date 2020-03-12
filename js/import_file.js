@@ -1,4 +1,10 @@
 XDRO.import_file_done = function(response) {
+	// update button
+	$("button#submit_file").html('Import')
+	$("button#submit_file").removeClass('btn-primary')
+	$("button#submit_file").addClass('btn-primary-outline')
+	$("button#submit_file").removeAttr('disabled')
+	
 	console.log('import response', response)
 	if (response.errors.length > 0) {
 		var alertHtml = "<h6>Data import failed:</h6><br>"
@@ -59,6 +65,12 @@ $(function() {
 })
 
 $('body').on('click', '#submit_file', function() {
+	// update button
+	$(this).html('<span class="spinner-border spinner-border-sm mr-3"></span>Importing')
+	$(this).removeClass('btn-primary-outline')
+	$(this).addClass('btn-primary')
+	$(this).attr('disabled', true)
+	
 	XDRO.reset()
 	
 	if (!$("#import_file").prop('files'))
