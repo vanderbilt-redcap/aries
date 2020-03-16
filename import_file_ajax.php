@@ -16,7 +16,7 @@
 // connect to REDCap
 require_once (APP_PATH_TEMP . "../redcap_connect.php");
 $pid = $module->getProjectId();
-// $module->nlog();
+$module->nlog();
 
 // make object that will hold our response
 $json = new \stdClass();
@@ -315,6 +315,20 @@ function import_data_row($row, $row_index) {
 		
 		$column_name = $headers[$i];
 		
+		$date_fields = [
+			"lab_rpt_dt",
+			"specimen_collection_dt",
+			"resulted_dt",
+			"patient_dob",
+			"patient_last_change_time"
+		];
+		
+		if (array_search(strtolower($column_name), $date_fields, true) != false) {
+			$value = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)->format("Y-m-d");
+		}
+		
+		$column_name = $headers[$i];
+		
 		// either add error to return array or set assoc_form to be form string value
 		$assoc_form = get_assoc_form($column_name);
 		if ($assoc_form[0] == 0) {
@@ -343,7 +357,7 @@ function import_data_row($row, $row_index) {
 		unset($column_name, $assoc_form, $assoc_field);
 	}
 	
-	// $module->llog('printing \$imported:' . print_r($imported, true));
+	$module->llog('printing \$imported:' . print_r($imported, true));
 	
 	// save to redcap
 	$rows = [];
@@ -361,7 +375,6 @@ function import_data_row($row, $row_index) {
 			
 			// add to \$rows for reporting purposes
 			$fields = array_keys($imported["xdro_registry"]);
-			// $module->llog("xdro rg keys: " . print_r($fields, true));
 			$rows[] = [$row_index, $pati_id, 'xdro_registry', "Updating fields: " . implode(', ', $fields)];
 		}
 		
@@ -478,6 +491,11 @@ foreach ($sheet->getRowIterator() as $i => $row) {
 	} else {
 		$range = "A$i:" . number_to_column(count($headers)) . "$i";
 		$json->actions = array_merge($json->actions, import_data_row(reset($sheet->rangeToArray($range)), $i));
+		
+		if ($i == 10) {
+			$json->success = true;
+			exit(json_encode($json));
+		}
 	}
 }
 
