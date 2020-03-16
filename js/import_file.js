@@ -5,13 +5,20 @@ XDRO.import_file_done = function(response) {
 	$("button#submit_file").addClass('btn-primary-outline')
 	$("button#submit_file").removeAttr('disabled')
 	
+	XDRO.response = response
 	console.log('import response', response)
-	if (response.errors.length > 0) {
-		var alertHtml = "<h6>Data import failed:</h6><br>"
-		XDRO.showMessage(alertHtml + "<ul><li>" + response.errors.join('</li><li>') + "</li></ul>", 'danger')
-	} else {
-		XDRO.showImportResults(response.row_error_arrays)
+	
+	// show ignored columns
+	if (response.ignored_cols) {
+		XDRO.showIgnoredColumns(response.ignored_cols)
 	}
+	
+	// if (response.errors.length > 0) {
+		// var alertHtml = "<h6>Data import failed:</h6><br>"
+		// XDRO.showMessage(alertHtml + "<ul><li>" + response.errors.join('</li><li>') + "</li></ul>", 'danger')
+	// } else {
+		// XDRO.showImportResults(response.row_error_arrays)
+	// }
 }
 
 XDRO.reset = function() {
@@ -41,6 +48,21 @@ XDRO.showImportResults = function(rows) {
 	XDRO.results_table.columns.adjust()
 	// XDRO.results_table.css('width', 'none')
 	$("#results_wrapper").show()
+}
+
+XDRO.showIgnoredColumns = function(cols) {
+	if (cols.length > 0) {
+		Object.keys(cols).forEach(function(col) {
+			$("#ignored_cols ul").append("<li>" + col + "</li>")
+		})
+		
+		$("#ignored_cols").css('display', 'flex')
+	}
+}
+
+XDRO.hideIgnoredColumns = function(cols) {
+	$("#ignored_cols ul").empty()
+	$("#ignored_cols").hide()
 }
 
 XDRO.showMessage = function(txt, alert_class, wide) {

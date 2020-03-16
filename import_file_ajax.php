@@ -21,6 +21,8 @@ $module->nlog();
 // make object that will hold our response
 $json = new \stdClass();
 $json->errors = [];
+$json->ignored_cols = [];
+$json->actions = [];
 
 // $module->llog("post: " . print_r($_POST, true));
 // $module->llog("files: " . print_r($_FILES, true));
@@ -127,6 +129,7 @@ function checkWorkbookFile($file_param_name) {
 
 function get_assoc_form($column_name) {
 	// given "patient_ssn" would return "xdro_registry" -- return form name that a field belongs to
+	global $module;
 	$forms = [
 		"patientID" => "xdro_registry",
 		"PATIENT_LOCAL_ID" => "xdro_registry",
@@ -182,12 +185,14 @@ function get_assoc_form($column_name) {
 	if (!empty($forms[strtolower($column_name)])) {
 		return [1, $forms[strtolower($column_name)]];
 	} else {
+		$module->llog("$column_name not found get_assoc_form");
 		return [0, "no associated form for column $column_name"];
 	}
 }
 
 function get_assoc_field($column_name) {
 	// use this to convert data file column names to REDCap project field names (e.g., given "ORDERING_PROVIDER_NM", returns "providername"
+	global $module;
 	$fields = [
 		"patientID" => "patientid",
 		"PATIENT_LOCAL_ID" => "patientid",
@@ -232,6 +237,7 @@ function get_assoc_field($column_name) {
 	if (!empty($fields[strtolower($column_name)])) {
 		return [1, $fields[strtolower($column_name)]];
 	} else {
+		$module->llog("$column_name not found get_assoc_field");
 		return [0, "no associated field for column $column_name"];
 	}
 }
@@ -250,6 +256,7 @@ function get_next_instance($record, $form_name) {
 
 
 function import_data_row($row) {
+	global $json;
 	global $module;
 	global $headers;
 	global $headers_flipped;
@@ -306,7 +313,7 @@ function import_data_row($row) {
 	$imported["demographics"] = [];
 	$imported["antimicrobial_susceptibilities_and_resistance_mech"] = [];
 	
-	$errors = [];
+	$rows = [];
 	
 	foreach ($row as $i => $value) {
 		if (strcasecmp($value, "NULL") == 0)
@@ -316,17 +323,16 @@ function import_data_row($row) {
 		
 		// either add error to return array or set assoc_form to be form string value
 		$assoc_form = get_assoc_form($column_name);
-		if (!$assoc_form[0]) {
-			$errors[] = [0, $assoc_form[1]];
+		if ($assoc_form[0] == 0) {
+			$json->ignored_cols[$column_name] = true;
 			unset($assoc_form);
 		} else {
 			$assoc_form = $assoc_form[1];
 		}
 		
 		$assoc_field = get_assoc_field($column_name);
-		if (!$assoc_field[0]) {
-			// uncomment to allow reporting of non-used columns as errors
-			$errors[] = [0, $assoc_field[1]];
+		if ($assoc_field[0] == 0) {
+			$json->ignored_cols[$column_name] = true;
 			unset($assoc_field);
 		} else {
 			$assoc_field = $assoc_field[1];
@@ -342,6 +348,7 @@ function import_data_row($row) {
 		}
 		unset($column_name, $assoc_form, $assoc_field);
 	}
+	
 	
 	// save to redcap
 	$pati_id = $imported["xdro_registry"]["patientid"];
@@ -363,11 +370,11 @@ function import_data_row($row) {
 		if (!empty($imported["antimicrobial_susceptibilities_and_resistance_mech"]))
 			$data[$pati_id]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"][$next_antimicrobial_instance] = $imported["antimicrobial_susceptibilities_and_resistance_mech"];
 		
-		// $module->llog('printing data:' . print_r($data, true));
+		$module->llog('printing data:' . print_r($data, true));
 		
 		// try to save
 		$result = \REDCap::saveData($pid, 'array', $data);
-		// $module->llog("$pati_id saveData \$result: " . print_r($result, true));
+		$module->llog("$pati_id saveData \$result: " . print_r($result, true));
 		
 		if (gettype($result["errors"]) == "string")
 			$errors[] = $result["errors"];
