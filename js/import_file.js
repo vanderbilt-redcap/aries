@@ -13,12 +13,13 @@ XDRO.import_file_done = function(response) {
 		XDRO.showIgnoredColumns(response.ignored_cols)
 	}
 	
-	// if (response.errors.length > 0) {
-		// var alertHtml = "<h6>Data import failed:</h6><br>"
-		// XDRO.showMessage(alertHtml + "<ul><li>" + response.errors.join('</li><li>') + "</li></ul>", 'danger')
-	// } else {
+	if (response.errors.length > 0) {
+		var alertHtml = "<h6>Data import failed:</h6><br>"
+		XDRO.showMessage(alertHtml + "<ul><li>" + response.errors.join('</li><li>') + "</li></ul>", 'danger')
+	} else {
 		// XDRO.showImportResults(response.row_error_arrays)
-	// }
+		XDRO.showImportResults(response.actions)
+	}
 }
 
 XDRO.reset = function() {
@@ -27,32 +28,28 @@ XDRO.reset = function() {
 	alert.html("")
 	alert.hide()
 	
+	XDRO.hideIgnoredColumns()
+	
 	// clear table results
-	$("tbody").html("")
+	// $("tbody").html("")
+	XDRO.results_table.clear()
 	$("#results_wrapper").hide()
 }
 
 XDRO.showImportResults = function(rows) {
 	console.log('rows', rows)
-	// rows.forEach(function(error_arr, index) {
-	for (var index in rows) {
-		var error_arr = rows[index]
-		if (error_arr.length == 0) {
-			var td = "Row imported"
-		} else {
-			var td = "<ul><li>" + error_arr.join('</li><li>') + "</li></ul>"
-		}
-		$("#results > tbody").append("<tr><td>" + index + "</td><td>" + td + "</td></tr>")
-	}
 	
+	XDRO.results_table.rows.add(rows)
 	XDRO.results_table.columns.adjust()
-	// XDRO.results_table.css('width', 'none')
+	XDRO.results_table.draw()
+	
 	$("#results_wrapper").show()
 }
 
 XDRO.showIgnoredColumns = function(cols) {
+	cols = Object.keys(cols)
 	if (cols.length > 0) {
-		Object.keys(cols).forEach(function(col) {
+		cols.forEach(function(col) {
 			$("#ignored_cols ul").append("<li>" + col + "</li>")
 		})
 		
@@ -81,7 +78,7 @@ $(function() {
 		columnDefs: [
 			{className: "dt-center", target: "_all"}
 		],
-		pageLength: 50
+		pageLength: 25
 	});
 	XDRO.reset()
 })

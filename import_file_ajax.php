@@ -16,7 +16,7 @@
 // connect to REDCap
 require_once (APP_PATH_TEMP . "../redcap_connect.php");
 $pid = $module->getProjectId();
-$module->nlog();
+// $module->nlog();
 
 // make object that will hold our response
 $json = new \stdClass();
@@ -129,7 +129,6 @@ function checkWorkbookFile($file_param_name) {
 
 function get_assoc_form($column_name) {
 	// given "patient_ssn" would return "xdro_registry" -- return form name that a field belongs to
-	global $module;
 	$forms = [
 		"patientID" => "xdro_registry",
 		"PATIENT_LOCAL_ID" => "xdro_registry",
@@ -185,14 +184,12 @@ function get_assoc_form($column_name) {
 	if (!empty($forms[strtolower($column_name)])) {
 		return [1, $forms[strtolower($column_name)]];
 	} else {
-		$module->llog("$column_name not found get_assoc_form");
 		return [0, "no associated form for column $column_name"];
 	}
 }
 
 function get_assoc_field($column_name) {
 	// use this to convert data file column names to REDCap project field names (e.g., given "ORDERING_PROVIDER_NM", returns "providername"
-	global $module;
 	$fields = [
 		"patientID" => "patientid",
 		"PATIENT_LOCAL_ID" => "patientid",
@@ -237,7 +234,6 @@ function get_assoc_field($column_name) {
 	if (!empty($fields[strtolower($column_name)])) {
 		return [1, $fields[strtolower($column_name)]];
 	} else {
-		$module->llog("$column_name not found get_assoc_field");
 		return [0, "no associated field for column $column_name"];
 	}
 }
@@ -255,7 +251,7 @@ function get_next_instance($record, $form_name) {
 }
 
 
-function import_data_row($row) {
+function import_data_row($row, $row_index) {
 	global $json;
 	global $module;
 	global $headers;
@@ -313,8 +309,6 @@ function import_data_row($row) {
 	$imported["demographics"] = [];
 	$imported["antimicrobial_susceptibilities_and_resistance_mech"] = [];
 	
-	$rows = [];
-	
 	foreach ($row as $i => $value) {
 		if (strcasecmp($value, "NULL") == 0)
 			continue;
@@ -343,47 +337,66 @@ function import_data_row($row) {
 			
 			if ($mode == 'lab') {
 				if (!empty($lab_obj->$assoc_field) and $assoc_field != "patient_local_id")
-					$imported[$assoc_form][$assoc_field] = $lab_obj_->$assoc_field;
+					$imported[$assoc_form][$assoc_field] = $lab_obj->$assoc_field;
 			}
 		}
 		unset($column_name, $assoc_form, $assoc_field);
 	}
 	
+	// $module->llog('printing \$imported:' . print_r($imported, true));
 	
 	// save to redcap
+	$rows = [];
 	$pati_id = $imported["xdro_registry"]["patientid"];
 	if (empty($pati_id)) {
-		$errors[] = [1, "No patient ID found -- make sure patient_ID or PATIENT_LOCAL_ID column isn't empty"];
+		$rows[] = [$row, "", "", "No patient ID found -- make sure patient_ID or PATIENT_LOCAL_ID column isn't empty"];
 	} else {
 		$data = \REDCap::getData($pid, 'array', $pati_id);
 		$next_demographics_instance = get_next_instance(reset($data), "demographics");
 		$next_antimicrobial_instance = get_next_instance(reset($data), "antimicrobial_susceptibilities_and_resistance_mech");
 		
 		// overwrite xdro_registry form values (if imported values)
-		if (!empty($imported["xdro_registry"]))
+		if (!empty($imported["xdro_registry"])) {
 			$data[$pati_id][$eid] = $imported["xdro_registry"];
+			
+			// add to \$rows for reporting purposes
+			$fields = array_keys($imported["xdro_registry"]);
+			// $module->llog("xdro rg keys: " . print_r($fields, true));
+			$rows[] = [$row_index, $pati_id, 'xdro_registry', "Updating fields: " . implode(', ', $fields)];
+		}
 		
 		// add instances to repeatable forms (if imported values)
-		if (!empty($imported["demographics"]))
+		if (!empty($imported["demographics"])) {
 			$data[$pati_id]["repeat_instances"][$eid]["demographics"][$next_demographics_instance] = $imported["demographics"];
+			
+			// reporting
+			$rows[] = [$row_index, $pati_id, 'demographics', "Creating instance $next_demographics_instance"];
+		}
 		
-		if (!empty($imported["antimicrobial_susceptibilities_and_resistance_mech"]))
+		if (!empty($imported["antimicrobial_susceptibilities_and_resistance_mech"])) {
 			$data[$pati_id]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"][$next_antimicrobial_instance] = $imported["antimicrobial_susceptibilities_and_resistance_mech"];
+			
+			// reporting
+			$rows[] = [$row_index, $pati_id, 'antimicrobial_susceptibilities_and_resistance_mech', "Creating instance $next_antimicrobial_instance"];
+		}
 		
-		$module->llog('printing data:' . print_r($data, true));
+		// $module->llog('printing data:' . print_r($data, true));
 		
 		// try to save
 		$result = \REDCap::saveData($pid, 'array', $data);
-		$module->llog("$pati_id saveData \$result: " . print_r($result, true));
+		// $module->llog("$pati_id saveData \$result: " . print_r($result, true));
 		
-		if (gettype($result["errors"]) == "string")
-			$errors[] = $result["errors"];
+		if (!empty($result["errors"]))
+			$rows = [];
 		foreach($result["errors"] as $err) {
 			// $module->llog("saveData err: $err");
-			$errors[] = [1, $err];
+			$rows[] = [$row_index, $pati_id, "", $err];
+		}
+		if (gettype($result["errors"]) == "string") {
+			$rows[] = [$row_index, $pati_id, "", $result["errors"]];
 		}
 	}
-	return $errors;
+	return $rows;
 }
 
 function send_lots_of_errors() {
@@ -446,7 +459,7 @@ try {
 $lab_obj = new \stdClass();
 
 $headers = [];
-$json->row_error_arrays = [];
+$json->actions = [];
 foreach ($sheet->getRowIterator() as $i => $row) {
 	if ($i == 1) {
 		// build headers array for future referencing
@@ -464,9 +477,7 @@ foreach ($sheet->getRowIterator() as $i => $row) {
 		}
 	} else {
 		$range = "A$i:" . number_to_column(count($headers)) . "$i";
-		$json->row_error_arrays[$i] = import_data_row(reset($sheet->rangeToArray($range)));
-		// if (!empty($row_errors))
-			// $module->llog("row errors for row $i: " . print_r($row_errors, true));
+		$json->actions = array_merge($json->actions, import_data_row(reset($sheet->rangeToArray($range)), $i));
 	}
 }
 
@@ -474,19 +485,4 @@ $json->success = true;
 exit(json_encode($json));
 
 
-/*
-	If LAB_TEST_TYPE != "r_result"
-	lab_obj->lab_test_nm = lab_test_nm
-	 ' ' jurisdiction_nm
-	 ' ' resulted_dt
-	 ' ' lab_test_status
-	 ' ' specimen_desc
-	 ' ' disease
-	 ' ' disease_cd
-	 ' ' reporting_facility
-	 ' ' ordering_facility
-	Finally, lab_obj->patientid = PATIENT_LOCAL_ID
-	
-	LATER, when LAB_TEST_TYPE == "r_result"
-		lab_test_nm convert to lab_test_nm_2		(this is actually taken care of by get_assoc_field
-*/
+

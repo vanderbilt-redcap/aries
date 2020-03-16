@@ -29,17 +29,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 		</div>
 	</div>
 
-	<div role="alert" id="notes"></div>
-	<table id="results">
-		<thead>
-			<th>Row #</th>
-			<th>Notes</th>
-		</thead>
-		<tbody>
-		</tbody>
-	</table>
-
-	<div id="ignored_cols" class="card mt-3">
+	<div id="ignored_cols" class="card my-3">
 		<div class="card-body">
 			<h5 class="card-title mb-3">Ignored Columns</h5>
 			<p class="mb-3">The following columns were ignored during the import process<br> as they do not have fields in the XDRO registry project.</p>
@@ -47,6 +37,18 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 			</ul>
 		</div>
 	</div>
+
+	<div role="alert" id="notes"></div>
+	<table id="results">
+		<thead>
+			<th>Row #</th>
+			<th>Patient ID</th>
+			<th>Form</th>
+			<th>Action</th>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
 	
 </div>
 <script type="text/javascript" src="<?=$module->getUrl('js/import_file.js')?>"></script>
