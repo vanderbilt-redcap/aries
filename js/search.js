@@ -138,10 +138,12 @@ XDRO.make_results_table = function(records) {
 
 XDRO.add_file_interface = function() {
 	// add buttons
-	first = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="XDRO.first_query()"><i class="fas fa-angle-double-left"></i></button>'
-	prev = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="XDRO.prev_query()"><i class="fas fa-chevron-left"></i></button>'
-	next = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="XDRO.next_query()"><i class="fas fa-chevron-right"></i></button>'
-	last = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="XDRO.last_query()"><i class="fas fa-angle-double-right"></i></button>'
+	var leftChev = String.fromCharCode(0xf054);
+	var rightChev = '\uF054';
+	first = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="XDRO.first_query()"><i class="fa fa-chevron-left"></i><i class="fa fa-chevron-left"></i></button>'
+	prev = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="XDRO.prev_query()"><i class="fa fa-chevron-left"></i></button>'
+	next = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="XDRO.next_query()"><i class="fa fa-chevron-right"></i></button>'
+	last = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="XDRO.last_query()"><i class="fa fa-chevron-right"></i><i class="fa fa-chevron-right"></i></button>'
 	$("#search-input div:eq(0)").prepend(prev)
 	$("#search-input div:eq(0)").prepend(first)
 	$("#search-input div:eq(0)").append(next)

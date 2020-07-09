@@ -75,6 +75,9 @@ div.logo img {
 	
 	background-color: #eeece1;
 }
+button.neg_iter i, button.pos_iter i {
+	display: inline;
+}
 
 #search-input div:first-child {
 	display: flex;
