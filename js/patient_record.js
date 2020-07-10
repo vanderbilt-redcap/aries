@@ -72,7 +72,16 @@ XDRO.save_patient_match = function() {
 	data.match = $("#match_radio_1").is(":checked") ? true : false
 	data.contact_prior = $("#aware_radio_1").is(":checked") ? true : false
 	data.contact = $("#already_radio_1").is(":checked") ? true : false
-	data.facility = $("facility-dd").val() || null
+	
+	var facility_name = $("#facility-dd").val()
+	var facility_index = null;
+	$("#facility-dd").next("div").children("a").each(function(i, e) {
+		if ($(e).html() == facility_name) {
+			facility_index = $(e).attr("value")
+			return;
+		}
+	})
+	data.facility = facility_index
 	
 	var date_admitted = $("#date_admitted").datepicker("getDate")
 	data.date_admitted = null
@@ -88,9 +97,7 @@ XDRO.save_patient_match = function() {
 			console.log('response', response)
 		},
 		dataType: 'json',
-		cache: false,
-		// contentType: false,
-		// processData: false
+		cache: false
 	})
 }
 

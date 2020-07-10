@@ -16,6 +16,27 @@ function sort_demographics($a, $b) {
 	return 0;
 }
 
+function getFieldValues($field_name) {
+	global $project;
+	if (empty($project))
+		return false;
+	
+	$enumeration = $project->metadata[$field_name]["element_enum"];
+	if (gettype($enumeration) !== "string")
+		return false;
+	
+	$field_values = [];
+	$labelPattern = "/(\d+),?\s?(.+?)(?=\x{005c}\x{006E}|$)/";
+	preg_match_all($labelPattern, $enumeration, $matches);
+	foreach ($matches[0] as $value) {
+		$arr = explode(",", $value);
+		$key = trim($arr[0]);
+		$val = trim($arr[1]);
+		$field_values[$key] = $val;
+	}
+	return $field_values;
+}
+
 if (empty($rid)) {
 	// TODO what to show when wrong Record ID or missing??
 } else {
@@ -56,6 +77,8 @@ if (empty($rid)) {
 	$address_td .= "<br>" . $last_demo["patient_city"] . ", " . $last_demo["patient_state"] . " " . $last_demo["patient_zip"];
 }
 
+// get Metrics instrument [facility] field values/labels
+$facilities = getFieldValues("facility");
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -336,9 +359,11 @@ if (empty($rid)) {
 						<div class='dropdown'>
 							<button class='btn btn-outline-primary dropdown-toggle' type='button' id='facility-dd' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Facility</button>
 							<div class='dropdown-menu' aria-labelledby='facility-dd'>
-								<a class='dropdown-item' href='#'>Facility A</a>
-								<a class='dropdown-item' href='#'>Facility B</a>
-								<a class='dropdown-item' href='#'>Facility C</a>
+								<?php
+								foreach($facilities as $val => $facility_name) {
+									echo("<a class='dropdown-item' value='$val' href='#'>$facility_name</a>");
+								}
+								?>
 							</div>
 						</div>
 					</div>
