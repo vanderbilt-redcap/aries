@@ -40,12 +40,10 @@ $('body').on('click', '.dropdown-menu a', function() {
 	dd.text($(this).text());
 	$(".btn:first-child").val($(this).text());
 })
-$('body').on('click', '.modal-content .form-check-input', function() {
+$('body').on('change', '#facility-dd, #date_admitted', function() {
 	// if all Patient Match radios have one of their pair selected, enable save button, otherwise disable Save button
 	if (// are radios selected?
-		($("#match_radio_0").is(":checked") || $("#match_radio_1").is(":checked"))
-		&& ($("#aware_radio_0").is(":checked") || $("#aware_radio_1").is(":checked"))
-		&& ($("#already_radio_0").is(":checked") || $("#already_radio_1").is(":checked"))
+		$("#facility-dd").val() != "" && $("#date_admitted").val() != ""
 		) {
 		$("#save-metrics").removeAttr('disabled')
 	} else {
@@ -95,6 +93,10 @@ XDRO.save_patient_match = function() {
 		data: data,
 		success: function(response) {
 			console.log('response', response)
+			if (response.errors) {
+				var msg = "This match failed to save due to the following errors:\n\n" + response.errors.join("\n") + "\n\nPlease contact the Tennessee Dept. of Health with these errors."
+				alert(msg)
+			}
 		},
 		dataType: 'json',
 		cache: false

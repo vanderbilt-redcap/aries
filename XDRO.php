@@ -6,11 +6,14 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	
 	public function __construct() {
 		parent::__construct();
+		$this->nlog();
 		$this->auth_data_raw = $this->framework->getSystemSetting('auth_data');
 		if (empty($this->auth_data_raw)) {
 			$this->auth_data_raw = "{}";
 		}
 		$this->auth_data = json_decode($this->auth_data_raw);
+		
+		$this->project = new \Project($this->framework->getProjectId());
 	}
 	
 	// given a user supplied string, search for records in our patient registry that might match
@@ -226,6 +229,15 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		return $ret_array;
 	}
 	
+	function getFieldLabels($field) {
+		$labels = [];
+		
+		$label_pattern = "/(\d+),?\s?(.+?)(?=\x{005c}\x{006E}|$)/";
+		$label_string = $this->project->metadata[$field]["element_enum"];
+		preg_match_all($label_pattern, $label_string, $matches);
+		if (!empty($matches[2]))
+			return $matches[2];
+	}
 	
 	function save_auth_data() {
 		$this->framework->setSystemSetting('auth_data', json_encode($this->auth_data));

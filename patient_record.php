@@ -2,7 +2,6 @@
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 // require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 
-$module->nlog();
 $rid = $_GET['rid'];
 $module->llog("fetching patient_record for rid: $rid");
 
@@ -306,21 +305,6 @@ $facilities = getFieldValues("facility");
 				</button>
 			</div>
 			<div class="modal-body">
-				<div class="row">
-					<div class="col-8">
-						<span>Is this patient a match?</span>
-					</div>
-					<div class="col-4">
-						<div class="form-check">
-							<input class="form-check-input" type="radio" name="match_radios" id="match_radio_1" value="1">
-							<label class="form-check-label" for="match_radios">Yes</label>
-						</div>
-						<div class="form-check">
-							<input class="form-check-input" type="radio" name="match_radios" id="match_radio_0" value="0">
-							<label class="form-check-label" for="match_radios">No</label>
-						</div>
-					</div>
-				</div>
 				<div class="row">
 					<div class="col-8">
 						<span>Were you aware that this patient should be on contact precautions prior to searching the registry?</span>
