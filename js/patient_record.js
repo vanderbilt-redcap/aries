@@ -11,6 +11,17 @@ $(function() {
 		$("button#prev_demo_inst").attr('disabled', true)
 		$("button#next_demo_inst").attr('disabled', true)
 	}
+	
+	// if only one facility value present, disable facility input and set as first option
+	if ($("#facility-dd").next().children().length == 1) {
+		var onlyOption = $("#facility-dd").next().children().first()
+		var name = $(onlyOption).html()
+		var value = $(onlyOption).attr('value')
+		
+		$("#facility-dd").attr('disabled', true)
+		$("#facility-dd").html(name)
+		$("#facility-dd").val(name)
+	}
 })
 
 // events
@@ -93,9 +104,11 @@ XDRO.save_patient_match = function() {
 		data: data,
 		success: function(response) {
 			console.log('response', response)
-			if (response.errors) {
+			if (response.errors.length) {
 				var msg = "This match failed to save due to the following errors:\n\n" + response.errors.join("\n") + "\n\nPlease contact the Tennessee Dept. of Health with these errors."
 				alert(msg)
+			} else {
+				alert("Match instance saved to the XDRO Registry.\nThank you!")
 			}
 		},
 		dataType: 'json',
