@@ -13,7 +13,9 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		}
 		$this->auth_data = json_decode($this->auth_data_raw);
 		
-		$this->project = new \Project($this->framework->getProjectId());
+		$pid = $this->framework->getProjectId();
+		if (!empty($pid))
+			$this->project = new \Project($pid);
 	}
 	
 	// given a user supplied string, search for records in our patient registry that might match
