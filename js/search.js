@@ -121,8 +121,9 @@ XDRO.make_results_table = function(records) {
 	var table = $("div#results table").DataTable()
 	console.log('records seen by make_results_table', records)
 	records.forEach(function (record, i) {
+		var link = "<a href=" + XDRO.recordAddress + "&rid=" + record.patientid + ">" + record.patientid + "</a>"
 		var node = table.row.add([
-			record.patientid,
+			link,
 			record.patient_first_name + " " + record.patient_last_name,
 			record.patient_dob,
 			record.patient_current_sex,
