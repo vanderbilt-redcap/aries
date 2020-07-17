@@ -229,6 +229,8 @@ $facilities = getFieldValues("facility");
 							
 							if ($sir == "R" || strpos($val, ">=4") != FALSE) {
 								$class = " class='redfont font-weight-bold'";
+							} elseif ($sir == "I") {
+								$class = " class='redfont'";
 							}
 							echo "
 					<tr$class>
