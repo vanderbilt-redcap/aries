@@ -220,7 +220,7 @@ $(function() {
 	})
 	
 	// forward to patient record on prediction clicked
-	$("#autocomplete").on('mousedown', 'span', function(e) {
+	$("#autocomplete").on('click', 'span', function(e) {
 		var span = $(e.target)
 		if (span.hasClass('predict-name')) {
 			span = span.parent('span')
@@ -230,9 +230,6 @@ $(function() {
 			window.location.href = XDRO.recordAddress + "&rid=" + rid
 		}
 	})
-	
-	// hide autocomplete predictions
-	$("#search-input input").on('blur', function() {$("#autocomplete").hide()})
 	
 	$("#error_alert").hide()
 	$("#file-queries").hide()
