@@ -15,7 +15,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 	<div class="card">
 		<div class="card-body">
 			<h5 class="card-title mb-3">Lab/Patient Data File Import</h5>
-			<p>Choose a data file (.xlsx format) with the input below and click "Import".</p>
+			<p>Import patients or lab results by uploading an Excel workbook or .csv file.</p>
 			<p class="mb-3">The XDRO module will iterate over the rows in the workbook and create demographic or lab instrument instances as applicable.</p>
 			<div class="input-group">
 				<div class="custom-file">

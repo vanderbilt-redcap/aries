@@ -455,7 +455,7 @@ try {
 	$upload_path = $_FILES["client_file"]["tmp_name"];
 	
 	// at this point, we know checkWorkbookFile didn't exit with errors
-	$reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader("Xlsx");
+	$reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($upload_path);
 	$reader->setReadDataOnly(TRUE);
 	$workbook = $reader->load($upload_path);
 	$sheet = $workbook->getActiveSheet();
@@ -467,6 +467,8 @@ try {
 	$json->errors[] = "There was an error reading the file uploaded: $e";
 	exit(json_encode($json));
 }
+
+$module->llog("No error reading file.");
 
 // this obj will lab order values that span across multiple rows (per PATIENT_LOCAL_ID)
 $lab_obj = new \stdClass();
