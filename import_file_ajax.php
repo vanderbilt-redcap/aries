@@ -309,10 +309,13 @@ function import_data_row($row, $row_index) {
 	$imported["demographics"] = [];
 	$imported["antimicrobial_susceptibilities_and_resistance_mech"] = [];
 	
+	// fill 'imported' array with data so we can save to REDCap
 	foreach ($row as $i => $value) {
+		// skip null values
 		if (strcasecmp($value, "NULL") == 0)
 			continue;
 		
+		// figure out what kind of value we're importing
 		$column_name = $headers[$i];
 		
 		$date_fields = [
@@ -323,15 +326,15 @@ function import_data_row($row, $row_index) {
 			"patient_last_change_time"
 		];
 		
+		// convert to Y-m-d value if applicable
 		if (array_search(strtolower($column_name), $date_fields, true) != false) {
 			$value = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)->format("Y-m-d");
 		}
 		
-		$column_name = $headers[$i];
-		
 		// either add error to return array or set assoc_form to be form string value
 		$assoc_form = get_assoc_form($column_name);
 		if ($assoc_form[0] == 0) {
+			// $module->llog("error getting associated form for row / column / value : $i / $column_name / $value");
 			$json->ignored_cols[$column_name] = true;
 			unset($assoc_form);
 		} else {
@@ -340,6 +343,7 @@ function import_data_row($row, $row_index) {
 		
 		$assoc_field = get_assoc_field($column_name);
 		if ($assoc_field[0] == 0) {
+			// $module->llog("error getting associated field for row / column / value : $i / $column_name / $value");
 			$json->ignored_cols[$column_name] = true;
 			unset($assoc_field);
 		} else {
@@ -357,13 +361,13 @@ function import_data_row($row, $row_index) {
 		unset($column_name, $assoc_form, $assoc_field);
 	}
 	
-	$module->llog('printing \$imported:' . print_r($imported, true));
+	// $module->llog("printing 'imported' array before saving:" . print_r($imported, true));
 	
 	// save to redcap
 	$rows = [];
 	$pati_id = $imported["xdro_registry"]["patientid"];
 	if (empty($pati_id)) {
-		$rows[] = [$row, "", "", "No patient ID found -- make sure patient_ID or PATIENT_LOCAL_ID column isn't empty"];
+		$rows[] = [$row, "[NOT FOUND]", "N/A", "No patient ID found -- make sure patient_ID or PATIENT_LOCAL_ID column isn't empty!"];
 	} else {
 		$data = \REDCap::getData($pid, 'array', $pati_id);
 		$next_demographics_instance = get_next_instance(reset($data), "demographics");
@@ -396,11 +400,14 @@ function import_data_row($row, $row_index) {
 		// $module->llog('printing data:' . print_r($data, true));
 		
 		// try to save
+		// $module->llog("PATIENTID: $pati_id - saveData data: " . print_r($data, true));
 		$result = \REDCap::saveData($pid, 'array', $data);
-		// $module->llog("$pati_id saveData \$result: " . print_r($result, true));
+		// $module->llog("PATIENTID: $pati_id - saveData result: " . print_r($result, true));
 		
+		// set \$rows to empty array since above $rows entries are now inaccurate (save errors prevent update/create)
 		if (!empty($result["errors"]))
 			$rows = [];
+		
 		foreach($result["errors"] as $err) {
 			// $module->llog("saveData err: $err");
 			$rows[] = [$row_index, $pati_id, "", $err];
@@ -468,7 +475,7 @@ try {
 	exit(json_encode($json));
 }
 
-$module->llog("No error reading file.");
+// $module->llog("No error reading file.");
 
 // this obj will lab order values that span across multiple rows (per PATIENT_LOCAL_ID)
 $lab_obj = new \stdClass();
@@ -493,11 +500,6 @@ foreach ($sheet->getRowIterator() as $i => $row) {
 	} else {
 		$range = "A$i:" . number_to_column(count($headers)) . "$i";
 		$json->actions = array_merge($json->actions, import_data_row(reset($sheet->rangeToArray($range)), $i));
-		
-		if ($i == 10) {
-			$json->success = true;
-			exit(json_encode($json));
-		}
 	}
 }
 
