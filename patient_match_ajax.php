@@ -107,7 +107,7 @@ function validate_data() {
 */
 
 $pid = $module->getProjectId();
-$module->nlog();
+// $module->nlog();
 
 // make object that will hold our response
 $json = new \stdClass();

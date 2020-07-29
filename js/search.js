@@ -1,5 +1,15 @@
 
-XDRO = {}
+XDRO = {
+	fileReader: new FileReader(),
+	validCSVHeaders: [
+		"patientid",
+		"patient_dob",
+		"patient_first_name",
+		"patient_last_name",
+		"patient_current_sex",
+		"patient_street_address_1"
+	]
+}
 XDRO.shrinkSearch = function() {
 	$("#search-info").html("<h6><b>Results for:</b></h6>")
 	$("#search-info").css('padding', '20px 8px')
@@ -52,58 +62,62 @@ XDRO.showPredictions = function(predictions) {
 }
 
 XDRO.submit_manual_query = function() {
-	var searchBar = $("#search-input input")
-	var searchString = searchBar.val()
-	XDRO.query_string = searchString
-	$("#search-feedback").css('visibility', 'visible')
+	// XDRO.query_string = $("#search-input input").val()
+	// $("#search-feedback").css('visibility', 'visible')
 	
-	$.ajax({
-		url: XDRO.moduleAddress + "&action=manualQuery&searchString=" + encodeURI(searchString),
-		dataType: 'json',
-		complete: function(response) {
-			XDRO.response = response
+	// $.ajax({
+		// url: XDRO.moduleAddress + "&action=manualQuery&searchString=" + encodeURI(searchString),
+		// dataType: 'json',
+		// complete: function(response) {
+			// XDRO.response = response
 			
-			if (response.responseJSON) {
-				var records = response.responseJSON
-				XDRO.make_results_table(records)
-				XDRO.shrinkSearch()
-			}
+			// if (response.responseJSON) {
+				// var records = response.responseJSON
+				// XDRO.make_results_table(records)
+				// XDRO.shrinkSearch()
+			// }
 			
-			// update/re-draw results table
-			// table.draw()
-			if (records.length == 0) {
-				$(".dataTables_empty").text("Search for '" + XDRO.query_string + "' yielded no record results")
-			}
+			// // update/re-draw results table
+			// // table.draw()
+			// if (records.length == 0) {
+				// $(".dataTables_empty").text("Search for '" + XDRO.query_string + "' yielded no record results")
+			// }
 			
-			$("#search-feedback").css('visibility', 'hidden')
-		}
-	})
+			// $("#search-feedback").css('visibility', 'hidden')
+		// }
+	// })
 }
 
 XDRO.submit_file_query = function () {
-	if (!$("#upload_csv").prop('files'))
-		return
-	if (!$("#upload_csv").prop('files')[0])
-		return
+	// if (!$("#upload_csv").prop('files'))
+		// return
+	// if (!$("#upload_csv").prop('files')[0])
+		// return
 	
-	console.log('sending file query ajax')
-	var form_data = new FormData()
-	form_data.append('client_file', $("#upload_csv").prop('files')[0])
-	$.ajax({
-		type: "POST",
-		url: XDRO.CSVSearchAddress,
-		data: form_data,
-		success: XDRO.file_search_done,
-		dataType: 'json',
-		cache: false,
-		contentType: false,
-		processData: false
-	})
+	// try {
+		// localStorage.setItem('xdro_csv_search_file', $("#upload_csv").prop('files')[0])
+	// } catch(err) {
+		// alert("REDCap's XDRO module couldn't save the file to local (browser) storage -- try clearing your local storage or restarting your browser in non-private mode. Error message: " + String(err))
+	// }
+	
+	// console.log('sending file query ajax')
+	// var form_data = new FormData()
+	// form_data.append('client_file', $("#upload_csv").prop('files')[0])
+	// $.ajax({
+		// type: "POST",
+		// url: XDRO.CSVSearchAddress,
+		// data: form_data,
+		// success: XDRO.file_search_done,
+		// dataType: 'json',
+		// cache: false,
+		// contentType: false,
+		// processData: false
+	// })
 }
 
 XDRO.file_search_done = function(response) {
-	console.log('response', response)
-	XDRO.response = response
+	// console.log('response', response)
+	// XDRO.response = response
 	
 	XDRO.shrinkSearch()
 	
@@ -156,6 +170,82 @@ XDRO.add_file_interface = function() {
 	$("#search").css('margin-top', '10px')
 }
 
+XDRO.process_selected_file = function(file_text) {
+	// make sure we get SOME text out of the selected file
+	if (!file_text.length) {
+		alert("When the XDRO module read your selected file, it couldn't find valid text data. Please select a .csv file to upload.")
+		var input = $('.custom-file-label')
+		input.html("Upload a CSV")
+		input.val(null)
+		return
+	}
+	
+	var lines = file_text.split("\n")
+	
+	if (lines.length < 2) {
+		alert("Selected .csv file must contain at least two rows of data, headers (first row) and at least one row of search parameters (correlating to header columns).")
+		var input = $('.custom-file-label')
+		input.html("Upload a CSV")
+		input.val(null)
+		return
+	}
+	
+	var headers = lines[0].split(',').map(function(item) {
+		return item.trim()
+	})
+	
+	//	make sure we have at least one valid header (to correlate with searched patient info)
+	var validHeaderFound = XDRO.validCSVHeaders.some(function(valid_header) {
+		return headers.includes(valid_header)
+	})
+	if (!validHeaderFound) {
+		alert("The XDRO module couldn't find a valid header in the selected .csv file.\nPlease ensure the first csv row in your file contains at least one of the following:\n\n" + XDRO.validCSVHeaders.join("\n"))
+		var input = $('.custom-file-label')
+		input.html("Upload a CSV")
+		input.val(null)
+		return
+	}
+	
+	// no errors, get a map of valid header names to column indices (e.g. "patient_dob" maps to csv column 3)
+	var headerIndices = {}
+	XDRO.validCSVHeaders.forEach(function(validHeader) {
+		var foundIndex = headers.findIndex(header => header == validHeader)
+		if (foundIndex >= 0)
+			headerIndices[validHeader] = foundIndex
+	})
+	
+	// now we can process the remaining lines into structured query objects (held in rowQueries)
+	var rowQueries = []
+	lines.forEach(function(line, row) {
+		// skip header row
+		if (row == 0)
+			return
+		
+		var rowQuery = {}
+		var lineValues = line.split(',').map(function(item) {
+			return item.trim()
+		})
+		for (const header in headerIndices) {
+			var col = headerIndices[header]
+			if (lineValues[col])
+				rowQuery[header] = lineValues[col]
+		}
+		
+		if (!$.isEmptyObject(rowQuery))
+			rowQueries.push(rowQuery)
+	})
+	XDRO.rowQueries = rowQueries
+	
+	// store queries in local storage
+	try {
+		localStorage.setItem('xdro_csv_search_row_queries', JSON.stringify(rowQueries))
+	} catch(err) {
+		alert("REDCap's XDRO module couldn't save the file to local (browser) storage -- try clearing your local storage or restarting your browser in non-private mode. Error message: " + String(err))
+	}
+	
+	XDRO.processedFileThisSession = true
+}
+
 XDRO.prev_query = function() {
 	XDRO.row_query_index -= 1
 	XDRO.show_results_for_row_query(XDRO.row_query_index)
@@ -180,7 +270,7 @@ XDRO.show_results_for_row_query = function(index) {
 	XDRO.row_query_index = index
 	
 	// enable/disable seek buttons
-	if (XDRO.row_query_index == XDRO.response.rows.length-1) {
+	if (XDRO.row_query_index == XDRO.file_search_results.rows.length-1) {
 		$(".pos_iter").attr('disabled', true)
 	} else {
 		$(".pos_iter").attr('disabled', false)
@@ -191,7 +281,7 @@ XDRO.show_results_for_row_query = function(index) {
 		$(".neg_iter").attr('disabled', false)
 	}
 	
-	var rows = XDRO.response.rows
+	var rows = XDRO.file_search_results.rows
 	XDRO.make_results_table(rows[index].results)
 	
 	var query_string = ""
@@ -210,6 +300,8 @@ XDRO.show_results_for_row_query = function(index) {
 		$(".dataTables_empty").text("Search for '" + query_string + "' yielded no record results")
 	}
 }
+
+// XDRO.
 
 $(function() {
 	// autocomplete prediction stuff
@@ -245,8 +337,39 @@ $(function() {
 		pageLength: 15
 	});
 	
-	// XDRO.shrinkSearch()
-	// XDRO.add_file_interface()
+	var url_query = getQueryVariable('query');
+	if (XDRO.search_results) {
+		$("#query").val(url_query)
+		XDRO.shrinkSearch()
+		$("#search-feedback").css('visibility', 'hidden')
+		
+		if (XDRO.search_results.length) {
+			XDRO.make_results_table(XDRO.search_results)
+		} else {
+			$(".dataTables_empty").text("Search for '" + url_query + "' yielded no matching results")
+		}
+	} else if (XDRO.file_search_results && XDRO.file_search_results.rows.length) {
+		XDRO.shrinkSearch()
+		XDRO.add_file_interface()
+		
+		var row_query = getQueryVariable("row_query")
+		if (row_query && Number(row_query) < XDRO.file_search_results.rows.length) {
+			XDRO.show_results_for_row_query(row_query)
+		} else {
+			XDRO.show_results_for_row_query(0)
+		}
+		
+	} else {
+		$("#query").val("")
+	}
+	
+	try {
+		XDRO.rowQueries = JSON.parse(localStorage.getItem("xdro_csv_search_row_queries"))
+	} catch(exception) {
+		
+	}
+	
+	window.scroll(0, 0)
 })
 
 // hide autocomplete predictions when click outside autocomplete div
@@ -263,8 +386,31 @@ $("body").on("click", ".highlightable", function(e) {
 		window.location.href = XDRO.recordAddress + "&rid=" + rid;
 })
 
-$('body').on('change', ".custom-file-input", function() {
+$('body').on('change', ".custom-file-input", function(e) {
 	var fileName = $(this).val().split('\\').pop()
-	$('.custom-file-label').html(fileName)
 	XDRO.filename = fileName
+	var input = $('.custom-file-label')
+	input.html(fileName)
+	
+	if (e.target.files[0]) {
+		XDRO.fileReader.readAsText(e.target.files[0])
+	}
 })
+
+// load file into localstorage on upload
+XDRO.fileReader.addEventListener("load", function() {
+	XDRO.process_selected_file(this.result)
+})
+
+// helper functions
+function getQueryVariable(variable) {	// from: (https://stackoverflow.com/questions/827368/using-the-get-parameter-of-a-url-in-javascript)
+	var query = window.location.search.substring(1);
+	var vars = query.split("&");
+	for (var i=0;i<vars.length;i++) {
+		var pair = vars[i].split("=");
+		pair = [decodeURIComponent(pair[0]), decodeURIComponent(pair[1])]
+		if (pair[0] == variable) {
+			return pair[1];
+		}
+	}
+}

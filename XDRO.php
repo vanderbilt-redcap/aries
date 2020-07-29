@@ -286,10 +286,10 @@ if ($_GET['action'] == 'predictPatients') {
 	$query = filter_var($_GET['searchString'], FILTER_SANITIZE_STRING);
 	$recs = $module->search($query, 7);	// limit to 7 records for autocomplete
 	echo(json_encode($recs));
-}elseif ($_GET['action'] == 'manualQuery') {
-	$module = new XDRO();
-	$module->nlog();
-	$query = filter_var($_GET['searchString'], FILTER_SANITIZE_STRING);
-	$recs = $module->search($query);
-	echo(json_encode($recs));
+// }elseif ($_GET['action'] == 'manualQuery') {
+	// $module = new XDRO();
+	// $module->nlog();
+	// $query = filter_var($_GET['searchString'], FILTER_SANITIZE_STRING);
+	// $recs = $module->search($query);
+	// echo(json_encode($recs));
 }

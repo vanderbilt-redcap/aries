@@ -14,9 +14,9 @@
 	todo make sure we accept xlsx and csv
 */
 // connect to REDCap
-require_once (APP_PATH_TEMP . "../redcap_connect.php");
-$pid = $module->getProjectId();
-$module->nlog();
+// require_once (APP_PATH_TEMP . "../redcap_connect.php");
+// $pid = $module->getProjectId();
+// $module->nlog();
 
 // make object that will hold our response
 $json = new \stdClass();
@@ -31,8 +31,11 @@ $FIELDS = [
 	'patient_street_address_1'
 ];
 
-// $module->llog("post: " . print_r($_POST, true));
-// $module->llog("files: " . print_r($_FILES, true));
+$_GET   = filter_input_array(INPUT_GET, FILTER_SANITIZE_STRING);
+$_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+$module->llog("get: " . print_r($_GET, true));
+$module->llog("post: " . print_r($_POST, true));
+$module->llog("files: " . print_r($_FILES, true));
 
 /*
 	function definitions
@@ -103,7 +106,7 @@ function checkFile($file_param_name) {
 	
 	if (empty($_FILES[$file_param_name])) {
 		$json->errors[] = "Please attach a workbook file before clicking 'Upload'.";
-		exit(json_encode($json));
+		return (json_encode($json));
 		return;
 	}
 	
@@ -128,7 +131,7 @@ function checkFile($file_param_name) {
 	}
 	
 	if (count($json->errors) > 0) {
-		exit(json_encode($json));
+		return (json_encode($json));
 	}
 	
 	return true;
@@ -144,8 +147,8 @@ function removeBomUtf8($s){
 
 // check workbook file, load if ok
 try {
-	checkFile("client_file");
-	$upload_path = $_FILES["client_file"]["tmp_name"];
+	checkFile("upload_csv");
+	$upload_path = $_FILES["upload_csv"]["tmp_name"];
 	
 	// at this point, we know checkFile didn't exit with errors, let's read data
 	// see: https://stackoverflow.com/questions/5813168/how-to-import-csv-file-in-php
@@ -160,7 +163,7 @@ try {
 	
 	if (empty($data)) {
 		$json->errors[] = "Uploaded CSV file is empty.";
-		exit(json_encode($json));
+		return (json_encode($json));
 	}
 	
 	global $FIELDS;
@@ -195,7 +198,7 @@ try {
 	if (!$found_at_least_one_usable_header) {
 		$json->errors[] = "The CSV uploaded must contain at least one of the following values (case insensitive) as a column value: (" . implode(", ", $FIELDS) . ")";
 		$json->errors[] = "These are the column values that the XDRO module found: (" . implode(", ", $data[0]) . ")";
-		exit(json_encode($json));
+		return (json_encode($json));
 	}
 	
 	// cleanup
@@ -203,7 +206,7 @@ try {
 	
 } catch (\PhpOffice\PhpSpreadsheet\Reader\Exception $e) {
 	$json->errors[] = "There was an error reading the file uploaded: $e";
-	exit(json_encode($json));
+	return (json_encode($json));
 }
 
 // get all patient info
@@ -261,4 +264,4 @@ foreach ($data as $i => $row) {
 }
 
 $json->success = true;
-exit(json_encode($json));
+return (json_encode($json));
