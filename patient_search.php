@@ -189,7 +189,7 @@ if ($fieldsAdded > 0) {
 				<th>Date of Birth</th>
 				<th>Gender</th>
 				<th>Current Address</th>
-				<th>Match?</th>
+				<th>Relevance</th>
 			</tr>
 		</thead>
 		<tbody>

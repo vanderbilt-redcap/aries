@@ -158,7 +158,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		
 		// sort remaining records by score descending
 		usort($records, function($a, $b) {
-			return $b['score'] - $a['score'];
+			return $a['score'] < $b['score'] ? 1: -1;
 		});
 		
 		if (empty($limit)) {
@@ -170,22 +170,38 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function score_record_by_array(&$record, $tokens_arr) {
+		// final score should be a relevance score of [0, 1] where 0 is not relevant and 1 is exact match
 		$score = 0;
 		$scores = [];
 		$sum = 0;
+		
+		// compare query fields with record field values to update score
 		foreach($record as $field => $value) {
-			$a = strtolower(strval($value));
 			if (empty($tokens_arr[$field]))
 				continue;
+			
+			// patient_current_sex should score is 0 or 1, matched exactly or not
+			$a = strtolower(strval($value));
 			$b = strtolower(strval($tokens_arr[$field]));
-			$lev_dist = levenshtein($a, $b);
-			if ($lev_dist == -1)
-				break;
-			$len = max(strlen($a), strlen($b));
-			$similarity = ($len - $lev_dist) / $len;
+			if ($field == 'patient_current_sex') {
+				if ($a == $b) {
+					$similarity = 1;
+				} else {
+					$similarity = 0;
+				}
+			} else {
+				$lev_dist = levenshtein($a, $b);
+				if ($lev_dist == -1) {
+					$similarity = 0;
+				} else {
+					$len = max(strlen($a), strlen($b));
+					$similarity = ($len - $lev_dist) / $len;
+				}
+			}
+			
 			$scores[$field] = $similarity;
 			$score += $similarity;
-			// $this->llog("similarity for $a vs $b: $similarity");
+			$this->llog("$field similarity ($a vs $b) = $similarity");
 			$sum++;
 		}
 		

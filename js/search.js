@@ -104,7 +104,7 @@ XDRO.make_results_table = function(records) {
 			record.patient_dob,
 			record.patient_current_sex,
 			record.patient_street_address_1,
-			"<input class='cbox' data-rid='" + record.patientid + "' type='checkbox'>",
+			record.score,
 		]).node()
 		
 		$(node).addClass('highlightable').attr('data-rid', record.patientid)
@@ -264,12 +264,7 @@ $(function() {
 	
 	// make results table a DataTables table
 	$("div#results table").DataTable({
-		columnDefs: [
-			{
-				targets: [5],
-				orderable: false
-			}
-		],
+		order: [[5, 'desc']],
 		pageLength: 15
 	});
 	
@@ -290,6 +285,16 @@ $(function() {
 		
 		if (XDRO.use_file_interface) {
 			XDRO.add_file_interface()
+			var query_string = ""
+			for(const i in XDRO.validCSVHeaders) {
+				var field = XDRO.validCSVHeaders[i]
+				var param = getQueryVariable(field)
+				if (param)
+					query_string += param + ", "
+			}
+			if (query_string.length) {
+				$("#query").val(query_string.slice(0, -2))
+			}
 		}
 		
 		if (XDRO.search_results.length) {
