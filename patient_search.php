@@ -14,8 +14,25 @@ if (!empty($_GET['query'])) {
 	$search_results = json_encode($module->search($_GET['query']));
 }
 
-if (!empty($_FILES['upload_csv'])) {
-	$file_search_results = require_once("search_csv_ajax.php");
+$row_query_fields = [
+	"patientid",
+	"patient_dob",
+	"patient_first_name",
+	"patient_last_name",
+	"patient_current_sex",
+	"patient_street_address_1"
+];
+
+$query = new \stdClass();
+$fieldsAdded = 0;
+foreach($row_query_fields as $i => $fieldname) {
+	if (!empty($_GET[$fieldname])) {
+		$query->$fieldname = $_GET[$fieldname];
+		$fieldsAdded++;
+	}
+}
+if ($fieldsAdded > 0) {
+	$search_results = json_encode($module->structured_search($query));
 }
 
 ?>
@@ -72,10 +89,10 @@ if (!empty($_FILES['upload_csv'])) {
 	XDRO.CSVSearchAddress = "<?=$module->getUrl('search_csv_ajax.php')?>"
 	<?php
 	if (!empty($search_results)) {
-		?>XDRO.search_results = JSON.parse(<?php echo("'$search_results')");
+		?>;XDRO.search_results = JSON.parse(<?php echo("'$search_results');");
 	}
-	if (!empty($file_search_results)) {
-		?>XDRO.file_search_results = JSON.parse(<?php echo("'$file_search_results')");
+	if ($fieldsAdded > 0) {
+		?>;XDRO.use_file_interface = true<?php
 	}
 	?>
 </script>
@@ -95,7 +112,7 @@ if (!empty($_FILES['upload_csv'])) {
 <div id="file-queries">
 	<div class="alert alert-primary dark-border m-3" role="alert">
 		<p>File uploaded: <span class="filename"></span></p>
-		<p>Showing results for row <span class="records"></span></p>
+		<p>Showing results for row <span class="records"><?php echo ($_GET['query_row'] + 1); ?></span></p>
 	</div>
 </div>
 
@@ -151,7 +168,7 @@ if (!empty($_FILES['upload_csv'])) {
 			<div id="autocomplete"></div>
 		</div>
 		<div class='mx-2 px-2 col-2'>
-			<button id="file-submit-search" type="button" class="btn btn-primary" onclick="XDRO.submit_file_query()">Search</button>
+			<button id="file-submit-search" type="button" class="btn btn-primary" onclick="XDRO.submit_row_query()">Search</button>
 			<!--  <input type="submit" value="Search"> -->
 		</div>
 		<div id="file-search-feedback" class='mr-3 pr-3 col-2'>

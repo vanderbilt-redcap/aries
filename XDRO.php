@@ -123,8 +123,55 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		return [];
 	}
 	
+	function structured_search($query_obj) {
+		// get all records (only some fields though)
+		$params = [
+			"project_id" => $_GET['pid'],
+			// "return_format" => "json",
+			"return_format" => "array",
+			"fields" => [
+				'patientid',
+				'patient_dob',
+				'patient_first_name',
+				'patient_last_name',
+				'patient_current_sex',
+				'patient_street_address_1',
+				'patient_last_change_time'
+			]
+		];
+		$records = \REDCap::getData($params);
+		$records = $this->squish_demographics($records);
+		
+		// add relevance score to each record
+		foreach ($records as &$record) {
+			$this->score_record_by_array($record, (array) $query_obj);
+		}
+		
+		// remove records with zero score
+		$records = array_filter($records, function($record) {
+			return $record['score'] != 0;
+		});
+		
+		if (empty($records)) {
+			return [];
+		}
+		
+		// sort remaining records by score descending
+		usort($records, function($a, $b) {
+			return $b['score'] - $a['score'];
+		});
+		
+		if (empty($limit)) {
+			return $records;
+		} else {
+			return array_slice($records, 0, $limit);
+		}
+		return [];
+	}
+	
 	function score_record_by_array(&$record, $tokens_arr) {
 		$score = 0;
+		$scores = [];
 		$sum = 0;
 		foreach($record as $field => $value) {
 			$a = strtolower(strval($value));
@@ -136,6 +183,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 				break;
 			$len = max(strlen($a), strlen($b));
 			$similarity = ($len - $lev_dist) / $len;
+			$scores[$field] = $similarity;
 			$score += $similarity;
 			// $this->llog("similarity for $a vs $b: $similarity");
 			$sum++;
@@ -145,6 +193,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 			$score = $score / $sum;
 		
 		$record["score"] = $score;	// score should be in range [0, 1], 0 if no matching params, 1 if all match exactly
+		$record["scores"] = $scores;
 		// $this->llog("\$record after inserting score: " . print_r($record, true));
 	}
 	
@@ -286,10 +335,4 @@ if ($_GET['action'] == 'predictPatients') {
 	$query = filter_var($_GET['searchString'], FILTER_SANITIZE_STRING);
 	$recs = $module->search($query, 7);	// limit to 7 records for autocomplete
 	echo(json_encode($recs));
-// }elseif ($_GET['action'] == 'manualQuery') {
-	// $module = new XDRO();
-	// $module->nlog();
-	// $query = filter_var($_GET['searchString'], FILTER_SANITIZE_STRING);
-	// $recs = $module->search($query);
-	// echo(json_encode($recs));
 }

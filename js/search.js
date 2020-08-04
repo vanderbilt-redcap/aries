@@ -61,70 +61,32 @@ XDRO.showPredictions = function(predictions) {
 	$("#autocomplete").css('left', search.position().left + 'px')
 }
 
-XDRO.submit_manual_query = function() {
-	// XDRO.query_string = $("#search-input input").val()
-	// $("#search-feedback").css('visibility', 'visible')
-	
-	// $.ajax({
-		// url: XDRO.moduleAddress + "&action=manualQuery&searchString=" + encodeURI(searchString),
-		// dataType: 'json',
-		// complete: function(response) {
-			// XDRO.response = response
-			
-			// if (response.responseJSON) {
-				// var records = response.responseJSON
-				// XDRO.make_results_table(records)
-				// XDRO.shrinkSearch()
-			// }
-			
-			// // update/re-draw results table
-			// // table.draw()
-			// if (records.length == 0) {
-				// $(".dataTables_empty").text("Search for '" + XDRO.query_string + "' yielded no record results")
-			// }
-			
-			// $("#search-feedback").css('visibility', 'hidden')
-		// }
-	// })
-}
-
-XDRO.submit_file_query = function () {
-	// if (!$("#upload_csv").prop('files'))
-		// return
-	// if (!$("#upload_csv").prop('files')[0])
-		// return
-	
-	// try {
-		// localStorage.setItem('xdro_csv_search_file', $("#upload_csv").prop('files')[0])
-	// } catch(err) {
-		// alert("REDCap's XDRO module couldn't save the file to local (browser) storage -- try clearing your local storage or restarting your browser in non-private mode. Error message: " + String(err))
-	// }
-	
-	// console.log('sending file query ajax')
-	// var form_data = new FormData()
-	// form_data.append('client_file', $("#upload_csv").prop('files')[0])
-	// $.ajax({
-		// type: "POST",
-		// url: XDRO.CSVSearchAddress,
-		// data: form_data,
-		// success: XDRO.file_search_done,
-		// dataType: 'json',
-		// cache: false,
-		// contentType: false,
-		// processData: false
-	// })
-}
-
-XDRO.file_search_done = function(response) {
-	// console.log('response', response)
-	// XDRO.response = response
-	
-	XDRO.shrinkSearch()
-	
-	// add record iterator buttons and info div
-	XDRO.add_file_interface()
-	// update results table
-	XDRO.show_results_for_row_query(0)
+XDRO.submit_row_query = function(query_index = 0) {
+	console.log("query_index", query_index)
+	if (XDRO.rowQueries == undefined || XDRO.rowQueries[query_index] == undefined) {
+		alert("Please upload a .csv search file before searching.")
+	} else {
+		var rowQuery = XDRO.rowQueries[query_index]
+		
+		if (!rowQuery || rowQuery == undefined) {
+			alert("There was a finding a valid search query. Please send this error message to the XDRO administrators.")
+		}
+		
+		
+		// adding more params
+		rowQuery.prefix = getQueryVariable('prefix')
+		rowQuery.page = getQueryVariable('page')
+		rowQuery.pid = getQueryVariable('pid')
+		rowQuery.query_row = query_index
+		
+		// redirect
+		var newUrl = location.protocol + '//' + location.host + location.pathname + "?" + $.param(rowQuery)
+		
+		// console.log('newUrl', newUrl)
+		// debugger;
+		
+		window.location.href = newUrl
+	}
 }
 
 XDRO.make_results_table = function(records) {
@@ -168,6 +130,19 @@ XDRO.add_file_interface = function() {
 	$("#file-queries").show()
 	$("#file-queries .filename").text(XDRO.filename)
 	$("#search").css('margin-top', '10px')
+	
+	// enable/disable seek buttons
+	var query_row = Number(getQueryVariable("query_row"))
+	if (query_row == XDRO.rowQueries.length - 1) {
+		$(".pos_iter").attr('disabled', true)
+	} else {
+		$(".pos_iter").attr('disabled', false)
+	}
+	if (query_row == 0) {
+		$(".neg_iter").attr('disabled', true)
+	} else {
+		$(".neg_iter").attr('disabled', false)
+	}
 }
 
 XDRO.process_selected_file = function(file_text) {
@@ -239,6 +214,7 @@ XDRO.process_selected_file = function(file_text) {
 	// store queries in local storage
 	try {
 		localStorage.setItem('xdro_csv_search_row_queries', JSON.stringify(rowQueries))
+		localStorage.setItem('xdro_csv_filename', XDRO.filename)
 	} catch(err) {
 		alert("REDCap's XDRO module couldn't save the file to local (browser) storage -- try clearing your local storage or restarting your browser in non-private mode. Error message: " + String(err))
 	}
@@ -247,62 +223,22 @@ XDRO.process_selected_file = function(file_text) {
 }
 
 XDRO.prev_query = function() {
-	XDRO.row_query_index -= 1
-	XDRO.show_results_for_row_query(XDRO.row_query_index)
+	XDRO.submit_row_query(Number(getQueryVariable("query_row")) - 1)
 }
 
 XDRO.next_query = function() {
-	XDRO.row_query_index += 1
-	XDRO.show_results_for_row_query(XDRO.row_query_index)
+	XDRO.submit_row_query(Number(getQueryVariable("query_row")) + 1)
 }
 
 XDRO.first_query = function() {
-	XDRO.row_query_index = 0
-	XDRO.show_results_for_row_query(XDRO.row_query_index)
+	XDRO.submit_row_query(0)
 }
 
 XDRO.last_query = function() {
-	XDRO.row_query_index = XDRO.response.rows.length-1
-	XDRO.show_results_for_row_query(XDRO.row_query_index)
+	XDRO.submit_row_query(XDRO.rowQueries.length - 1)
 }
 
-XDRO.show_results_for_row_query = function(index) {
-	XDRO.row_query_index = index
-	
-	// enable/disable seek buttons
-	if (XDRO.row_query_index == XDRO.file_search_results.rows.length-1) {
-		$(".pos_iter").attr('disabled', true)
-	} else {
-		$(".pos_iter").attr('disabled', false)
-	}
-	if (XDRO.row_query_index == 0) {
-		$(".neg_iter").attr('disabled', true)
-	} else {
-		$(".neg_iter").attr('disabled', false)
-	}
-	
-	var rows = XDRO.file_search_results.rows
-	XDRO.make_results_table(rows[index].results)
-	
-	var query_string = ""
-	for (const name in rows[index].query) {
-		query_string += String(rows[index].query[name]) + " "
-	}
-	query_string = query_string.trimEnd()
-	
-	// update file queries area
-	$("span.records").text(String(XDRO.row_query_index + 1) + " / " + String(rows.length))
-	$("#search-input input").val(query_string)
-	console.log('query_string', query_string)
-	
-	$("div#results table").DataTable().draw()
-	if (rows[index].results.length == 0) {
-		$(".dataTables_empty").text("Search for '" + query_string + "' yielded no record results")
-	}
-}
-
-// XDRO.
-
+// on document ready
 $(function() {
 	// autocomplete prediction stuff
 	$("#search-input input").on('input', function() {
@@ -337,38 +273,35 @@ $(function() {
 		pageLength: 15
 	});
 	
+	// if a file has been previously selected/loaded, use rowQueries from that
+	try {
+		XDRO.rowQueries = JSON.parse(localStorage.getItem("xdro_csv_search_row_queries"))
+		XDRO.filename = localStorage.getItem("xdro_csv_filename")
+	} catch(exception) {
+		
+	}
+	
+	// show search results (should be present if query parameters are set)
 	var url_query = getQueryVariable('query');
 	if (XDRO.search_results) {
 		$("#query").val(url_query)
 		XDRO.shrinkSearch()
 		$("#search-feedback").css('visibility', 'hidden')
 		
+		if (XDRO.use_file_interface) {
+			XDRO.add_file_interface()
+		}
+		
 		if (XDRO.search_results.length) {
 			XDRO.make_results_table(XDRO.search_results)
 		} else {
 			$(".dataTables_empty").text("Search for '" + url_query + "' yielded no matching results")
 		}
-	} else if (XDRO.file_search_results && XDRO.file_search_results.rows.length) {
-		XDRO.shrinkSearch()
-		XDRO.add_file_interface()
-		
-		var row_query = getQueryVariable("row_query")
-		if (row_query && Number(row_query) < XDRO.file_search_results.rows.length) {
-			XDRO.show_results_for_row_query(row_query)
-		} else {
-			XDRO.show_results_for_row_query(0)
-		}
-		
 	} else {
 		$("#query").val("")
 	}
 	
-	try {
-		XDRO.rowQueries = JSON.parse(localStorage.getItem("xdro_csv_search_row_queries"))
-	} catch(exception) {
-		
-	}
-	
+	// scroll to top
 	window.scroll(0, 0)
 })
 
