@@ -86,7 +86,6 @@ if ($fieldsAdded > 0) {
 <script type="text/javascript">
 	XDRO.moduleAddress = "<?=$module->getUrl('XDRO.php')?>"
 	XDRO.recordAddress = "<?=$module->getUrl('patient_record.php')?>"
-	XDRO.CSVSearchAddress = "<?=$module->getUrl('search_csv_ajax.php')?>"
 	<?php
 	if (!empty($search_results)) {
 		?>;XDRO.search_results = JSON.parse(<?php echo("'$search_results');");
@@ -187,7 +186,7 @@ if ($fieldsAdded > 0) {
 				<th>Record ID</th>
 				<th>Name</th>
 				<th>Date of Birth</th>
-				<th>Gender</th>
+				<th>Sex</th>
 				<th>Current Address</th>
 				<th>Relevance</th>
 			</tr>

@@ -104,7 +104,7 @@ XDRO.make_results_table = function(records) {
 			record.patient_dob,
 			record.patient_current_sex,
 			record.patient_street_address_1,
-			record.score,
+			record.score.toFixed(1) + "%",
 		]).node()
 		
 		$(node).addClass('highlightable').attr('data-rid', record.patientid)
@@ -279,7 +279,7 @@ $(function() {
 	// show search results (should be present if query parameters are set)
 	var url_query = getQueryVariable('query');
 	if (XDRO.search_results) {
-		$("#query").val(url_query)
+		$("#query").val(decodeURIComponent(url_query.replace(/\+/g, " ")))
 		XDRO.shrinkSearch()
 		$("#search-feedback").css('visibility', 'hidden')
 		
