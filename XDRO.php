@@ -85,11 +85,15 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		$sum = 0;
 		
 		// create patient_name, remove patient_first_name, patient_last_name
-		$record['patient_name'] = $record['patient_first_name'] . ' ' . $record['patient_last_name'];
-
-		if (empty($tokens_arr['patient_name'])) {
-			$tokens_arr['patient_name'] = $tokens_arr['patient_first_name'] . ' ' . $tokens_arr['patient_last_name'];
+		if ($record['patient_first_name'] || $record['patient_last_name']) {
+			$record['patient_name'] = trim($record['patient_first_name'] . ' ' . $record['patient_last_name']);
 		}
+		if ($tokens_arr['patient_first_name'] || $tokens_arr['patient_last_name']) {
+			$tokens_arr['patient_name'] = trim($tokens_arr['patient_first_name'] . ' ' . $tokens_arr['patient_last_name']);
+			unset($tokens_arr['patient_first_name']);
+			unset($tokens_arr['patient_last_name']);
+		}
+		
 		
 		// compare query fields with record field values to update score
 		foreach($record as $field => $value) {
@@ -201,14 +205,11 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 			if ($numeric) {
 				if ($i > 0) {
 					$query_obj->patient_name = implode(' ', array_slice($tokens, 0, $i));
+					// array_splice($tokens, $i, 1);
 				}
 				$query_obj->patient_street_address_1 = implode(' ', array_slice($tokens, $i));
 				break;
 			}
-		}
-		
-		if (empty($query_obj->patient_name)) {
-			$query_obj->patient_name = implode(' ', $tokens);
 		}
 		
 		return $query_obj;

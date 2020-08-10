@@ -69,7 +69,7 @@ XDRO.submit_row_query = function(query_index = 0) {
 		var rowQuery = XDRO.rowQueries[query_index]
 		
 		if (!rowQuery || rowQuery == undefined) {
-			alert("There was a finding a valid search query. Please send this error message to the XDRO administrators.")
+			alert("There was an error finding a valid search query. Please send this error message to the XDRO administrators.")
 		}
 		
 		
@@ -279,7 +279,6 @@ $(function() {
 	// show search results (should be present if query parameters are set)
 	var url_query = getQueryVariable('query');
 	if (XDRO.search_results) {
-		$("#query").val(decodeURIComponent(url_query.replace(/\+/g, " ")))
 		XDRO.shrinkSearch()
 		$("#search-feedback").css('visibility', 'hidden')
 		
@@ -295,6 +294,8 @@ $(function() {
 			if (query_string.length) {
 				$("#query").val(query_string.slice(0, -2))
 			}
+		} else if (url_query.length) {
+			$("#query").val(decodeURIComponent(url_query.replace(/\+/g, " ")))
 		}
 		
 		if (XDRO.search_results.length) {
