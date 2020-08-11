@@ -29,6 +29,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	// given a user supplied string, search for records in our patient registry that might match
 	function search($query_string, $limit = null) {
 		$query_obj = $this->structure_string_query($query_string);
+		$this->llog("structured string query obj:\n" . print_r($query_obj, true));
 		return $this->structured_search($query_obj);
 	}
 	
@@ -210,6 +211,10 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 				$query_obj->patient_street_address_1 = implode(' ', array_slice($tokens, $i));
 				break;
 			}
+		}
+		
+		if (empty($query_obj->patient_name)) {
+			$query_obj->patient_name = implode(' ', $tokens);
 		}
 		
 		return $query_obj;
