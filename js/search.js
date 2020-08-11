@@ -265,6 +265,10 @@ $(function() {
 	// make results table a DataTables table
 	$("div#results table").DataTable({
 		order: [[5, 'desc']],
+		columnDefs: [
+			{className: "dt-center", targets: "_all"}
+		],
+		autoWidth: true,
 		pageLength: 15
 	});
 	
