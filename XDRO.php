@@ -29,11 +29,10 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	// given a user supplied string, search for records in our patient registry that might match
 	function search($query_string, $limit = null) {
 		$query_obj = $this->structure_string_query($query_string);
-		$this->llog("structured string query obj:\n" . print_r($query_obj, true));
-		return $this->structured_search($query_obj);
+		return $this->structured_search($query_obj, $limit);
 	}
 	
-	function structured_search($query_obj) {
+	function structured_search($query_obj, $limit = null) {
 		// get all records (only some fields though)
 		$params = [
 			"project_id" => $_GET['pid'],
@@ -124,7 +123,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 			
 			$scores[$field] = $similarity;
 			$score += $similarity;
-			$this->llog("$field similarity ($a vs $b) = $similarity");
+			// $this->llog("$field similarity ($a vs $b) = $similarity");
 			$sum++;
 		}
 		
@@ -148,7 +147,6 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		}
 	}
 	
-		
 	function structure_string_query($str_query) {
 		// general strategy is to tokenize query,
 		// then extract patient_current_sex tokens (m/f/male/female)
@@ -304,7 +302,6 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	}
 }
 
-$module = new XDRO();
 
 if ($_GET['action'] == 'predictPatients') {
 	$module = new XDRO();

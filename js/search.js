@@ -22,7 +22,7 @@ XDRO.shrinkSearch = function() {
 }
 
 XDRO.predictPatients = function() {
-	var searchBar = $("#search-input input")
+	var searchBar = $("#query")
 	var searchString = searchBar.val()
 	
 	$("#search-feedback").css('visibility', 'visible')
