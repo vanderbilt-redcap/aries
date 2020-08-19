@@ -12,3 +12,7 @@
 .alert {
 	border: 1px solid transparent !important;
 }
+
+#ignored_cols {
+	display: none;
+}

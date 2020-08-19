@@ -11,6 +11,9 @@
 			"institution": "Vanderbilt University Medical Center"
 		}
 	],
+	"versions": {
+		"0.1.1": "Implement match instance save to record function. Fix record and search interface issues. Improved user feedback for match instance save errors/success."
+	},
 	"permissions": [],
 	"enable-every-page-hooks-on-system-pages": false,
 	"links": {

@@ -1,5 +1,15 @@
 
-XDRO = {}
+XDRO = {
+	fileReader: new FileReader(),
+	validCSVHeaders: [
+		"patientid",
+		"patient_dob",
+		"patient_first_name",
+		"patient_last_name",
+		"patient_current_sex",
+		"patient_street_address_1"
+	]
+}
 XDRO.shrinkSearch = function() {
 	$("#search-info").html("<h6><b>Results for:</b></h6>")
 	$("#search-info").css('padding', '20px 8px')
@@ -12,7 +22,7 @@ XDRO.shrinkSearch = function() {
 }
 
 XDRO.predictPatients = function() {
-	var searchBar = $("#search-input input")
+	var searchBar = $("#query")
 	var searchString = searchBar.val()
 	
 	$("#search-feedback").css('visibility', 'visible')
@@ -51,66 +61,32 @@ XDRO.showPredictions = function(predictions) {
 	$("#autocomplete").css('left', search.position().left + 'px')
 }
 
-XDRO.submit_manual_query = function() {
-	var searchBar = $("#search-input input")
-	var searchString = searchBar.val()
-	XDRO.query_string = searchString
-	$("#search-feedback").css('visibility', 'visible')
-	
-	$.ajax({
-		url: XDRO.moduleAddress + "&action=manualQuery&searchString=" + encodeURI(searchString),
-		dataType: 'json',
-		complete: function(response) {
-			XDRO.response = response
-			
-			if (response.responseJSON) {
-				var records = response.responseJSON
-				XDRO.make_results_table(records)
-				XDRO.shrinkSearch()
-			}
-			
-			// update/re-draw results table
-			// table.draw()
-			if (records.length == 0) {
-				$(".dataTables_empty").text("Search for '" + XDRO.query_string + "' yielded no record results")
-			}
-			
-			$("#search-feedback").css('visibility', 'hidden')
+XDRO.submit_row_query = function(query_index = 0) {
+	console.log("query_index", query_index)
+	if (XDRO.rowQueries == undefined || XDRO.rowQueries[query_index] == undefined) {
+		alert("Please upload a .csv search file before searching.")
+	} else {
+		var rowQuery = XDRO.rowQueries[query_index]
+		
+		if (!rowQuery || rowQuery == undefined) {
+			alert("There was an error finding a valid search query. Please send this error message to the XDRO administrators.")
 		}
-	})
-}
-
-XDRO.submit_file_query = function () {
-	if (!$("#upload_csv").prop('files'))
-		return
-	if (!$("#upload_csv").prop('files')[0])
-		return
-	
-	console.log('sending file query ajax')
-	var form_data = new FormData()
-	form_data.append('client_file', $("#upload_csv").prop('files')[0])
-	$.ajax({
-		type: "POST",
-		url: XDRO.CSVSearchAddress,
-		data: form_data,
-		success: XDRO.file_search_done,
-		dataType: 'json',
-		cache: false,
-		contentType: false,
-		processData: false
-	})
-}
-
-XDRO.file_search_done = function(response) {
-	console.log('response', response)
-	XDRO.response = response
-	
-	XDRO.shrinkSearch()
-	
-	// add record iterator buttons and info div
-	XDRO.add_file_interface()
-	// update results table
-	XDRO.show_results_for_row_query(0)
+		
+		
+		// adding more params
+		rowQuery.prefix = getQueryVariable('prefix')
+		rowQuery.page = getQueryVariable('page')
+		rowQuery.pid = getQueryVariable('pid')
+		rowQuery.query_row = query_index
+		
+		// redirect
+		var newUrl = location.protocol + '//' + location.host + location.pathname + "?" + $.param(rowQuery)
+		
+		// console.log('newUrl', newUrl)
+		// debugger;
+		
+		window.location.href = newUrl
+	}
 }
 
 XDRO.make_results_table = function(records) {
@@ -121,13 +97,14 @@ XDRO.make_results_table = function(records) {
 	var table = $("div#results table").DataTable()
 	console.log('records seen by make_results_table', records)
 	records.forEach(function (record, i) {
+		var link = "<a href=" + XDRO.recordAddress + "&rid=" + record.patientid + ">" + record.patientid + "</a>"
 		var node = table.row.add([
-			record.patientid,
+			link,
 			record.patient_first_name + " " + record.patient_last_name,
 			record.patient_dob,
 			record.patient_current_sex,
 			record.patient_street_address_1,
-			"<input class='cbox' data-rid='" + record.patientid + "' type='checkbox'>",
+			record.score.toFixed(1) + "%",
 		]).node()
 		
 		$(node).addClass('highlightable').attr('data-rid', record.patientid)
@@ -138,10 +115,12 @@ XDRO.make_results_table = function(records) {
 
 XDRO.add_file_interface = function() {
 	// add buttons
-	first = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="XDRO.first_query()"><i class="fas fa-angle-double-left"></i></button>'
-	prev = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="XDRO.prev_query()"><i class="fas fa-chevron-left"></i></button>'
-	next = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="XDRO.next_query()"><i class="fas fa-chevron-right"></i></button>'
-	last = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="XDRO.last_query()"><i class="fas fa-angle-double-right"></i></button>'
+	var leftChev = String.fromCharCode(0xf054);
+	var rightChev = '\uF054';
+	first = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="XDRO.first_query()"><i class="fa fa-chevron-left"></i><i class="fa fa-chevron-left"></i></button>'
+	prev = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="XDRO.prev_query()"><i class="fa fa-chevron-left"></i></button>'
+	next = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="XDRO.next_query()"><i class="fa fa-chevron-right"></i></button>'
+	last = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="XDRO.last_query()"><i class="fa fa-chevron-right"></i><i class="fa fa-chevron-right"></i></button>'
 	$("#search-input div:eq(0)").prepend(prev)
 	$("#search-input div:eq(0)").prepend(first)
 	$("#search-input div:eq(0)").append(next)
@@ -151,63 +130,115 @@ XDRO.add_file_interface = function() {
 	$("#file-queries").show()
 	$("#file-queries .filename").text(XDRO.filename)
 	$("#search").css('margin-top', '10px')
-}
-
-XDRO.prev_query = function() {
-	XDRO.row_query_index -= 1
-	XDRO.show_results_for_row_query(XDRO.row_query_index)
-}
-
-XDRO.next_query = function() {
-	XDRO.row_query_index += 1
-	XDRO.show_results_for_row_query(XDRO.row_query_index)
-}
-
-XDRO.first_query = function() {
-	XDRO.row_query_index = 0
-	XDRO.show_results_for_row_query(XDRO.row_query_index)
-}
-
-XDRO.last_query = function() {
-	XDRO.row_query_index = XDRO.response.rows.length-1
-	XDRO.show_results_for_row_query(XDRO.row_query_index)
-}
-
-XDRO.show_results_for_row_query = function(index) {
-	XDRO.row_query_index = index
 	
 	// enable/disable seek buttons
-	if (XDRO.row_query_index == XDRO.response.rows.length-1) {
+	var query_row = Number(getQueryVariable("query_row"))
+	if (query_row == XDRO.rowQueries.length - 1) {
 		$(".pos_iter").attr('disabled', true)
 	} else {
 		$(".pos_iter").attr('disabled', false)
 	}
-	if (XDRO.row_query_index == 0) {
+	if (query_row == 0) {
 		$(".neg_iter").attr('disabled', true)
 	} else {
 		$(".neg_iter").attr('disabled', false)
 	}
-	
-	var rows = XDRO.response.rows
-	XDRO.make_results_table(rows[index].results)
-	
-	var query_string = ""
-	for (const name in rows[index].query) {
-		query_string += String(rows[index].query[name]) + " "
-	}
-	query_string = query_string.trimEnd()
-	
-	// update file queries area
-	$("span.records").text(String(XDRO.row_query_index + 1) + " / " + String(rows.length))
-	$("#search-input input").val(query_string)
-	console.log('query_string', query_string)
-	
-	$("div#results table").DataTable().draw()
-	if (rows[index].results.length == 0) {
-		$(".dataTables_empty").text("Search for '" + query_string + "' yielded no record results")
-	}
 }
 
+XDRO.process_selected_file = function(file_text) {
+	// make sure we get SOME text out of the selected file
+	if (!file_text.length) {
+		alert("When the XDRO module read your selected file, it couldn't find valid text data. Please select a .csv file to upload.")
+		var input = $('.custom-file-label')
+		input.html("Upload a CSV")
+		input.val(null)
+		return
+	}
+	
+	var lines = file_text.split("\n")
+	
+	if (lines.length < 2) {
+		alert("Selected .csv file must contain at least two rows of data, headers (first row) and at least one row of search parameters (correlating to header columns).")
+		var input = $('.custom-file-label')
+		input.html("Upload a CSV")
+		input.val(null)
+		return
+	}
+	
+	var headers = lines[0].split(',').map(function(item) {
+		return item.trim()
+	})
+	
+	//	make sure we have at least one valid header (to correlate with searched patient info)
+	var validHeaderFound = XDRO.validCSVHeaders.some(function(valid_header) {
+		return headers.includes(valid_header)
+	})
+	if (!validHeaderFound) {
+		alert("The XDRO module couldn't find a valid header in the selected .csv file.\nPlease ensure the first csv row in your file contains at least one of the following:\n\n" + XDRO.validCSVHeaders.join("\n"))
+		var input = $('.custom-file-label')
+		input.html("Upload a CSV")
+		input.val(null)
+		return
+	}
+	
+	// no errors, get a map of valid header names to column indices (e.g. "patient_dob" maps to csv column 3)
+	var headerIndices = {}
+	XDRO.validCSVHeaders.forEach(function(validHeader) {
+		var foundIndex = headers.findIndex(header => header == validHeader)
+		if (foundIndex >= 0)
+			headerIndices[validHeader] = foundIndex
+	})
+	
+	// now we can process the remaining lines into structured query objects (held in rowQueries)
+	var rowQueries = []
+	lines.forEach(function(line, row) {
+		// skip header row
+		if (row == 0)
+			return
+		
+		var rowQuery = {}
+		var lineValues = line.split(',').map(function(item) {
+			return item.trim()
+		})
+		for (const header in headerIndices) {
+			var col = headerIndices[header]
+			if (lineValues[col])
+				rowQuery[header] = lineValues[col]
+		}
+		
+		if (!$.isEmptyObject(rowQuery))
+			rowQueries.push(rowQuery)
+	})
+	XDRO.rowQueries = rowQueries
+	
+	// store queries in local storage
+	try {
+		localStorage.setItem('xdro_csv_search_row_queries', JSON.stringify(rowQueries))
+		localStorage.setItem('xdro_csv_filename', XDRO.filename)
+	} catch(err) {
+		alert("REDCap's XDRO module couldn't save the file to local (browser) storage -- try clearing your local storage or restarting your browser in non-private mode. Error message: " + String(err))
+	}
+	
+	XDRO.processedFileThisSession = true
+}
+
+XDRO.prev_query = function() {
+	XDRO.submit_row_query(Number(getQueryVariable("query_row")) - 1)
+}
+
+XDRO.next_query = function() {
+	XDRO.submit_row_query(Number(getQueryVariable("query_row")) + 1)
+}
+
+XDRO.first_query = function() {
+	XDRO.submit_row_query(0)
+}
+
+XDRO.last_query = function() {
+	XDRO.submit_row_query(XDRO.rowQueries.length - 1)
+}
+
+// on document ready
 $(function() {
 	// autocomplete prediction stuff
 	$("#search-input input").on('input', function() {
@@ -217,7 +248,7 @@ $(function() {
 	})
 	
 	// forward to patient record on prediction clicked
-	$("#autocomplete").on('mousedown', 'span', function(e) {
+	$("#autocomplete").on('click', 'span', function(e) {
 		var span = $(e.target)
 		if (span.hasClass('predict-name')) {
 			span = span.parent('span')
@@ -228,25 +259,60 @@ $(function() {
 		}
 	})
 	
-	// hide autocomplete predictions
-	$("#search-input input").on('blur', function() {$("#autocomplete").hide()})
-	
 	$("#error_alert").hide()
 	$("#file-queries").hide()
 	
 	// make results table a DataTables table
 	$("div#results table").DataTable({
+		order: [[5, 'desc']],
 		columnDefs: [
-			{
-				targets: [5],
-				orderable: false
-			}
+			{className: "dt-center", targets: "_all"}
 		],
+		autoWidth: true,
 		pageLength: 15
 	});
 	
-	// XDRO.shrinkSearch()
-	// XDRO.add_file_interface()
+	// if a file has been previously selected/loaded, use rowQueries from that
+	try {
+		XDRO.rowQueries = JSON.parse(localStorage.getItem("xdro_csv_search_row_queries"))
+		XDRO.filename = localStorage.getItem("xdro_csv_filename")
+	} catch(exception) {
+		
+	}
+	
+	// show search results (should be present if query parameters are set)
+	var url_query = getQueryVariable('query');
+	if (XDRO.search_results) {
+		XDRO.shrinkSearch()
+		$("#search-feedback").css('visibility', 'hidden')
+		
+		if (XDRO.use_file_interface) {
+			XDRO.add_file_interface()
+			var query_string = ""
+			for(const i in XDRO.validCSVHeaders) {
+				var field = XDRO.validCSVHeaders[i]
+				var param = getQueryVariable(field)
+				if (param)
+					query_string += param + ", "
+			}
+			if (query_string.length) {
+				$("#query").val(query_string.slice(0, -2))
+			}
+		} else if (url_query.length) {
+			$("#query").val(decodeURIComponent(url_query.replace(/\+/g, " ")))
+		}
+		
+		if (XDRO.search_results.length) {
+			XDRO.make_results_table(XDRO.search_results)
+		} else {
+			$(".dataTables_empty").text("Search for '" + url_query + "' yielded no matching results")
+		}
+	} else {
+		$("#query").val("")
+	}
+	
+	// scroll to top
+	window.scroll(0, 0)
 })
 
 // hide autocomplete predictions when click outside autocomplete div
@@ -263,8 +329,31 @@ $("body").on("click", ".highlightable", function(e) {
 		window.location.href = XDRO.recordAddress + "&rid=" + rid;
 })
 
-$('body').on('change', ".custom-file-input", function() {
+$('body').on('change', ".custom-file-input", function(e) {
 	var fileName = $(this).val().split('\\').pop()
-	$('.custom-file-label').html(fileName)
 	XDRO.filename = fileName
+	var input = $('.custom-file-label')
+	input.html(fileName)
+	
+	if (e.target.files[0]) {
+		XDRO.fileReader.readAsText(e.target.files[0])
+	}
 })
+
+// load file into localstorage on upload
+XDRO.fileReader.addEventListener("load", function() {
+	XDRO.process_selected_file(this.result)
+})
+
+// helper functions
+function getQueryVariable(variable) {	// from: (https://stackoverflow.com/questions/827368/using-the-get-parameter-of-a-url-in-javascript)
+	var query = window.location.search.substring(1);
+	var vars = query.split("&");
+	for (var i=0;i<vars.length;i++) {
+		var pair = vars[i].split("=");
+		pair = [decodeURIComponent(pair[0]), decodeURIComponent(pair[1])]
+		if (pair[0] == variable) {
+			return pair[1];
+		}
+	}
+}

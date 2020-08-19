@@ -16,11 +16,13 @@
 // connect to REDCap
 require_once (APP_PATH_TEMP . "../redcap_connect.php");
 $pid = $module->getProjectId();
-$module->nlog();
+// $module->nlog();
 
 // make object that will hold our response
 $json = new \stdClass();
 $json->errors = [];
+$json->ignored_cols = [];
+$json->actions = [];
 
 // $module->llog("post: " . print_r($_POST, true));
 // $module->llog("files: " . print_r($_FILES, true));
@@ -249,7 +251,8 @@ function get_next_instance($record, $form_name) {
 }
 
 
-function import_data_row($row) {
+function import_data_row($row, $row_index) {
+	global $json;
 	global $module;
 	global $headers;
 	global $headers_flipped;
@@ -306,27 +309,42 @@ function import_data_row($row) {
 	$imported["demographics"] = [];
 	$imported["antimicrobial_susceptibilities_and_resistance_mech"] = [];
 	
-	$errors = [];
-	
+	// fill 'imported' array with data so we can save to REDCap
 	foreach ($row as $i => $value) {
+		// skip null values
 		if (strcasecmp($value, "NULL") == 0)
 			continue;
 		
+		// figure out what kind of value we're importing
 		$column_name = $headers[$i];
+		
+		$date_fields = [
+			"lab_rpt_dt",
+			"specimen_collection_dt",
+			"resulted_dt",
+			"patient_dob",
+			"patient_last_change_time"
+		];
+		
+		// convert to Y-m-d value if applicable
+		if (array_search(strtolower($column_name), $date_fields, true) != false) {
+			$value = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)->format("Y-m-d");
+		}
 		
 		// either add error to return array or set assoc_form to be form string value
 		$assoc_form = get_assoc_form($column_name);
-		if (!$assoc_form[0]) {
-			$errors[] = [0, $assoc_form[1]];
+		if ($assoc_form[0] == 0) {
+			// $module->llog("error getting associated form for row / column / value : $i / $column_name / $value");
+			$json->ignored_cols[$column_name] = true;
 			unset($assoc_form);
 		} else {
 			$assoc_form = $assoc_form[1];
 		}
 		
 		$assoc_field = get_assoc_field($column_name);
-		if (!$assoc_field[0]) {
-			// uncomment to allow reporting of non-used columns as errors
-			$errors[] = [0, $assoc_field[1]];
+		if ($assoc_field[0] == 0) {
+			// $module->llog("error getting associated field for row / column / value : $i / $column_name / $value");
+			$json->ignored_cols[$column_name] = true;
 			unset($assoc_field);
 		} else {
 			$assoc_field = $assoc_field[1];
@@ -337,46 +355,68 @@ function import_data_row($row) {
 			
 			if ($mode == 'lab') {
 				if (!empty($lab_obj->$assoc_field) and $assoc_field != "patient_local_id")
-					$imported[$assoc_form][$assoc_field] = $lab_obj_->$assoc_field;
+					$imported[$assoc_form][$assoc_field] = $lab_obj->$assoc_field;
 			}
 		}
 		unset($column_name, $assoc_form, $assoc_field);
 	}
 	
+	// $module->llog("printing 'imported' array before saving:" . print_r($imported, true));
+	
 	// save to redcap
+	$rows = [];
 	$pati_id = $imported["xdro_registry"]["patientid"];
 	if (empty($pati_id)) {
-		$errors[] = [1, "No patient ID found -- make sure patient_ID or PATIENT_LOCAL_ID column isn't empty"];
+		$rows[] = [$row, "[NOT FOUND]", "N/A", "No patient ID found -- make sure patient_ID or PATIENT_LOCAL_ID column isn't empty!"];
 	} else {
 		$data = \REDCap::getData($pid, 'array', $pati_id);
 		$next_demographics_instance = get_next_instance(reset($data), "demographics");
 		$next_antimicrobial_instance = get_next_instance(reset($data), "antimicrobial_susceptibilities_and_resistance_mech");
 		
 		// overwrite xdro_registry form values (if imported values)
-		if (!empty($imported["xdro_registry"]))
+		if (!empty($imported["xdro_registry"])) {
 			$data[$pati_id][$eid] = $imported["xdro_registry"];
+			
+			// add to \$rows for reporting purposes
+			$fields = array_keys($imported["xdro_registry"]);
+			$rows[] = [$row_index, $pati_id, 'xdro_registry', "Updating fields: " . implode(', ', $fields)];
+		}
 		
 		// add instances to repeatable forms (if imported values)
-		if (!empty($imported["demographics"]))
+		if (!empty($imported["demographics"])) {
 			$data[$pati_id]["repeat_instances"][$eid]["demographics"][$next_demographics_instance] = $imported["demographics"];
+			
+			// reporting
+			$rows[] = [$row_index, $pati_id, 'demographics', "Creating instance $next_demographics_instance"];
+		}
 		
-		if (!empty($imported["antimicrobial_susceptibilities_and_resistance_mech"]))
+		if (!empty($imported["antimicrobial_susceptibilities_and_resistance_mech"])) {
 			$data[$pati_id]["repeat_instances"][$eid]["antimicrobial_susceptibilities_and_resistance_mech"][$next_antimicrobial_instance] = $imported["antimicrobial_susceptibilities_and_resistance_mech"];
+			
+			// reporting
+			$rows[] = [$row_index, $pati_id, 'antimicrobial_susceptibilities_and_resistance_mech', "Creating instance $next_antimicrobial_instance"];
+		}
 		
 		// $module->llog('printing data:' . print_r($data, true));
 		
 		// try to save
+		// $module->llog("PATIENTID: $pati_id - saveData data: " . print_r($data, true));
 		$result = \REDCap::saveData($pid, 'array', $data);
-		// $module->llog("$pati_id saveData \$result: " . print_r($result, true));
+		// $module->llog("PATIENTID: $pati_id - saveData result: " . print_r($result, true));
 		
-		if (gettype($result["errors"]) == "string")
-			$errors[] = $result["errors"];
+		// set \$rows to empty array since above $rows entries are now inaccurate (save errors prevent update/create)
+		if (!empty($result["errors"]))
+			$rows = [];
+		
 		foreach($result["errors"] as $err) {
 			// $module->llog("saveData err: $err");
-			$errors[] = [1, $err];
+			$rows[] = [$row_index, $pati_id, "", $err];
+		}
+		if (gettype($result["errors"]) == "string") {
+			$rows[] = [$row_index, $pati_id, "", $result["errors"]];
 		}
 	}
-	return $errors;
+	return $rows;
 }
 
 function send_lots_of_errors() {
@@ -422,7 +462,7 @@ try {
 	$upload_path = $_FILES["client_file"]["tmp_name"];
 	
 	// at this point, we know checkWorkbookFile didn't exit with errors
-	$reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader("Xlsx");
+	$reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($upload_path);
 	$reader->setReadDataOnly(TRUE);
 	$workbook = $reader->load($upload_path);
 	$sheet = $workbook->getActiveSheet();
@@ -435,11 +475,13 @@ try {
 	exit(json_encode($json));
 }
 
+// $module->llog("No error reading file.");
+
 // this obj will lab order values that span across multiple rows (per PATIENT_LOCAL_ID)
 $lab_obj = new \stdClass();
 
 $headers = [];
-$json->row_error_arrays = [];
+$json->actions = [];
 foreach ($sheet->getRowIterator() as $i => $row) {
 	if ($i == 1) {
 		// build headers array for future referencing
@@ -457,9 +499,7 @@ foreach ($sheet->getRowIterator() as $i => $row) {
 		}
 	} else {
 		$range = "A$i:" . number_to_column(count($headers)) . "$i";
-		$json->row_error_arrays[$i] = import_data_row(reset($sheet->rangeToArray($range)));
-		// if (!empty($row_errors))
-			// $module->llog("row errors for row $i: " . print_r($row_errors, true));
+		$json->actions = array_merge($json->actions, import_data_row(reset($sheet->rangeToArray($range)), $i));
 	}
 }
 
@@ -467,19 +507,4 @@ $json->success = true;
 exit(json_encode($json));
 
 
-/*
-	If LAB_TEST_TYPE != "r_result"
-	lab_obj->lab_test_nm = lab_test_nm
-	 ' ' jurisdiction_nm
-	 ' ' resulted_dt
-	 ' ' lab_test_status
-	 ' ' specimen_desc
-	 ' ' disease
-	 ' ' disease_cd
-	 ' ' reporting_facility
-	 ' ' ordering_facility
-	Finally, lab_obj->patientid = PATIENT_LOCAL_ID
-	
-	LATER, when LAB_TEST_TYPE == "r_result"
-		lab_test_nm convert to lab_test_nm_2		(this is actually taken care of by get_assoc_field
-*/
+

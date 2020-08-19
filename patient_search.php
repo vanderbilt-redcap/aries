@@ -1,6 +1,40 @@
 <?php
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
-$fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
+$fa_path = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css";
+
+$pid = $module->getProjectId();
+
+$_GET   = filter_input_array(INPUT_GET, FILTER_SANITIZE_STRING);
+$_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+$module->llog("_GET: " . print_r($_GET, true));
+$module->llog("_POST: " . print_r($_POST, true));
+$module->llog("_FILES: " . print_r($_FILES, true));
+
+if (!empty($_GET['query'])) {
+	$search_results = json_encode($module->search($_GET['query']));
+}
+
+$row_query_fields = [
+	"patientid",
+	"patient_dob",
+	"patient_first_name",
+	"patient_last_name",
+	"patient_current_sex",
+	"patient_street_address_1"
+];
+
+$query = new \stdClass();
+$fieldsAdded = 0;
+foreach($row_query_fields as $i => $fieldname) {
+	if (!empty($_GET[$fieldname])) {
+		$query->$fieldname = $_GET[$fieldname];
+		$fieldsAdded++;
+	}
+}
+if ($fieldsAdded > 0) {
+	$search_results = json_encode($module->structured_search($query));
+}
+
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -52,7 +86,14 @@ $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 <script type="text/javascript">
 	XDRO.moduleAddress = "<?=$module->getUrl('XDRO.php')?>"
 	XDRO.recordAddress = "<?=$module->getUrl('patient_record.php')?>"
-	XDRO.CSVSearchAddress = "<?=$module->getUrl('search_csv_ajax.php')?>"
+	<?php
+	if (!empty($search_results)) {
+		?>;XDRO.search_results = JSON.parse(<?php echo("'$search_results');");
+	}
+	if ($fieldsAdded > 0) {
+		?>;XDRO.use_file_interface = true<?php
+	}
+	?>
 </script>
 
 <!-- page contents -->
@@ -70,7 +111,7 @@ $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 <div id="file-queries">
 	<div class="alert alert-primary dark-border m-3" role="alert">
 		<p>File uploaded: <span class="filename"></span></p>
-		<p>Showing results for row <span class="records"></span></p>
+		<p>Showing results for row <span class="records"><?php echo ($_GET['query_row'] + 1); ?></span></p>
 	</div>
 </div>
 
@@ -79,13 +120,17 @@ $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 		<h5><b>Search Query</b></h5>
 		<p>Begin typing to search the registry data,<br> then click an item in the list to navigate to that record for further investigation.</p>
 	</div>
-	<div id="search-input" class='col-8'>
+	<form id="search-input" class='col-8'>
+		<input style="display:none;" name="prefix" value="xdro">
+		<input style="display:none;" name="page" value="patient_search">
+		<input style="display:none;" name="pid" value="<?php echo($pid); ?>">
 		<div class='col-8'>
-			<input type='text' name='user-query' class='w-100'>
+			<input type='text' name='query' id="query" class='w-100'>
 			<div id="autocomplete"></div>
 		</div>
 		<div class='mx-2 px-2 col-2'>
-			<button id="submit-search" type="button" class="btn btn-primary" onclick="XDRO.submit_manual_query()">Search</button>
+			<!-- <button id="submit-search" type="submit" class="btn btn-primary">Search</button> -->
+			<input type="submit" value="Search">
 		</div>
 		<div id="search-feedback" class='mr-3 pr-3 col-2'>
 			<div class="spinner">
@@ -93,7 +138,7 @@ $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 			</div>
 			<span class='ml-2 search-indicator'>Searching</span>
 		</div>
-	</div>
+	</form>
 </div>
 
 <div id="error_alert">
@@ -110,20 +155,20 @@ $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 			A CSV is a type of file. You can save any spreadsheet in Excel as a CSV. When 'Saving As,' underneath the field for 'File name', there is a field for 'Save as type' which will open a drop-down menu. Select CSV (Comma delimited) and save.
 		</div>
 	</div>
-	<div id="file-search-input" class='col-8'>
+	<form method="post" enctype="multipart/form-data" id="file-search-input" class='col-8'>
+		<input style="display:none;" name="prefix" value="xdro">
+		<input style="display:none;" name="page" value="patient_search">
+		<input style="display:none;" name="pid" value="<?php echo($pid); ?>">
 		<div class="input-group col-8">
 			<div class="custom-file">
-				<input type="file" class="custom-file-input" id="upload_csv" aria-describedby="upload_csv">
+				<input type="file" class="custom-file-input" id="upload_csv" name="upload_csv" aria-describedby="upload_csv">
 				<label class="custom-file-label" for="upload_csv">Upload a CSV</label>
 			</div>
 			<div id="autocomplete"></div>
 		</div>
-		<!--<div class='col-8'>
-			<input type='text' name='user-query' class='col-12'>
-			<div id="autocomplete"></div>
-		</div>-->
 		<div class='mx-2 px-2 col-2'>
-			<button id="file-submit-search" type="button" class="btn btn-primary" onclick="XDRO.submit_file_query()">Search</button>
+			<button id="file-submit-search" type="button" class="btn btn-primary" onclick="XDRO.submit_row_query()">Search</button>
+			<!--  <input type="submit" value="Search"> -->
 		</div>
 		<div id="file-search-feedback" class='mr-3 pr-3 col-2'>
 			<div class="spinner">
@@ -131,7 +176,7 @@ $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 			</div>
 			<span class='ml-2 search-indicator'>Searching</span>
 		</div>
-	</div>
+	</form>
 </div>
 
 <div id='results'>
@@ -141,9 +186,9 @@ $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 				<th>Record ID</th>
 				<th>Name</th>
 				<th>Date of Birth</th>
-				<th>Gender</th>
+				<th>Sex</th>
 				<th>Current Address</th>
-				<th>Match?</th>
+				<th>Relevance</th>
 			</tr>
 		</thead>
 		<tbody>

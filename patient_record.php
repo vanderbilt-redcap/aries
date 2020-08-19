@@ -2,7 +2,6 @@
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 // require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 
-$module->nlog();
 $rid = $_GET['rid'];
 $module->llog("fetching patient_record for rid: $rid");
 
@@ -14,6 +13,27 @@ function sort_demographics($a, $b) {
 	if (strtotime($a["patient_last_change_time"]) < strtotime($b["patient_last_change_time"]))
 		return -1;
 	return 0;
+}
+
+function getFieldValues($field_name) {
+	global $project;
+	if (empty($project))
+		return false;
+	
+	$enumeration = $project->metadata[$field_name]["element_enum"];
+	if (gettype($enumeration) !== "string")
+		return false;
+	
+	$field_values = [];
+	$labelPattern = "/(\d+),?\s?(.+?)(?=\x{005c}\x{006E}|$)/";
+	preg_match_all($labelPattern, $enumeration, $matches);
+	foreach ($matches[0] as $value) {
+		$arr = explode(",", $value);
+		$key = trim($arr[0]);
+		$val = trim($arr[1]);
+		$field_values[$key] = $val;
+	}
+	return $field_values;
 }
 
 if (empty($rid)) {
@@ -56,6 +76,8 @@ if (empty($rid)) {
 	$address_td .= "<br>" . $last_demo["patient_city"] . ", " . $last_demo["patient_state"] . " " . $last_demo["patient_zip"];
 }
 
+// get Metrics instrument [facility] field values/labels
+$facilities = getFieldValues("facility");
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -77,12 +99,16 @@ if (empty($rid)) {
 	<link rel="stylesheet" type="text/css" href="/redcap/redcap_v9.5.14/Resources/css/bootstrap-ie9.min.css">
 	<script type="text/javascript">$(function(){ie9FormFix()});</script>
 	<!--<![endif]-->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+	<!-- jqueryui -->
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
 </head>
 <body>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
 <link rel="stylesheet" href="<?=$module->getUrl('css/record.css')?>"/>
 <script type="text/javascript" src="<?=$module->getUrl('js/patient_record.js')?>"></script>
@@ -91,6 +117,7 @@ if (empty($rid)) {
 	XDRO.rid = "<?php echo $rid;?>";
 	XDRO.eid = "<?php echo $eid;?>";
 	XDRO.demographics = '<?php echo json_encode($all_demographics);?>';
+	XDRO.patient_match_ajax = "<?php echo $module->getUrl('patient_match_ajax.php');?>";
 </script>
 <div id="main">
 <div id='header' class='row'>
@@ -202,6 +229,8 @@ if (empty($rid)) {
 							
 							if ($sir == "R" || strpos($val, ">=4") != FALSE) {
 								$class = " class='redfont font-weight-bold'";
+							} elseif ($sir == "I") {
+								$class = " class='redfont'";
 							}
 							echo "
 					<tr$class>
@@ -280,21 +309,6 @@ if (empty($rid)) {
 			<div class="modal-body">
 				<div class="row">
 					<div class="col-8">
-						<span>Is this patient a match?</span>
-					</div>
-					<div class="col-4">
-						<div class="form-check">
-							<input class="form-check-input" type="radio" name="match_radios" id="match_radio_1" value="1">
-							<label class="form-check-label" for="match_radios">Yes</label>
-						</div>
-						<div class="form-check">
-							<input class="form-check-input" type="radio" name="match_radios" id="match_radio_0" value="0">
-							<label class="form-check-label" for="match_radios">No</label>
-						</div>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-8">
 						<span>Were you aware that this patient should be on contact precautions prior to searching the registry?</span>
 					</div>
 					<div class="col-4">
@@ -331,16 +345,26 @@ if (empty($rid)) {
 						<div class='dropdown'>
 							<button class='btn btn-outline-primary dropdown-toggle' type='button' id='facility-dd' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Facility</button>
 							<div class='dropdown-menu' aria-labelledby='facility-dd'>
-								<a class='dropdown-item' href='#'>Facility A</a>
-								<a class='dropdown-item' href='#'>Facility B</a>
-								<a class='dropdown-item' href='#'>Facility C</a>
+								<?php
+								foreach($facilities as $val => $facility_name) {
+									echo("<a class='dropdown-item' value='$val' href='#'>$facility_name</a>");
+								}
+								?>
 							</div>
 						</div>
 					</div>
 				</div>
+				<div class="row">
+					<div class="col-6">
+						<span>What date was this patient admitted?</span>
+					</div>
+					<div class="col-6">
+						<input type="text" id="date_admitted">
+					</div>
+				</div>
 			</div>
 			<div class="modal-footer">
-				<button id="save-metrics" type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
+				<button id="save-metrics" type="button" class="btn btn-primary" data-dismiss="modal" disabled onclick="XDRO.save_patient_match()">Save</button>
 			</divS
 		</div>
 	</div>
