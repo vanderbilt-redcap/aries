@@ -48,9 +48,9 @@
 	"system-settings": [],
 	"crons": [],
 	"compatibility": {
-		"php-version-min": "",
-		"php-version-max": "",
-		"redcap-version-min": "",
-		"redcap-version-max": ""
+		"php-version-min": "7.0.0",
+		"php-version-max": "7.3.1",
+		"redcap-version-min": "9.1.1",
+		"redcap-version-max": "10.2.1"
 	}
 }
