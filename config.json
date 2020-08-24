@@ -32,6 +32,11 @@
 				"name": "User Administration",
 				"icon": "arrow_right",
 				"url": "user_admin.php"
+			},
+			{
+				"name": "Patient Match Dashboard",
+				"icon": "arrow_right",
+				"url": "patient_match_dash.php"
 			}
 		],
 		"control-center": []
