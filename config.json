@@ -12,7 +12,8 @@
 		}
 	],
 	"versions": {
-		"0.1.1": "Implement match instance save to record function. Fix record and search interface issues. Improved user feedback for match instance save errors/success."
+		"0.1.1": "Implement match instance save to record function. Fix record and search interface issues. Improved user feedback for match instance save errors/success.",
+		"1.1.0": "Added Patient Match Dashboard"
 	},
 	"permissions": [],
 	"enable-every-page-hooks-on-system-pages": false,
@@ -49,8 +50,8 @@
 	"crons": [],
 	"compatibility": {
 		"php-version-min": "7.0.0",
-		"php-version-max": "7.3.1",
+		"php-version-max": "",
 		"redcap-version-min": "9.1.1",
-		"redcap-version-max": "10.2.1"
+		"redcap-version-max": ""
 	}
 }
