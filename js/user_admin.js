@@ -150,7 +150,31 @@ XDRO.change_email = function() {
 }
 
 XDRO.reset_password = function() {
+	var user_id = $("#users table tr.selected").attr('data-id')
 	
+	if (user_id === undefined)
+		return;
+	
+	var data = {
+		user: {id: user_id},
+		action: 'reset_password'
+	}
+	
+	XDRO.disable_buttons()
+	$.ajax({
+		url: ajax_address,
+		dataType: 'json',
+		data: data,
+		method: "POST",
+		complete: function(response) {
+			XDRO.enable_buttons()
+			XDRO.response = response
+			console.log('response', response)
+			if (response.responseJSON.error) {
+				XDRO.show_error(response.responseJSON.error)
+			}
+		}
+	})
 }
 
 XDRO.delete_user = function() {

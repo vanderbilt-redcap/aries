@@ -98,7 +98,7 @@ $pid = $module->getProjectId();
 					</button>
 				</div>
 				<div class="modal-body">
-					<p>Enter your username or email adddress in the input below.</p>
+					<p>Enter your username or email address in the input below.</p>
 					<div class="input-group mb-3">
 						<input type="text" class="form-control" aria-label="user-or-email">
 					</div>

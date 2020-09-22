@@ -1,5 +1,4 @@
 <?php
-require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 
 // $module->setSystemSetting("auth_data", "{}");
@@ -36,7 +35,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 		<div class="user-actions">
 			<button type="button" class="btn btn-primary">Assign Facilities</button>
 			<button type="button" class="btn btn-primary" onclick="$('#change_email.modal').modal('show')">Change Email</button>
-			<button type="button" class="btn btn-primary">Reset Password</button>
+			<button type="button" class="btn btn-primary" onclick="XDRO.reset_password()">Reset Password</button>
 			<button type="button" class="btn btn-danger" onclick="XDRO.delete_user()">Delete User</button>
 		</div>
 	</div>

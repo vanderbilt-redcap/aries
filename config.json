@@ -38,12 +38,17 @@
 				"name": "Patient Match Dashboard",
 				"icon": "arrow_right",
 				"url": "patient_match_dash.php"
+			},
+			{
+				"name": "XDRO User Login",
+				"icon": "arrow_right",
+				"url": "sign_in.php&NOAUTH"
 			}
 		],
 		"control-center": []
 	},
 	"no-auth-pages": [
-		"patient_search"
+		"sign_in"
 	],
 	"project-settings": [],
 	"system-settings": [],
