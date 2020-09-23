@@ -6,9 +6,9 @@ $pid = $module->getProjectId();
 
 $_GET   = filter_input_array(INPUT_GET, FILTER_SANITIZE_STRING);
 $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
-$module->llog("_GET: " . print_r($_GET, true));
-$module->llog("_POST: " . print_r($_POST, true));
-$module->llog("_FILES: " . print_r($_FILES, true));
+// $module->llog("_GET: " . print_r($_GET, true));
+// $module->llog("_POST: " . print_r($_POST, true));
+// $module->llog("_FILES: " . print_r($_FILES, true));
 
 if (!empty($_GET['query'])) {
 	$search_results = json_encode($module->search($_GET['query']));

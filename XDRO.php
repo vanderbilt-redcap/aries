@@ -266,7 +266,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	
 	function save_auth_data() {
 		$this->framework->setSystemSetting('auth_data', json_encode($this->auth_data));
-		$this->llog("saved auth_data: " . print_r($this->auth_data, true));
+		// $this->llog("saved auth_data: " . print_r($this->auth_data, true));
 	}
 	
 	function get_next_user_id() {

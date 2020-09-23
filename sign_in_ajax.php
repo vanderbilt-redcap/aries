@@ -2,7 +2,7 @@
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 
 // $module->nlog();
-$module->llog(print_r($module->auth_data, true));
+// $module->llog(print_r($module->auth_data, true));
 $json = new stdClass();
 
 // make objects, not arrays
