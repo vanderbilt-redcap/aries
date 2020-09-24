@@ -1,8 +1,34 @@
 <?php
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
-
 $pid = $module->getProjectId();
+session_start();
+
+$module->llog("_GET: " . print_r($_GET, true));
+$module->llog("_POST: " . print_r($_POST, true));
+$module->llog("_REQUEST: " . print_r($_REQUEST, true));
+$module->llog("_SESSION: " . print_r($_SESSION, true));
+
+
+if (isset($_GET['unauthorized'])) {
+	$errmsg = "Please login to access XDRO resources";
+}
+
+if (isset($_POST['sign-in'])) {
+	$module->llog("authenticating...");
+	list($authenticated, $errmsg) = $module->authenticate();
+	if ($authenticated) {
+		$_SESSION['authenticated'] = true;
+		header("location: " . $module->getUrl('patient_search.php'));
+	}
+}
+
+if (isset($_GET['logout'])) {
+	$_SESSION = [];
+	$authenticated = null;
+	$errmsg = "You were successfully logged out";
+}
+
 ?>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -43,15 +69,6 @@ $pid = $module->getProjectId();
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 	
-	<!-- xdro sign in js -->
-	<script type="text/javascript">
-		var XDRO = {project_id: <?=$pid?>}
-		var ajax_address = "<?=$module->getUrl('sign_in_ajax.php')?>"
-		var search_address = "<?=$module->getUrl('patient_search.php')?>"
-	</script>
-	<script type="text/javascript" src="<?=$module->getUrl('js/sign_in.js')?>"></script>
-	
-	
 	<div class="main container">
 		<div class="card">
 			<div class="card-header">
@@ -65,22 +82,32 @@ $pid = $module->getProjectId();
 			</div>
 			
 			<div class="card-body">
+				<?php
+				// check if we were redirected from resource because unauthorized
+				if (!empty($errmsg)) {?>
+					<div class="alert alert-primary" role="alert">
+						<span id='errmsg'><?php echo $errmsg; ?></span>
+					</div>
+				<?php
+				}
+				?>
 				<h5 class="card-title">User Sign-In</h5>
-				
-				<div class="input-group mb-3">
-					<div class="input-group-prepend">
-						<span class="input-group-text">Username</span>
+				<form action="<?php echo $module->getUrl('sign_in.php'); ?>" method="post">
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text">Username</span>
+						</div>
+						<input name="username" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="username">
 					</div>
-					<input id="username" type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="username">
-				</div>
-				<div class="input-group mb-3">
-					<div class="input-group-prepend">
-						<span class="input-group-text">Password</span>
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text">Password</span>
+						</div>
+						<input name="password" type="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="password">
 					</div>
-					<input id="password" type="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="password">
-				</div>
-				
-				<button type="button" id="sign-in" class="btn btn-primary mb-2" onclick="XDRO.sign_in()">Sign In</button>
+					
+					<button type="submit" name="sign-in" class="btn btn-primary mb-2">Sign In</button>
+				</form>
 				<br>
 				<a href="#" data-toggle="modal" data-target="#forgot" class="card-link">Forgot your password?</a>
 			</div>

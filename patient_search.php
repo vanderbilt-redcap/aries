@@ -1,14 +1,15 @@
 <?php
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
-$fa_path = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css";
+
+session_start();
+if ($_SESSION['authenticated'] !== true) {
+	header("location: " . $module->getUrl('sign_in.php') . "&unauthorized");
+}
 
 $pid = $module->getProjectId();
-
+$fa_path = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css";
 $_GET   = filter_input_array(INPUT_GET, FILTER_SANITIZE_STRING);
 $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
-// $module->llog("_GET: " . print_r($_GET, true));
-// $module->llog("_POST: " . print_r($_POST, true));
-// $module->llog("_FILES: " . print_r($_FILES, true));
 
 if (!empty($_GET['query'])) {
 	$search_results = json_encode($module->search($_GET['query']));

@@ -2,6 +2,11 @@
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 // require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 
+session_start();
+if ($_SESSION['authenticated'] !== true) {
+	header("location: " . $module->getUrl('sign_in.php') . "&unauthorized");
+}
+
 $rid = $_GET['rid'];
 $module->llog("fetching patient_record for rid: $rid");
 

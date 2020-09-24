@@ -26,6 +26,28 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 			$this->project = new \Project($pid);
 	}
 	
+	// sign-in / authentication
+	function authenticate() {
+		$username = htmlspecialchars(trim($_POST['username']), ENT_QUOTES, 'UTF-8');
+		if (empty($username))
+			return [false, "Please provide a username to login"];
+		
+		$password = htmlspecialchars(trim($_POST['password']), ENT_QUOTES, 'UTF-8');
+		if (empty($password))
+			return [false, "Please provide a password to login"];
+		
+		foreach($this->auth_data->users as $i => $user) {
+			if ($user->username == $username) {
+				if (password_verify($password, $user->pw_hash)) {
+					return [true, null];
+				} else {
+					return [false, "Authentication failed -- password incorrect"];
+				}
+			}
+		}
+		return [false, "Authentication failed -- username '$username' not found"];
+	}
+	
 	// given a user supplied string, search for records in our patient registry that might match
 	function search($query_string, $limit = null) {
 		$query_obj = $this->structure_string_query($query_string);
@@ -287,7 +309,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	
 	function nlog() {
 		if (file_exists("C:/vumc/log.txt")) {
-			file_put_contents("C:/vumc/log.txt", "constructing XDRO instance\n");
+			// file_put_contents("C:/vumc/log.txt", "constructing XDRO instance\n");
 		}
 	}
 	
@@ -305,6 +327,10 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 
 if ($_GET['action'] == 'predictPatients') {
 	$module = new XDRO();
+	$module->llog("_GET: " . print_r($_GET, true));
+	$module->llog("predictPatients");
+	$module->llog("_POST: " . print_r($_POST, true));
+	$module->llog("_SESSION: " . print_r($_SESSION, true));
 	$query = filter_var($_GET['searchString'], FILTER_SANITIZE_STRING);
 	$recs = $module->search($query, 7);	// limit to 7 records for autocomplete
 	echo(json_encode($recs));
