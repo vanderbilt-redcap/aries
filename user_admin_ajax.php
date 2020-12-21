@@ -73,7 +73,7 @@ http://localhost/redcap/external_modules/?prefix=xdro&page=sign_in&pid=68");
 } elseif ($action == 'assign_facilities') {
 	
 } elseif ($action == 'change_email') {
-	$module->llog("current users array: \n" . print_r($module->auth_data->users, true));
+	// $module->llog("current users array: \n" . print_r($module->auth_data->users, true));
 	foreach($module->auth_data->users as $i => $user) {
 		if ($user->id == $data->id) {
 			$old_email = $facility->email;

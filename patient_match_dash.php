@@ -30,7 +30,7 @@ $params = [
 $data = \REDCap::getData($params);
 $table_data = [];
 $facility_labels = $module->getFieldLabels('facility');
-$module->llog('facility_labels: ' . print_r($facility_labels, true));
+// $module->llog('facility_labels: ' . print_r($facility_labels, true));
 
 foreach($data as $pati_id => $record) {
 	$disease_string = "";

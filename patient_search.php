@@ -3,18 +3,10 @@ require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "red
 
 session_start();
 if ($_SESSION['authenticated'] !== true) {
-	header("location: " . $module->getUrl('sign_in.php') . "&unauthorized");
+	header("location: " . $module->getUrl('sign_in.php') . "&unauthorized&NOAUTH");
 }
-
 $pid = $module->getProjectId();
 $fa_path = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css";
-$_GET   = filter_input_array(INPUT_GET, FILTER_SANITIZE_STRING);
-$_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
-
-if (!empty($_GET['query'])) {
-	$search_results = json_encode($module->search($_GET['query']));
-}
-
 $row_query_fields = [
 	"patientid",
 	"patient_dob",
@@ -24,17 +16,31 @@ $row_query_fields = [
 	"patient_street_address_1"
 ];
 
+
+// $module->llog("patient_search \$_POST: " . print_r($_POST, true));
+// $module->llog("patient_search \$_GET: " . print_r($_GET, true));
+
+// handle queries if exist
+$query = db_escape($_GET['query']);
+if (!empty($query))
+	$search_results = json_encode($module->search($query));
+unset($query);
+
+
 $query = new \stdClass();
 $fieldsAdded = 0;
 foreach($row_query_fields as $i => $fieldname) {
-	if (!empty($_GET[$fieldname])) {
-		$query->$fieldname = $_GET[$fieldname];
+	$value = db_escape($_GET[$fieldname]);
+	if (!empty($value)) {
+		$query->$fieldname = $value;
 		$fieldsAdded++;
 	}
+	unset($value);
 }
 if ($fieldsAdded > 0) {
 	$search_results = json_encode($module->structured_search($query));
 }
+
 
 ?>
 
@@ -86,7 +92,7 @@ if ($fieldsAdded > 0) {
 <script type="text/javascript" src="<?=$module->getUrl('js/search.js')?>"></script>
 <script type="text/javascript">
 	XDRO.moduleAddress = "<?=$module->getUrl('XDRO.php')?>"
-	XDRO.recordAddress = "<?=$module->getUrl('patient_record.php')?>"
+	XDRO.recordAddress = "<?=$module->getUrl('patient_record.php') . '&NOAUTH'?>"
 	<?php
 	if (!empty($search_results)) {
 		?>;XDRO.search_results = JSON.parse(<?php echo("'$search_results');");
@@ -122,6 +128,7 @@ if ($fieldsAdded > 0) {
 		<p>Begin typing to search the registry data,<br> then click an item in the list to navigate to that record for further investigation.</p>
 	</div>
 	<form id="search-input" class='col-8'>
+		<input style="display:none;" name="NOAUTH" value="1">
 		<input style="display:none;" name="prefix" value="xdro">
 		<input style="display:none;" name="page" value="patient_search">
 		<input style="display:none;" name="pid" value="<?php echo($pid); ?>">
@@ -157,6 +164,7 @@ if ($fieldsAdded > 0) {
 		</div>
 	</div>
 	<form method="post" enctype="multipart/form-data" id="file-search-input" class='col-8'>
+		<input style="display:none;" name="NOAUTH" value="1">
 		<input style="display:none;" name="prefix" value="xdro">
 		<input style="display:none;" name="page" value="patient_search">
 		<input style="display:none;" name="pid" value="<?php echo($pid); ?>">

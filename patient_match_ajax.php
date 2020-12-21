@@ -12,9 +12,25 @@
 	
 */
 
+// make response object
+$json = new \stdClass();
+$json->errors = [];
+
 // connect to REDCap
 include_once (APP_PATH_TEMP . "../redcap_connect.php");
-// $module->llog('connected');
+session_start();
+if (!$_SESSION['authenticated']) {
+	$json->errors[] = "Failed to pass XDRO module authentication check";
+	exit(json_encode($json));
+}
+
+// check csrf token
+$token = $_POST['xdro_csrf_token'];
+list($ok, $errmsg) = $module->checkCSRFToken($token);
+if (!$ok) {
+	$json->errors[] = $errmsg;
+	exit(json_encode($json));
+}
 /*
 	function definitions
 */
@@ -108,10 +124,6 @@ function validate_data() {
 
 $pid = $module->getProjectId();
 // $module->nlog();
-
-// make object that will hold our response
-$json = new \stdClass();
-$json->errors = [];
 
 // sanitize POST params
 $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);

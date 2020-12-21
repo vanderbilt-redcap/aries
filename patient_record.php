@@ -4,11 +4,11 @@ require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "red
 
 session_start();
 if ($_SESSION['authenticated'] !== true) {
-	header("location: " . $module->getUrl('sign_in.php') . "&unauthorized");
+	header("location: " . $module->getUrl('sign_in.php') . "&unauthorized&NOAUTH");
 }
 
 $rid = $_GET['rid'];
-$module->llog("fetching patient_record for rid: $rid");
+// $module->llog("fetching patient_record for rid: $rid");
 
 function sort_demographics($a, $b) {
 	// global $module;
@@ -376,6 +376,7 @@ $facilities = getFieldValues("facility");
 </div>
 
 </div>
+<script type='text/javascript'>XDRO.xdro_csrf_token = '<?= $module->makeCSRFToken(); ?>'</script>
 </body>
 </html>
 

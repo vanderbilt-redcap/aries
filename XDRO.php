@@ -15,6 +15,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	public function __construct() {
 		parent::__construct();
 		$this->nlog();
+		
 		$this->auth_data_raw = $this->framework->getSystemSetting('auth_data');
 		if (empty($this->auth_data_raw)) {
 			$this->auth_data_raw = "{}";
@@ -28,24 +29,57 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	
 	// sign-in / authentication
 	function authenticate() {
-		$username = htmlspecialchars(trim($_POST['username']), ENT_QUOTES, 'UTF-8');
+		$username = db_escape(trim($_POST['username']));
 		if (empty($username))
 			return [false, "Please provide a username to login"];
 		
-		$password = htmlspecialchars(trim($_POST['password']), ENT_QUOTES, 'UTF-8');
+		$password = db_escape(trim($_POST['password']));
 		if (empty($password))
 			return [false, "Please provide a password to login"];
 		
 		foreach($this->auth_data->users as $i => $user) {
 			if ($user->username == $username) {
 				if (password_verify($password, $user->pw_hash)) {
-					return [true, null];
+					return [$user->username, null];
 				} else {
 					return [false, "Authentication failed -- password incorrect"];
 				}
 			}
 		}
 		return [false, "Authentication failed -- username '$username' not found"];
+	}
+	
+	function makeCSRFToken() {
+		if (empty($username = $_SESSION['username']))
+			throw new \Exception('XDRO module expected username to be stored in SESSION data.');
+		
+		global $salt;
+		if (empty($salt))
+			throw new \Exception('XDRO module expected non-empty password salt value.');
+		
+		$_SESSION['csrf_ts'] = time();
+		$token = md5($salt . $_SESSION['csrf_ts'] . $username);
+		return $token;
+	}
+	
+	function checkCSRFToken($token) {
+		$username = $_SESSION['username'];
+		$csrf_ts = $_SESSION['csrf_ts'];
+		global $salt;
+		if (empty($salt) or empty($csrf_ts) or empty($username)) {
+			// $this->llog("csrf NOT OK: " . date('c'));
+			return [false, "XDRO module couldn't verify CSRF Token due to an empty precursor"];
+		}
+		
+		$token_expectation = md5($salt . $csrf_ts . $username);
+		if ($token === $token_expectation) {
+			// $this->llog("csrf OK: " . date('c'));
+			return [true, null];
+		} else {
+			// $this->llog("csrf NOT OK: " . date('c'));
+			// $this->llog("got $token, expected $token_expectation");
+			return [false, "XDRO module couldn't verify CSRF Token due to token mismatch"];
+		}
 	}
 	
 	// given a user supplied string, search for records in our patient registry that might match
@@ -308,9 +342,9 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function nlog() {
-		if (file_exists("C:/vumc/log.txt")) {
+		// if (file_exists("C:/vumc/log.txt")) {
 			// file_put_contents("C:/vumc/log.txt", "constructing XDRO instance\n");
-		}
+		// }
 	}
 	
 	function llog($text) {
@@ -327,11 +361,13 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 
 if ($_GET['action'] == 'predictPatients') {
 	$module = new XDRO();
-	$module->llog("_GET: " . print_r($_GET, true));
-	$module->llog("predictPatients");
-	$module->llog("_POST: " . print_r($_POST, true));
-	$module->llog("_SESSION: " . print_r($_SESSION, true));
-	$query = filter_var($_GET['searchString'], FILTER_SANITIZE_STRING);
-	$recs = $module->search($query, 7);	// limit to 7 records for autocomplete
-	echo(json_encode($recs));
+	session_start();
+	if (!$_SESSION['authenticated']) {
+		$response = ['error' => "The XDRO module can't return patient information without first authenticating -- please sign in"];
+		echo(json_encode((object) $response));
+	} else {
+		$query = filter_var($_GET['searchString'], FILTER_SANITIZE_STRING);
+		$recs = $module->search($query, 7);	// limit to 7 records for autocomplete
+		echo(json_encode($recs));
+	}
 }

@@ -95,7 +95,7 @@ XDRO.add_user = function() {
 		complete: function(response) {
 			XDRO.enable_buttons()
 			XDRO.response = response
-			console.log('response', response)
+			// console.log('response', response)
 			if (response.responseJSON.error) {
 				XDRO.show_error(response.responseJSON.error)
 			} else if (response.responseJSON.success) {
@@ -132,7 +132,7 @@ XDRO.change_email = function() {
 		complete: function(response) {
 			XDRO.enable_buttons()
 			XDRO.response = response
-			console.log('response', response)
+			// console.log('response', response)
 			if (response.responseJSON.error) {
 				XDRO.show_error(response.responseJSON.error)
 			} else if (response.responseJSON.success) {
@@ -169,7 +169,7 @@ XDRO.reset_password = function() {
 		complete: function(response) {
 			XDRO.enable_buttons()
 			XDRO.response = response
-			console.log('response', response)
+			// console.log('response', response)
 			if (response.responseJSON.error) {
 				XDRO.show_error(response.responseJSON.error)
 			}
@@ -194,7 +194,7 @@ XDRO.delete_user = function() {
 		complete: function(response) {
 			XDRO.enable_buttons()
 			XDRO.response = response
-			console.log('response', response)
+			// console.log('response', response)
 			if (response.responseJSON.error) {
 				XDRO.show_error(response.responseJSON.error)
 			} else if (response.responseJSON.success) {
@@ -232,7 +232,7 @@ XDRO.add_facility = function() {
 		complete: function(response) {
 			XDRO.enable_buttons()
 			XDRO.response = response
-			console.log('response', response)
+			// console.log('response', response)
 			if (response.responseJSON.error) {
 				XDRO.show_error(response.responseJSON.error)
 			} else if (response.responseJSON.success) {
@@ -262,7 +262,7 @@ XDRO.remove_facility = function() {
 		complete: function(response) {
 			XDRO.enable_buttons()
 			XDRO.response = response
-			console.log('response', response)
+			// console.log('response', response)
 			if (response.responseJSON.error) {
 				XDRO.show_error(response.responseJSON.error)
 			} else if (response.responseJSON.success) {
@@ -303,7 +303,7 @@ XDRO.rename_facility = function() {
 		complete: function(response) {
 			XDRO.enable_buttons()
 			XDRO.response = response
-			console.log('response', response)
+			// console.log('response', response)
 			if (response.responseJSON.error) {
 				XDRO.show_error(response.responseJSON.error)
 			} else if (response.responseJSON.success) {

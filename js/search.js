@@ -32,7 +32,7 @@ XDRO.predictPatients = function() {
 		dataType: 'json',
 		complete: function(response) {
 			XDRO.response = response
-			// console.log('response', response)
+			console.log('response', response)
 			if (response.responseJSON && response.responseJSON.length > 0) {
 				XDRO.showPredictions(response.responseJSON)
 			} else {
@@ -62,7 +62,7 @@ XDRO.showPredictions = function(predictions) {
 }
 
 XDRO.submit_row_query = function(query_index = 0) {
-	console.log("query_index", query_index)
+	// console.log("query_index", query_index)
 	if (XDRO.rowQueries == undefined || XDRO.rowQueries[query_index] == undefined) {
 		alert("Please upload a .csv search file before searching.")
 	} else {
@@ -80,7 +80,7 @@ XDRO.submit_row_query = function(query_index = 0) {
 		rowQuery.query_row = query_index
 		
 		// redirect
-		var newUrl = location.protocol + '//' + location.host + location.pathname + "?" + $.param(rowQuery)
+		var newUrl = location.protocol + '//' + location.host + location.pathname + "?" + $.param(rowQuery) + "&NOAUTH"
 		
 		// console.log('newUrl', newUrl)
 		// debugger;
@@ -95,7 +95,7 @@ XDRO.make_results_table = function(records) {
 	table.rows().remove()
 	
 	var table = $("div#results table").DataTable()
-	console.log('records seen by make_results_table', records)
+	// console.log('records seen by make_results_table', records)
 	records.forEach(function (record, i) {
 		var link = "<a href=" + XDRO.recordAddress + "&rid=" + record.patientid + ">" + record.patientid + "</a>"
 		var node = table.row.add([
@@ -255,7 +255,7 @@ $(function() {
 		}
 		var rid = span.attr('data-rid')
 		if (rid) {
-			window.location.href = XDRO.recordAddress + "&rid=" + rid
+			window.location.href = XDRO.recordAddress + "&rid=" + rid + "&NOAUTH"
 		}
 	})
 	
@@ -326,7 +326,7 @@ $(document).mouseup(function (e){
 $("body").on("click", ".highlightable", function(e) {
 	var rid = $(this).attr('data-rid')
 	if (rid)
-		window.location.href = XDRO.recordAddress + "&rid=" + rid;
+		window.location.href = XDRO.recordAddress + "&rid=" + rid + "&NOAUTH";
 })
 
 $('body').on('change', ".custom-file-input", function(e) {

@@ -1,7 +1,7 @@
 {
 	"name": "XDRO",
 	"namespace": "Vanderbilt\\XDRO",
-	"framework-version": 3,
+	"framework-version": 5,
 	"description": "REDCap external module to help track Exceedingly Drug Resistant Organisms in patients across intake/discharge from various facilities.",
 	"documentation": "README.md",
 	"authors": [
@@ -22,7 +22,7 @@
 			{
 				"name": "Patient Search",
 				"icon": "arrow_right",
-				"url": "patient_search.php"
+				"url": "patient_search.php?NOAUTH"
 			},
 			{
 				"name": "Import Lab/Patient File",
@@ -48,7 +48,10 @@
 		"control-center": []
 	},
 	"no-auth-pages": [
-		"sign_in"
+		"sign_in",
+		"patient_record",
+		"patient_search",
+		"XDRO"
 	],
 	"project-settings": [],
 	"system-settings": [],

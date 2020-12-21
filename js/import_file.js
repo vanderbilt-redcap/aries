@@ -6,7 +6,7 @@ XDRO.import_file_done = function(response) {
 	$("button#submit_file").removeAttr('disabled')
 	
 	XDRO.response = response
-	console.log('import response', response)
+	// console.log('import response', response)
 	
 	// show ignored columns
 	if (response.ignored_cols) {
@@ -37,7 +37,7 @@ XDRO.reset = function() {
 }
 
 XDRO.showImportResults = function(rows) {
-	console.log('rows', rows)
+	// console.log('rows', rows)
 	
 	XDRO.results_table.rows.add(rows)
 	XDRO.results_table.columns.adjust()
@@ -109,7 +109,7 @@ $('body').on('click', '#submit_file', function() {
 		contentType: false,
 		processData: false
 	})
-	console.log('ajax sent to ' + XDRO.import_ajax_url)
+	// console.log('ajax sent to ' + XDRO.import_ajax_url)
 })
 
 $('body').on('change', ".custom-file-input", function() {

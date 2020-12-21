@@ -4,22 +4,25 @@ $fa_path = APP_PATH_WEBROOT . "Resources/css/fontawesome/css/all.css";
 $pid = $module->getProjectId();
 session_start();
 
-$module->llog("_GET: " . print_r($_GET, true));
-$module->llog("_POST: " . print_r($_POST, true));
-$module->llog("_REQUEST: " . print_r($_REQUEST, true));
-$module->llog("_SESSION: " . print_r($_SESSION, true));
+// $module->llog("_GET: " . print_r($_GET, true));
+// $module->llog("_POST: " . print_r($_POST, true));
+// $module->llog("_REQUEST: " . print_r($_REQUEST, true));
+// $module->llog("_SESSION: " . print_r($_SESSION, true));
 
 
 if (isset($_GET['unauthorized'])) {
-	$errmsg = "Please login to access XDRO resources";
+	$errmsg = $_GET['unauthorized'];
+	if (empty($errmsg))
+		$errmsg = "Please login to access XDRO resources";
 }
 
 if (isset($_POST['sign-in'])) {
-	$module->llog("authenticating...");
-	list($authenticated, $errmsg) = $module->authenticate();
-	if ($authenticated) {
+	// $module->llog("authenticating...");
+	list($authenticated_user, $errmsg) = $module->authenticate();
+	if ($authenticated_user) {
 		$_SESSION['authenticated'] = true;
-		header("location: " . $module->getUrl('patient_search.php'));
+		$_SESSION['username'] = $authenticated_user;
+		header("location: " . $module->getUrl('patient_search.php') . "&NOUATH");
 	}
 }
 

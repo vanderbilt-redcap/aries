@@ -81,6 +81,7 @@ XDRO.save_patient_match = function() {
 	data.match = $("#match_radio_1").is(":checked") ? true : false
 	data.contact_prior = $("#aware_radio_1").is(":checked") ? true : false
 	data.contact = $("#already_radio_1").is(":checked") ? true : false
+	data.xdro_csrf_token = XDRO.xdro_csrf_token
 	
 	var facility_name = $("#facility-dd").val()
 	var facility_index = null;
@@ -96,14 +97,14 @@ XDRO.save_patient_match = function() {
 	data.date_admitted = null
 	if (date_admitted)
 		data.date_admitted = date_admitted.toISOString().split('T')[0]
-	console.log('data', data)
+	// console.log('data', data)
 	
 	$.ajax({
 		type: "POST",
 		url: XDRO.patient_match_ajax,
 		data: data,
 		success: function(response) {
-			console.log('response', response)
+			// console.log('response', response)
 			if (response.errors.length) {
 				var msg = "This match failed to save due to the following errors:\n\n" + response.errors.join("\n") + "\n\nPlease contact the Tennessee Dept. of Health with these errors."
 				alert(msg)
