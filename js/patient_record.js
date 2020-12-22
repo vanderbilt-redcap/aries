@@ -1,13 +1,13 @@
-XDRO = {}
+ARIES = {}
 
 $(function() {
-	XDRO.demographics = JSON.parse(XDRO.demographics)
-	XDRO.demo_index = XDRO.demographics.length
-	$("#demo_instance").text(XDRO.demographics.length + " / " + XDRO.demographics.length)
+	ARIES.demographics = JSON.parse(ARIES.demographics)
+	ARIES.demo_index = ARIES.demographics.length
+	$("#demo_instance").text(ARIES.demographics.length + " / " + ARIES.demographics.length)
 	$("#date_admitted").datepicker()
 	// $("#date_admitted").datepicker("show")
 	
-	if (XDRO.demographics.length < 2){
+	if (ARIES.demographics.length < 2){
 		$("button#prev_demo_inst").attr('disabled', true)
 		$("button#next_demo_inst").attr('disabled', true)
 	}
@@ -26,22 +26,22 @@ $(function() {
 
 // events
 $('body').on('click', '#prev_demo_inst', function (e) {
-	XDRO.demo_index -= 1
-	if (XDRO.demo_index == 1)
+	ARIES.demo_index -= 1
+	if (ARIES.demo_index == 1)
 		$(this).attr('disabled', true)
 	$("button#next_demo_inst").removeAttr('disabled')
 	
-	$("#demo_instance").text(XDRO.demo_index + " / " + XDRO.demographics.length)
-	XDRO.update_demographics(XDRO.demo_index)
+	$("#demo_instance").text(ARIES.demo_index + " / " + ARIES.demographics.length)
+	ARIES.update_demographics(ARIES.demo_index)
 })
 $('body').on('click', '#next_demo_inst', function (e) {
-	XDRO.demo_index += 1
-	if (XDRO.demo_index == XDRO.demographics.length)
+	ARIES.demo_index += 1
+	if (ARIES.demo_index == ARIES.demographics.length)
 		$(this).attr('disabled', true)
 	$("button#prev_demo_inst").removeAttr('disabled')
 	
-	$("#demo_instance").text(XDRO.demo_index + " / " + XDRO.demographics.length)
-	XDRO.update_demographics(XDRO.demo_index)
+	$("#demo_instance").text(ARIES.demo_index + " / " + ARIES.demographics.length)
+	ARIES.update_demographics(ARIES.demo_index)
 })
 $('body').on('click', '#header_radio_1', function (e) {
 	$("#metrics").modal('show')
@@ -64,8 +64,8 @@ $('body').on('change', '#facility-dd, #date_admitted', function() {
 
 
 
-XDRO.update_demographics = function(demo_index) {
-	var demographics = XDRO.demographics[demo_index-1]
+ARIES.update_demographics = function(demo_index) {
+	var demographics = ARIES.demographics[demo_index-1]
 	
 	$("#demographics tbody td[data-field]").each(function(i, e) {
 		var fieldname = $(e).attr('data-field')
@@ -74,14 +74,14 @@ XDRO.update_demographics = function(demo_index) {
 	$("#demographics #last_change_time").text(String(demographics["patient_last_change_time"]))
 }
 
-XDRO.save_patient_match = function() {
+ARIES.save_patient_match = function() {
 	// send patient match modal data to server to save as an instance in 'Metrics' form (repeating)
 	var data = {}
 	data.record_id = this.getParameter('rid')
 	data.match = $("#match_radio_1").is(":checked") ? true : false
 	data.contact_prior = $("#aware_radio_1").is(":checked") ? true : false
 	data.contact = $("#already_radio_1").is(":checked") ? true : false
-	data.xdro_csrf_token = XDRO.xdro_csrf_token
+	data.aries_csrf_token = ARIES.aries_csrf_token
 	
 	var facility_name = $("#facility-dd").val()
 	var facility_index = null;
@@ -101,7 +101,7 @@ XDRO.save_patient_match = function() {
 	
 	$.ajax({
 		type: "POST",
-		url: XDRO.patient_match_ajax,
+		url: ARIES.patient_match_ajax,
 		data: data,
 		success: function(response) {
 			// console.log('response', response)
@@ -109,7 +109,7 @@ XDRO.save_patient_match = function() {
 				var msg = "This match failed to save due to the following errors:\n\n" + response.errors.join("\n") + "\n\nPlease contact the Tennessee Dept. of Health with these errors."
 				alert(msg)
 			} else {
-				alert("Match instance saved to the XDRO Registry.\nThank you!")
+				alert("Match instance saved to the ARIES Registry.\nThank you!")
 			}
 		},
 		dataType: 'json',
@@ -118,7 +118,7 @@ XDRO.save_patient_match = function() {
 }
 
 // see: https://stackoverflow.com/questions/979975/how-to-get-the-value-from-the-get-parameters
-XDRO.getParameter = function(name) {
+ARIES.getParameter = function(name) {
 	function parse_query_string(query) {
 		var vars = query.split("&");
 		var query_string = {};

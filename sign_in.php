@@ -9,36 +9,15 @@ session_start();
 // $module->llog("_REQUEST: " . print_r($_REQUEST, true));
 // $module->llog("_SESSION: " . print_r($_SESSION, true));
 
-// check for REDCap user
-if ($redcap_user = $_SESSION['username']) {
-	$module->llog("\$redcap_user detected: " . $redcap_user);
-	list($authenticated_user, $errmsg) = $module->authenticate();
-	if ($authenticated_user) {
-		$_SESSION['xdro_authenticated'] = true;
-		$_SESSION['xdro_username'] = $authenticated_user;
-		header("location: " . $module->getUrl('patient_search.php') . "&NOUATH");
-	}
-}
-
-if (isset($_GET['unauthorized'])) {
-	$errmsg = $_GET['unauthorized'];
-	if (empty($errmsg))
-		$errmsg = "Please login to access XDRO resources";
-}
-
 if (isset($_POST['sign-in'])) {
-	// $module->llog("authenticating...");
-	list($authenticated_user, $errmsg) = $module->authenticate();
-	if ($authenticated_user) {
-		$_SESSION['xdro_authenticated'] = true;
-		$_SESSION['xdro_username'] = $authenticated_user;
-		header("location: " . $module->getUrl('patient_search.php') . "&NOUATH");
-	}
+	$module->authenticateUser();
+	if ($module->userIsAuthenticated())
+		header("location: " . $module->getUrl('patient_search.php') . "&NOAUTH");
 }
 
 if (isset($_GET['logout'])) {
 	$_SESSION = [];
-	$errmsg = "You were successfully logged out";
+	$module->signInAlertMessage = "You were successfully logged out";
 }
 
 ?>
@@ -47,7 +26,7 @@ if (isset($_GET['logout'])) {
 <html>
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<title>XDRO | REDCap</title>
+		<title>ARIES | REDCap</title>
 		<meta name="googlebot" content="noindex, noarchive, nofollow, nosnippet">
 		<meta name="robots" content="noindex, noarchive, nofollow">
 		<meta name="slurp" content="noindex, noarchive, nofollow, noodp, noydir">
@@ -85,26 +64,26 @@ if (isset($_GET['logout'])) {
 		<div class="card">
 			<div class="card-header">
 				<div class='logo'>
-					<span id='xdro-title'>xdro</span>
+					<span id='aries-title'>aries</span>
 					<img id='tdh-logo' src="<?=$module->getUrl('res/tdh-logo.png')?>"></img>
 				</div>
 				<div id='registry-title'>
-					<h1>Extensively Drug Resistant Organism Registry</h1>
+					<h1>Antibiotic Resistance Information Exchange System</h1>
 				</div>
 			</div>
 			
 			<div class="card-body">
 				<?php
 				// check if we were redirected from resource because unauthorized
-				if (!empty($errmsg)) {?>
+				if ($message = $module->getSignInMessage()) {?>
 					<div class="alert alert-primary" role="alert">
-						<span id='errmsg'><?php echo $errmsg; ?></span>
+						<span id='errmsg'><?php echo $message; ?></span>
 					</div>
 				<?php
 				}
 				?>
 				<h5 class="card-title">User Sign-In</h5>
-				<form action="<?php echo $module->getUrl('sign_in.php'); ?>" method="post">
+				<form action="<?php echo $module->getUrl('sign_in.php') . "&NOAUTH"; ?>" method="post">
 					<div class="input-group mb-3">
 						<div class="input-group-prepend">
 							<span class="input-group-text">Username</span>

@@ -24,7 +24,7 @@ div.logo {
 div.logo img {
 	width: 67%;
 }
-#xdro-title {
+#aries-title {
 	color: white;
 	font-size: 6rem;
 	/* font-family: AvenirNextLTW04-Light; */
@@ -67,6 +67,10 @@ div.header-info {
 }
 #test-results {
 	text-align: left;
+	border-style: solid;
+	border-color: #92d050;
+	border-width: 4px;
+	width: 50%;
 }
 #test-results span {
 	display: block;
@@ -197,6 +201,6 @@ div.header-info {
 		margin-left: -100px;
 	}
 	#test-results {
-		padding-left: 166px;
+		margin-left: 20%;
 	}
 /* } */

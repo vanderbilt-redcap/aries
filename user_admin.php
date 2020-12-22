@@ -8,7 +8,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 ?>
 
 <script type="text/javascript">
-	XDRO = JSON.parse('<?=$module->auth_data_raw?>')
+	ARIES = JSON.parse('<?=$module->auth_data_raw?>')
 	var ajax_address = "<?=$module->getUrl('user_admin_ajax.php')?>"
 </script>
 
@@ -35,8 +35,8 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 		<div class="user-actions">
 			<button type="button" class="btn btn-primary">Assign Facilities</button>
 			<button type="button" class="btn btn-primary" onclick="$('#change_email.modal').modal('show')">Change Email</button>
-			<button type="button" class="btn btn-primary" onclick="XDRO.reset_password()">Reset Password</button>
-			<button type="button" class="btn btn-danger" onclick="XDRO.delete_user()">Delete User</button>
+			<button type="button" class="btn btn-primary" onclick="ARIES.reset_password()">Reset Password</button>
+			<button type="button" class="btn btn-danger" onclick="ARIES.delete_user()">Delete User</button>
 		</div>
 	</div>
 </div>
@@ -61,7 +61,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 				<label for="username">Pick a username for this user</label>
 				<input type="text" class="form-control" id="username" placeholder="john_smith_1" autocomplete="off" required>
 			</div>
-			<button type="button" class="btn btn-primary mb-3" onclick="XDRO.add_user()">Create New User</button>
+			<button type="button" class="btn btn-primary mb-3" onclick="ARIES.add_user()">Create New User</button>
 		</form>
 	</div>
 	<div id="facilities" class="card col-4">
@@ -70,12 +70,12 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 		</select>
 		<div class="facility-actions mb-3">
 			<button type="button" class="btn btn-primary" onclick="$('#rename.modal').modal('show')">Rename</button>
-			<button type="button" class="btn btn-danger" onclick="XDRO.remove_facility()">Remove</button>
+			<button type="button" class="btn btn-danger" onclick="ARIES.remove_facility()">Remove</button>
 		</div>
 		<div class="form-group" class="mb-3">
 			<label for="add-facility">Enter a facility name</label>
 			<input type="text" class="form-control mb-3" id="add-facility" placeholder="ABC Medical" autocomplete="off" required>
-			<button type="submit" class="btn btn-primary" onclick="XDRO.add_facility()">Add Facility</button>
+			<button type="submit" class="btn btn-primary" onclick="ARIES.add_facility()">Add Facility</button>
 		</div>
 	</div>
 </div>
@@ -96,7 +96,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="XDRO.rename_facility()">Save</button>
+				<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="ARIES.rename_facility()">Save</button>
 				<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="$('#rename input').val('')">Cancel</button>
 			</div>
 		</div>
@@ -119,7 +119,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="XDRO.change_email()">Save</button>
+				<button type="button" class="btn btn-primary" data-dismiss="modal" onclick="ARIES.change_email()">Save</button>
 				<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="$('#change_email input').val('')">Cancel</button>
 			</div>
 		</div>

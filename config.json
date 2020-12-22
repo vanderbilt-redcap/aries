@@ -1,6 +1,6 @@
 {
-	"name": "XDRO",
-	"namespace": "Vanderbilt\\XDRO",
+	"name": "ARIES",
+	"namespace": "Vanderbilt\\ARIES",
 	"framework-version": 5,
 	"description": "REDCap external module to help track Exceedingly Drug Resistant Organisms in patients across intake/discharge from various facilities.",
 	"documentation": "README.md",
@@ -40,7 +40,7 @@
 				"url": "patient_match_dash.php"
 			},
 			{
-				"name": "XDRO User Login",
+				"name": "ARIES User Login",
 				"icon": "arrow_right",
 				"url": "sign_in.php?NOAUTH"
 			}
@@ -51,7 +51,7 @@
 		"sign_in",
 		"patient_record",
 		"patient_search",
-		"XDRO"
+		"ARIES"
 	],
 	"project-settings": [],
 	"system-settings": [],

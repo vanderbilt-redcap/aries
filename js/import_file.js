@@ -1,52 +1,52 @@
-XDRO.import_file_done = function(response) {
+ARIES.import_file_done = function(response) {
 	// update button
 	$("button#submit_file").html('Import')
 	$("button#submit_file").removeClass('btn-primary')
 	$("button#submit_file").addClass('btn-primary-outline')
 	$("button#submit_file").removeAttr('disabled')
 	
-	XDRO.response = response
+	ARIES.response = response
 	// console.log('import response', response)
 	
 	// show ignored columns
 	if (response.ignored_cols) {
-		XDRO.showIgnoredColumns(response.ignored_cols)
+		ARIES.showIgnoredColumns(response.ignored_cols)
 	}
 	
 	if (response.errors.length > 0) {
 		var alertHtml = "<h6>Data import failed:</h6><br>"
-		XDRO.showMessage(alertHtml + "<ul><li>" + response.errors.join('</li><li>') + "</li></ul>", 'danger')
+		ARIES.showMessage(alertHtml + "<ul><li>" + response.errors.join('</li><li>') + "</li></ul>", 'danger')
 	} else {
-		// XDRO.showImportResults(response.row_error_arrays)
-		XDRO.showImportResults(response.actions)
+		// ARIES.showImportResults(response.row_error_arrays)
+		ARIES.showImportResults(response.actions)
 	}
 }
 
-XDRO.reset = function() {
+ARIES.reset = function() {
 	// clear alert
 	var alert = $("div#notes")
 	alert.html("")
 	alert.hide()
 	
-	XDRO.hideIgnoredColumns()
+	ARIES.hideIgnoredColumns()
 	
 	// clear table results
 	// $("tbody").html("")
-	XDRO.results_table.clear()
+	ARIES.results_table.clear()
 	$("#results_wrapper").hide()
 }
 
-XDRO.showImportResults = function(rows) {
+ARIES.showImportResults = function(rows) {
 	// console.log('rows', rows)
 	
-	XDRO.results_table.rows.add(rows)
-	XDRO.results_table.columns.adjust()
-	XDRO.results_table.draw()
+	ARIES.results_table.rows.add(rows)
+	ARIES.results_table.columns.adjust()
+	ARIES.results_table.draw()
 	
 	$("#results_wrapper").show()
 }
 
-XDRO.showIgnoredColumns = function(cols) {
+ARIES.showIgnoredColumns = function(cols) {
 	cols = Object.keys(cols)
 	if (cols.length > 0) {
 		cols.forEach(function(col) {
@@ -57,12 +57,12 @@ XDRO.showIgnoredColumns = function(cols) {
 	}
 }
 
-XDRO.hideIgnoredColumns = function(cols) {
+ARIES.hideIgnoredColumns = function(cols) {
 	$("#ignored_cols ul").empty()
 	$("#ignored_cols").hide()
 }
 
-XDRO.showMessage = function(txt, alert_class, wide) {
+ARIES.showMessage = function(txt, alert_class, wide) {
 	//https://getbootstrap.com/docs/4.4/components/alerts/ see for alert_class types (primary, danger, warning, info etc)
 	var alert = $("div#notes")
 	alert.html(txt)
@@ -74,13 +74,13 @@ XDRO.showMessage = function(txt, alert_class, wide) {
 ///////////////////////
 
 $(function() {
-	XDRO.results_table = $("table#results").DataTable({
+	ARIES.results_table = $("table#results").DataTable({
 		columnDefs: [
 			{className: "dt-center", target: "_all"}
 		],
 		pageLength: 25
 	});
-	XDRO.reset()
+	ARIES.reset()
 })
 
 $('body').on('click', '#submit_file', function() {
@@ -90,7 +90,7 @@ $('body').on('click', '#submit_file', function() {
 	$(this).addClass('btn-primary')
 	$(this).attr('disabled', true)
 	
-	XDRO.reset()
+	ARIES.reset()
 	
 	if (!$("#import_file").prop('files'))
 		return
@@ -101,15 +101,15 @@ $('body').on('click', '#submit_file', function() {
 	form_data.append('client_file', $("#import_file").prop('files')[0])
 	$.ajax({
 		type: "POST",
-		url: XDRO.import_ajax_url,
+		url: ARIES.import_ajax_url,
 		data: form_data,
-		success: XDRO.import_file_done,
+		success: ARIES.import_file_done,
 		dataType: 'json',
 		cache: false,
 		contentType: false,
 		processData: false
 	})
-	// console.log('ajax sent to ' + XDRO.import_ajax_url)
+	// console.log('ajax sent to ' + ARIES.import_ajax_url)
 })
 
 $('body').on('change', ".custom-file-input", function() {

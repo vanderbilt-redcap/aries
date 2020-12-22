@@ -6,7 +6,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 <link rel='stylesheet' href='//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css'>
 
 <script type="text/javascript">
-	XDRO = {
+	ARIES = {
 		import_ajax_url: "<?php echo $module->getUrl('import_file_ajax.php'); ?>"
 	}
 </script>
@@ -16,7 +16,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 		<div class="card-body">
 			<h5 class="card-title mb-3">Lab/Patient Data File Import</h5>
 			<p>Import patients or lab results by uploading an Excel workbook or .csv file.</p>
-			<p class="mb-3">The XDRO module will iterate over the rows in the workbook and create demographic or lab instrument instances as applicable.</p>
+			<p class="mb-3">The ARIES module will iterate over the rows in the workbook and create demographic or lab instrument instances as applicable.</p>
 			<div class="input-group">
 				<div class="custom-file">
 					<input type="file" class="custom-file-input" id="import_file" aria-describedby="import_file">
@@ -32,7 +32,7 @@ require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.
 	<div id="ignored_cols" class="card my-3">
 		<div class="card-body">
 			<h5 class="card-title mb-3">Ignored Columns</h5>
-			<p class="mb-3">The following columns were ignored during the import process<br> as they do not have fields in the XDRO registry project.</p>
+			<p class="mb-3">The following columns were ignored during the import process<br> as they do not have fields in the ARIES registry project.</p>
 			<ul>
 			</ul>
 		</div>

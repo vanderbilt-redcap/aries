@@ -1,8 +1,8 @@
 <?php
-namespace Vanderbilt\XDRO;
-class XDRO extends \ExternalModules\AbstractExternalModule {
+namespace Vanderbilt\ARIES;
+class ARIES extends \ExternalModules\AbstractExternalModule {
 
-	public $log_desc = "XDRO Module";
+	public $log_desc = "ARIES Module";
 	public $patient_field_names = [
 		'patient_street_address_1',
 		'patientid',
@@ -28,78 +28,113 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	// sign-in / authentication
-	function authenticate() {
-		// check redcap login
-		if ($redcap_user = $_SESSION['username']) {
-			return $this->authRedcapUser($redcap_user);
+	function userIsAuthenticated() {
+		if ($_SESSION['aries_authenticated']) {
+			// $this->llog("user is authenticated");
+			return true;
+		} else {
+			// $this->llog("user is not authenticated");
+			return false;
 		}
-		
-		// non-redcap access
-		$username = db_escape(trim($_POST['username']));
-		if (empty($username)) { 
-			return [false, "Please provide a username to login"];
-		}
-		
-		$password = db_escape(trim($_POST['password']));
-		if (empty($password)) {
-			return [false, "Please provide a password to login"];
-		}
-	
-		foreach($this->auth_data->users as $i => $user) {
-			if ($user->username == $username) {
-				if (password_verify($password, $user->pw_hash)) {
-					$this->rlog("XDRO user '$username' logged in successfully");
-					return [$user->username, null];
-				} else {
-					$this->rlog("XDRO user '$username' failed to login - wrong password");
-					return [false, "Authentication failed -- password incorrect"];
-				}
-			}
-		}
-		$this->rlog("XDRO user '$username' failed to login - not a valid username");
-		return [false, "Authentication failed -- username '$username' not found"];
 	}
 	
-	function authRedcapUser($username) {
-		$this->llog("in authRedcapUser");
+	function authenticateUser() {
+		if ($redcap_username = $_SESSION['username']) {
+			// redcap user auth
+			$this->authenticateREDCapUser($redcap_username);
+		} else {
+			// non-redcap user (aries user) auth
+			$username = db_escape(trim($_POST['username']));
+			if (empty($username)) { 
+				$this->signInAlertMessage = "Please provider a username to login";
+				return;
+			}
+			
+			$password = db_escape(trim($_POST['password']));
+			if (empty($password)) {
+				$this->signInAlertMessage = "Please provider a password to login";
+				return;
+			}
+			
+			foreach($this->auth_data->users as $i => $user) {
+				if ($user->username == $username) {
+					if (password_verify($password, $user->pw_hash)) {
+						$_SESSION['aries_authenticated'] = true;
+						$_SESSION['aries_username'] = $username;
+						$this->llog("authenticated aries user");
+						$this->rlog("ARIES user '$username' logged in successfully");
+					} else {
+						$this->rlog("ARIES user '$username' failed to login - wrong password");
+						$this->signInAlertMessage = "Authentication failed -- password incorrect";
+					}
+				}
+			}
+			$this->rlog("ARIES user '$username' failed to login - not a valid username");
+			$this->signInAlertMessage = "ARIES user '$username' failed to login - not a valid username";
+		}
+	}
+	
+	function getSignInMessage() {
+		if ($message = $this->signInAlertMessage)
+			return $message;
+		
+		if ($redcap_username = $_SESSION['username']) {
+			// redcap user auth
+			$this->authenticateREDCapUser($redcap_username);
+			return $this->signInAlertMessage;
+		}
+	}
+	
+	function authenticateREDCapUser($username) {
+		// $this->llog("in authenticateREDCapUser");
 		$rights = \REDCap::getUserRights($username);
 		
-		$this->llog("redcap user rights: " . print_r($rights, true));
+		// $this->llog("redcap user rights: " . print_r($rights, true));
 		
 		if (empty($rights)) {
-			$this->rlog("Authentication failed for REDCap user '$username' -- user not assigned to XDRO project.");
-			return [false, "REDCap users must have Project Design rights for the XDRO project to be allowed access to resources."];
+			$this->rlog("Authentication failed for REDCap user '$username' -- user does not have access");
+			$this->signInAlertMessage = "Unauthorized REDCap user detected -- user does not have access";
+			return;
 		}
 		
-		$design_rights = false;
-		foreach ($rights as $right) {
-			
+		if ($rights[$username]['design']) {
+			$_SESSION['aries_authenticated'] = true;
+			$_SESSION['aries_redcap_username'] = $username;
+			$this->rlog("Authenticated REDCap user '$username'");
+			$this->signInAlertMessage = "Authorized REDCap user detected";
+			return;
 		}
-		$this->rlog("Authenticated REDCap user '$username'");
-		
-		return [USERID, null];
+		$this->rlog("Authentication failed for REDCap user '$username' -- user does not have Project Design rights");
+		$this->signInAlertMessage = "Unauthorized REDCap user detected -- user does not have Project Design rights";
 	}
 	
 	function makeCSRFToken() {
-		if (empty($username = $_SESSION['xdro_username']))
-			throw new \Exception('XDRO module expected username to be stored in SESSION data.');
+		$username = $_SESSION['aries_username'];
+		if (empty($username))
+			$username = $_SESSION['username'];
+		
+		if (empty($username))
+			throw new \Exception('ARIES module expected username to be stored in SESSION data.');
 		
 		global $salt;
 		if (empty($salt))
-			throw new \Exception('XDRO module expected non-empty password salt value.');
+			throw new \Exception('ARIES module expected non-empty password salt value.');
 		
-		$_SESSION['xdro_csrf_ts'] = time();
-		$token = md5($salt . $_SESSION['xdro_csrf_ts'] . $username);
+		$_SESSION['aries_csrf_ts'] = time();
+		$token = md5($salt . $_SESSION['aries_csrf_ts'] . $username);
 		return $token;
 	}
 	
 	function checkCSRFToken($token) {
-		$username = $_SESSION['xdro_username'];
-		$csrf_ts = $_SESSION['xdro_csrf_ts'];
+		$username = $_SESSION['aries_username'];
+		if (empty($username))
+			$username = $_SESSION['username'];
+		
+		$csrf_ts = $_SESSION['aries_csrf_ts'];
 		global $salt;
 		if (empty($salt) or empty($csrf_ts) or empty($username)) {
 			// $this->llog("csrf NOT OK: " . date('c'));
-			return [false, "XDRO module couldn't verify CSRF Token due to an empty precursor"];
+			return [false, "ARIES module couldn't verify CSRF Token due to an empty precursor"];
 		}
 		
 		$token_expectation = md5($salt . $csrf_ts . $username);
@@ -109,7 +144,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 		} else {
 			// $this->llog("csrf NOT OK: " . date('c'));
 			// $this->llog("got $token, expected $token_expectation");
-			return [false, "XDRO module couldn't verify CSRF Token due to token mismatch"];
+			return [false, "ARIES module couldn't verify CSRF Token due to token mismatch"];
 		}
 	}
 	
@@ -374,7 +409,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	
 	function nlog() {
 		// if (file_exists("C:/vumc/log.txt")) {
-			// file_put_contents("C:/vumc/log.txt", "constructing XDRO instance\n");
+			// file_put_contents("C:/vumc/log.txt", "constructing ARIES instance\n");
 		// }
 	}
 	
@@ -385,16 +420,16 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function rlog($msg) {
-		\REDCap::logEvent("XDRO Module", $msg);
+		\REDCap::logEvent("ARIES Module", $msg);
 	}
 }
 
 
 if ($_GET['action'] == 'predictPatients') {
-	$module = new XDRO();
+	$module = new ARIES();
 	session_start();
-	if (!$_SESSION['xdro_authenticated']) {
-		$response = ['error' => "The XDRO module can't return patient information without first authenticating -- please sign in"];
+	if (!$_SESSION['aries_authenticated']) {
+		$response = ['error' => "The ARIES module can't return patient information without first authenticating -- please sign in"];
 		echo(json_encode((object) $response));
 	} else {
 		$query = filter_var($_GET['searchString'], FILTER_SANITIZE_STRING);

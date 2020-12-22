@@ -8,7 +8,7 @@ $json = new stdClass();
 $data = json_decode(json_encode($_POST));
 $action = $data->action;
 
-$module->llog('data:' . print_r($data, true));
+// $module->llog('data:' . print_r($data, true));
 
 if ($action == 'add_user') {
 	$email = filter_var($data->user->email, FILTER_SANITIZE_EMAIL);
@@ -27,7 +27,7 @@ if ($action == 'add_user') {
 		$newuser->id = $module->get_next_user_id();
 		
 		$data->user = $newuser;
-		\REDCap::logEvent("XDRO Module", "Adding user: " . print_r($data->user, true));
+		\REDCap::logEvent("ARIES Module", "Adding user: " . print_r($data->user, true));
 		
 		$new_pw = bin2hex(openssl_random_pseudo_bytes(8));
 		$data->user->pw_hash = password_hash($new_pw, PASSWORD_DEFAULT);
@@ -35,20 +35,20 @@ if ($action == 'add_user') {
 		$module->auth_data->users[] = $data->user;
 		
 		// send email to new user
-		$email_sent = \REDCap::email($email, "redcap.services@vumc.org", "TN Department of Health - XDRO New User", "
+		$email_sent = \REDCap::email($email, "redcap.services@vumc.org", "TN Department of Health - ARIES New User", "
 Hello {$data->user->first_name},<br>
 <br>
-You have been registered as a new user for the Tennessee Department of Health's XDRO Registry.<br>
+You have been registered as a new user for the Tennessee Department of Health's ARIES Registry.<br>
 Your username is {$data->user->username}<br>
 Your password is {$new_pw}<br>
 <br>
 You can sign in to the registry by visiting the following URL:<br>
-http://localhost/redcap/external_modules/?prefix=xdro&page=sign_in&pid=68");
+http://localhost/redcap/external_modules/?prefix=aries&page=sign_in&pid=68");
 		
 		$module->save_auth_data();
 	} catch (\Exception $e) {
 		$json->error = $e;
-		\REDCap::logEvent("XDRO Module", "Error occurred when adding new user: " . print_r($data, true) . " -- (exception): " . print_r($e, true));
+		\REDCap::logEvent("ARIES Module", "Error occurred when adding new user: " . print_r($data, true) . " -- (exception): " . print_r($e, true));
 	}
 	
 	if (!$email_sent) {
@@ -63,7 +63,7 @@ http://localhost/redcap/external_modules/?prefix=xdro&page=sign_in&pid=68");
 	foreach($module->auth_data->users as $i => $user) {
 		if ((int) $user->id === (int) $data->id) {
 			unset($user->pw_hash);
-			\REDCap::logEvent("XDRO Module", "Deleting user: " . print_r($user, true));
+			\REDCap::logEvent("ARIES Module", "Deleting user: " . print_r($user, true));
 			unset($module->auth_data->users[$i]);
 		}
 		// compact indices
@@ -78,7 +78,7 @@ http://localhost/redcap/external_modules/?prefix=xdro&page=sign_in&pid=68");
 		if ($user->id == $data->id) {
 			$old_email = $facility->email;
 			$module->auth_data->users[$i]->email = $data->value;
-			\REDCap::logEvent("XDRO Module", "Changed user email from '$old_email' to '{$data->value}' for username {$user->username}");
+			\REDCap::logEvent("ARIES Module", "Changed user email from '$old_email' to '{$data->value}' for username {$user->username}");
 		}
 	}
 	$module->save_auth_data();
@@ -86,13 +86,13 @@ http://localhost/redcap/external_modules/?prefix=xdro&page=sign_in&pid=68");
 	try {
 		$found_user = null;
 		foreach ($module->auth_data->users as &$user) {
-			$module->llog("given user id {$data->user->id} vs compared user id from auth_data {$user->id}");
+			// $module->llog("given user id {$data->user->id} vs compared user id from auth_data {$user->id}");
 			if ((int) $user->id === (int) $data->user->id) {
 				$found_user = $user;
 				break;
 			}
 		}
-		$module->llog('found_user: ' . print_r($found_user, true));
+		// $module->llog('found_user: ' . print_r($found_user, true));
 		if (!$found_user) {
 			$json->error = "Couldn't find user with given user ID: " . (int) $data->user->id;
 		}
@@ -101,7 +101,7 @@ http://localhost/redcap/external_modules/?prefix=xdro&page=sign_in&pid=68");
 		
 	} catch (\Exception $e) {
 		$json->error = $e;
-		\REDCap::logEvent("XDRO Module", "Error occurred when adding new user: " . print_r($data, true) . " -- (exception): " . print_r($e, true));
+		\REDCap::logEvent("ARIES Module", "Error occurred when adding new user: " . print_r($data, true) . " -- (exception): " . print_r($e, true));
 	}
 } elseif ($action == 'add_facility') {
 	try {
@@ -110,7 +110,7 @@ http://localhost/redcap/external_modules/?prefix=xdro&page=sign_in&pid=68");
 		$module->save_auth_data();
 	} catch (\Exception $e) {
 		$json->error = $e;
-		\REDCap::logEvent("XDRO Module", "Error occurred when adding new user: " . print_r($data, true) . " -- (exception): " . print_r($e, true));
+		\REDCap::logEvent("ARIES Module", "Error occurred when adding new user: " . print_r($data, true) . " -- (exception): " . print_r($e, true));
 	}
 	
 	$json->facility = $data->facility;
@@ -118,7 +118,7 @@ http://localhost/redcap/external_modules/?prefix=xdro&page=sign_in&pid=68");
 	// $module->llog("current facs array: \n" . print_r($module->auth_data->facilities, true));
 	foreach($module->auth_data->facilities as $i => $facility) {
 		if ($facility->id == $data->id) {
-			\REDCap::logEvent("XDRO Module", "Deleting facility: " . print_r($facility, true));
+			\REDCap::logEvent("ARIES Module", "Deleting facility: " . print_r($facility, true));
 			unset($module->auth_data->facilities[$i]);
 		}
 		
@@ -132,7 +132,7 @@ http://localhost/redcap/external_modules/?prefix=xdro&page=sign_in&pid=68");
 		if ($facility->id == $data->id) {
 			$old_name = $facility->name;
 			$module->auth_data->facilities[$i]->name = $data->value;
-			\REDCap::logEvent("XDRO Module", "Renamed facility from '$old_name' to '{$data->value}'");
+			\REDCap::logEvent("ARIES Module", "Renamed facility from '$old_name' to '{$data->value}'");
 		}
 	}
 	$module->save_auth_data();

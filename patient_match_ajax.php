@@ -19,13 +19,13 @@ $json->errors = [];
 // connect to REDCap
 include_once (APP_PATH_TEMP . "../redcap_connect.php");
 session_start();
-if (!$_SESSION['authenticated']) {
-	$json->errors[] = "Failed to pass XDRO module authentication check";
+if (!$module->userIsAuthenticated()) {
+	$json->errors[] = "Failed to pass ARIES module authentication check";
 	exit(json_encode($json));
 }
 
 // check csrf token
-$token = $_POST['xdro_csrf_token'];
+$token = $_POST['aries_csrf_token'];
 list($ok, $errmsg) = $module->checkCSRFToken($token);
 if (!$ok) {
 	$json->errors[] = $errmsg;
@@ -78,7 +78,7 @@ function validate_data() {
 		}
 	}
 	if (!$found_rid) {
-		$json->errors[] = "Record ID in submitted Metrics instance does not exist in XDRO Registry (REDCap project)";
+		$json->errors[] = "Record ID in submitted Metrics instance does not exist in ARIES Registry (REDCap project)";
 	}
 	
 	// ensure data not duplicate (facility or date_admitted

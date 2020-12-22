@@ -3,12 +3,18 @@ require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "red
 // require_once APP_PATH_DOCROOT . 'ProjectGeneral' . DIRECTORY_SEPARATOR. 'header.php';
 
 session_start();
-if ($_SESSION['authenticated'] !== true) {
-	header("location: " . $module->getUrl('sign_in.php') . "&unauthorized&NOAUTH");
+if (!$module->userIsAuthenticated()) {
+	if ($redcap_username = $_SESSION['username']) {	// try to auth if redcap user
+		$module->authenticateREDCapUser($redcap_username);
+		if (!$module->userIsAuthenticated()) {
+			header("location: " . $module->getUrl('sign_in.php') . "&NOAUTH");
+		}
+	} else {
+		header("location: " . $module->getUrl('sign_in.php') . "&NOAUTH");
+	}
 }
 
 $rid = $_GET['rid'];
-// $module->llog("fetching patient_record for rid: $rid");
 
 function sort_demographics($a, $b) {
 	// global $module;
@@ -50,7 +56,7 @@ if (empty($rid)) {
 	$record = \REDCap::getData($pid, 'array', $rid);
 	
 	// allow for easier access to specific form values
-	$xdro_registry = $record[$rid][$eid];
+	$aries_registry = $record[$rid][$eid];
 	
 	// sort demographics by [patient_last_change_time]
 	// $module->llog("before sort:");
@@ -81,6 +87,14 @@ if (empty($rid)) {
 	$address_td .= "<br>" . $last_demo["patient_city"] . ", " . $last_demo["patient_state"] . " " . $last_demo["patient_zip"];
 }
 
+if (!empty($last_lab["resulted_dt"])) {
+	// detect excel date
+	if (intval($last_lab["resulted_dt"]) == $last_lab["resulted_dt"]) {
+		// convert to y-m-d (thanks: https://stackoverflow.com/questions/11119631/excel-date-conversion-using-php-excel)
+		$last_lab["resulted_dt"] = gmdate("Y-m-d", ($last_lab["resulted_dt"] - 25569) * 86400);
+	}
+}
+
 // get Metrics instrument [facility] field values/labels
 $facilities = getFieldValues("facility");
 ?>
@@ -89,7 +103,7 @@ $facilities = getFieldValues("facility");
 <html>
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-	<title>XDRO | REDCap</title>
+	<title>aries | REDCap</title>
 	<meta name="googlebot" content="noindex, noarchive, nofollow, nosnippet">
 	<meta name="robots" content="noindex, noarchive, nofollow">
 	<meta name="slurp" content="noindex, noarchive, nofollow, noodp, noydir">
@@ -118,19 +132,21 @@ $facilities = getFieldValues("facility");
 <link rel="stylesheet" href="<?=$module->getUrl('css/record.css')?>"/>
 <script type="text/javascript" src="<?=$module->getUrl('js/patient_record.js')?>"></script>
 <script type="text/javascript" >
-	XDRO.pid = "<?php echo $pid;?>";
-	XDRO.rid = "<?php echo $rid;?>";
-	XDRO.eid = "<?php echo $eid;?>";
-	XDRO.demographics = '<?php echo json_encode($all_demographics);?>';
-	XDRO.patient_match_ajax = "<?php echo $module->getUrl('patient_match_ajax.php');?>";
+	ARIES.pid = "<?php echo $pid;?>";
+	ARIES.rid = "<?php echo $rid;?>";
+	ARIES.eid = "<?php echo $eid;?>";
+	ARIES.demographics = '<?php echo json_encode($all_demographics);?>';
+	ARIES.patient_match_ajax = "<?php echo $module->getUrl('patient_match_ajax.php');?>";
 </script>
 <div id="main">
 <div id='header' class='row'>
+	
 	<div class='logo column'>
-		<span id='xdro-title'>xdro</span>
+		<span id='aries-title'>aries</span>
 		<img id='tdh-logo' src="<?=$module->getUrl('res/tdh-logo.png')?>"></img>
 	</div>
 	<div class='header-info column'>
+		<button id="home" type="button" class="btn btn-primary mb-3"><a style='color: white; font-weight: 600;' href="<?=$module->getUrl('patient_search.php') . "&NOAUTH"?>">Home</a></button>
 		<div id='patient-match' class='bluefont'>
 			<span>Is this patient a match?</span>
 			<div class="form-check">
@@ -143,7 +159,7 @@ $facilities = getFieldValues("facility");
 			</div>
 		</div>
 		<p id='ip-blurb' class='bluefont pt-2'>Please consider an Infectious Disease consult and make sure facility Infection Preventionist is aware.</p>
-		<div id='registry-title'><h1>Extensively Drug Resistant Organism Registry</h1></div>
+		<div id='registry-title'><h1>Antibiotic Resistance Information Exchange System</h1></div>
 		<span><b>RESULT DATE:</b> <?=$last_lab["resulted_dt"]?></span>
 		<div id='test-results'>
 			<span><b>TEST RESULTS</b></span>
@@ -158,7 +174,7 @@ $facilities = getFieldValues("facility");
 			<table class='mb-3 mt-1 simpletable'>
 				<tr><th>FIRST NAME: </th><td><?=$last_demo["patient_first_name"]?></td></tr>
 				<tr><th>LAST NAME: </th><td><?=$last_demo["patient_last_name"]?></td></tr>
-				<tr><th>DATE OF BIRTH: </th><td><?=$xdro_registry["patient_dob"]?></td></tr>
+				<tr><th>DATE OF BIRTH: </th><td><?=$aries_registry["patient_dob"]?></td></tr>
 				<tr><th>GENDER: </th><td><?=$last_demo["patient_current_sex"]?></td></tr>
 				<tr><th>ADDRESS: </th><td><?=$address_td?></td></tr>
 				<tr><th>COUNTY: </th><td><?=$last_demo["patient_county"]?></td></tr>
@@ -171,7 +187,7 @@ $facilities = getFieldValues("facility");
 			<table class='mb-3 mt-1 simpletable'>
 				<tr><th>ORDERING FACILITY: </th><td><?=$last_lab["ordering_facility"]?></td></tr>
 				<tr><th>ORDERING PROVIDER: </th><td><?=$last_lab["providername"] . "<br>&emsp;" . $last_lab["provider_address"] . "<br>&emsp;" . $last_lab["providerphone"]?></td></tr>
-				<tr><th>PERFORMING FACILITY: </th><td class='redfont'></td></tr>
+				<tr><th>PERFORMING LABORATORY: </th><td class='redfont'></td></tr>
 				<tr><th>REPORTING FACILITY: </th><td class='redfont'><?=$last_lab["reporting_facility"] . "<br>&emsp;" . $last_lab["reportername"] . "<br>&emsp;" . $last_lab["reporterphone"]?></td></tr>
 			</table>
 		
@@ -182,21 +198,21 @@ $facilities = getFieldValues("facility");
 			<span><b>STATUS: </b> <?=$last_lab["lab_test_status"]?></span>
 		</div>
 		<div id='action-items' class='bluefont'>
-			<span class='text-center d-block mb-2 mt-1'><b><u>Action Items for <?=$xdro_registry["condition_alert"]?>:</b></u></span>
+			<span class='text-center d-block mb-2 mt-1'><b><u>Action Items for <?=$aries_registry["condition_alert"]?>:</b></u></span>
 			<ul>
-				<li class='mb-1'><?=$xdro_registry['alert_1']?></li>
-				<li class='mb-1'><?=$xdro_registry['alert_2']?></li>
-				<li class='mb-1'><?=$xdro_registry['alert_3']?></li>
-				<li class='mb-1'><?=$xdro_registry['alert_4']?></li>
+				<li class='mb-1'><?=$aries_registry['alert_1']?></li>
+				<li class='mb-1'><?=$aries_registry['alert_2']?></li>
+				<li class='mb-1'><?=$aries_registry['alert_3']?></li>
+				<li class='mb-1'><?=$aries_registry['alert_4']?></li>
 			</ul>
 		</div>
 	</div>
 	<div class='column'>
 		<span id='please-note' class='bluefont d-block text-right mt-3 mb-3'><li><b>Please note other tests performed on this patient.</b></li></span>
 		<div class='captions text-right mb-1'>
-			<span><i>S/I/R interpretation are baased on CLSI breakpoints.</i></span><br>
-			<span><i>MIC (μg/ml) results are directly from lab report.</i></span><br>
-			<span><i>Kirby-Bauer (KB) disk diffusion susceptibility test result if applicable.</i></span>
+			<span><i>S/I/R interpretation are based on Clinical & Laboratory Standards Institute (CLSI) breakpoints.</i></span><br>
+			<span><i>Minimum Inhibitory Concentration (MIC) (μg/ml) results are directly from lab report.</i></span><br>
+			<span><i>Kirby-Bauer (KB) (mm) disk diffusion susceptibility test result if applicable.</i></span>
 		</div>
 		<div id='susceptibilities' class='mb-3'>
 			<table>
@@ -208,7 +224,7 @@ $facilities = getFieldValues("facility");
 						<th></th>
 						<th><b>Result</b></th>
 						<th><b>S/I/R Interpretation</b></th>
-						<th><b>MIC (μg/ml) or KB</b></th>
+						<th><b>MIC (μg/ml) or KB (mm)</b></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -251,11 +267,6 @@ $facilities = getFieldValues("facility");
 				</tbody>
 			</table>
 		</div>
-		<div id='footer-link' class='text-center bluefont'>
-			<span>Click <a href="http://www.tn.gov/hai/xdro"><b>HERE</b></a> for educational materials about XDRO organisms</span>
-			<br>
-			<a href="http://www.tn.gov/hai/xdro">http://www.tn.gov/hai/xdro</a>
-		</div>
 	</div>
 </div>
 <div id="demographics" class="modal" tabindex="-1" role="dialog">
@@ -273,7 +284,7 @@ $facilities = getFieldValues("facility");
 					<tbody>
 							<tr><th>FIRST NAME:</th><td data-field="patient_first_name"><?=$last_demo['patient_first_name']?></td></tr>
 							<tr><th>LAST NAME:</th><td data-field="patient_last_name"><?=$last_demo['patient_last_name']?></td></tr>
-							<tr><th>DATE OF BIRTH:</th><td><?=$xdro_registry['patient_dob']?></td></tr>
+							<tr><th>DATE OF BIRTH:</th><td><?=$aries_registry['patient_dob']?></td></tr>
 							<tr><th>CURRENT GENDER:</th><td data-field="patient_current_sex"><?=$last_demo['patient_current_sex']?></td></tr>
 							<tr><th>PHONE:</th><td data-field="patient_phone_home"><?=$last_demo['patient_phone_home']?></td></tr>
 							<tr><th>ADDRESS:</th><td data-field="patient_street_address_1"><?=$last_demo['patient_street_address_1']?></td></tr>
@@ -284,9 +295,9 @@ $facilities = getFieldValues("facility");
 							<tr><th>COUNTY:</th><td data-field="patient_county"><?=$last_demo['patient_county']?></td></tr>
 							<tr><th>RESIDENCE:</th><td data-field="patient_state"><?=$last_demo['patient_state']?></td></tr>
 							<tr><th>JURISDICTION:</th><td data-field="jurisdiction_nm"><?=$last_demo['jurisdiction_nm']?></td></tr>
-							<tr><th>SOCIAL SECURITY:</th><td><?=$xdro_registry['patient_ssn']?></td></tr>
-							<tr><th>RACE:</th><td><?=$xdro_registry['patient_race_calculated']?></td></tr>
-							<tr><th>ETHNICITY:</th><td><?=$xdro_registry['patient_ethnicity']?></td></tr>
+							<tr><th>SOCIAL SECURITY:</th><td><?=$aries_registry['patient_ssn']?></td></tr>
+							<tr><th>RACE:</th><td><?=$aries_registry['patient_race_calculated']?></td></tr>
+							<tr><th>ETHNICITY:</th><td><?=$aries_registry['patient_ethnicity']?></td></tr>
 					</tbody>
 				</table>
 				<div class="mt-3" id="demo_buttons">
@@ -369,14 +380,14 @@ $facilities = getFieldValues("facility");
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button id="save-metrics" type="button" class="btn btn-primary" data-dismiss="modal" disabled onclick="XDRO.save_patient_match()">Save</button>
+				<button id="save-metrics" type="button" class="btn btn-primary" data-dismiss="modal" disabled onclick="ARIES.save_patient_match()">Save</button>
 			</divS
 		</div>
 	</div>
 </div>
 
 </div>
-<script type='text/javascript'>XDRO.xdro_csrf_token = '<?= $module->makeCSRFToken(); ?>'</script>
+<script type='text/javascript'>ARIES.aries_csrf_token = '<?= $module->makeCSRFToken(); ?>'</script>
 </body>
 </html>
 

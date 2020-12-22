@@ -16,7 +16,7 @@ $(function() {
 		}
 	});
 	
-	XDRO.refresh()
+	ARIES.refresh()
 	$(".dataTables_empty").text("There are currently no users! You may add users using the form below.")
 })
 
@@ -34,15 +34,15 @@ $(document).mouseup(function (e){
 });
 
 // call this on init or when user/facility data changes to update user_admin page elements
-XDRO.refresh = function() {
+ARIES.refresh = function() {
 	// clear forms
 	$(".form-control").val("")
 	
 	// users table
 	var users = $("#users table").DataTable()
 	users.clear()
-	if (XDRO.users)
-		users.rows.add(XDRO.users)
+	if (ARIES.users)
+		users.rows.add(ARIES.users)
 	users.draw()
 	
 	// add data-id values to each tr in #users table
@@ -50,29 +50,29 @@ XDRO.refresh = function() {
 	
 	// facilities
 	$(".fac-list").empty()
-	if (XDRO.facilities) {
-		XDRO.facilities.forEach(function(facility) {
+	if (ARIES.facilities) {
+		ARIES.facilities.forEach(function(facility) {
 			$(".fac-list").append("<option value='" + facility.id + "'>" + facility.name + "</option>")
 		})
 	}
 }
 
-XDRO.show_error = function(msg) {
+ARIES.show_error = function(msg) {
 	alert(msg)
 }
 
-XDRO.disable_buttons = function() {
+ARIES.disable_buttons = function() {
 	$("#users button, #cards button").attr('disabled', true)
 }
 
-XDRO.enable_buttons = function() {
+ARIES.enable_buttons = function() {
 	$("#users button, #cards button").removeAttr('disabled')
 }
 
 
 // user facing
 
-XDRO.add_user = function() {
+ARIES.add_user = function() {
 	var user = {
 		first_name: $("#first-name").val(),
 		last_name: $("#last-name").val(),
@@ -86,34 +86,34 @@ XDRO.add_user = function() {
 		action: 'add_user'
 	}
 	
-	XDRO.disable_buttons()
+	ARIES.disable_buttons()
 	$.ajax({
 		url: ajax_address,
 		dataType: 'json',
 		data: data,
 		method: "POST",
 		complete: function(response) {
-			XDRO.enable_buttons()
-			XDRO.response = response
+			ARIES.enable_buttons()
+			ARIES.response = response
 			// console.log('response', response)
 			if (response.responseJSON.error) {
-				XDRO.show_error(response.responseJSON.error)
+				ARIES.show_error(response.responseJSON.error)
 			} else if (response.responseJSON.success) {
-				if (!XDRO.users)
-					XDRO.users = []
-				XDRO.users.push(response.responseJSON.user)
-				XDRO.refresh()
+				if (!ARIES.users)
+					ARIES.users = []
+				ARIES.users.push(response.responseJSON.user)
+				ARIES.refresh()
 			}
 		}
 	})
 }
 
-XDRO.change_email = function() {
+ARIES.change_email = function() {
 	var user_id = $("#users table tr.selected").attr('data-id')
 	var new_email = $("#change_email input").val()
 	
 	if (!new_email || new_email == "") {
-		XDRO.show_error("Must provide a non-empty value for new user email address")
+		ARIES.show_error("Must provide a non-empty value for new user email address")
 		return
 	}
 	
@@ -123,33 +123,33 @@ XDRO.change_email = function() {
 		action: 'change_email'
 	}
 	
-	XDRO.disable_buttons()
+	ARIES.disable_buttons()
 	$.ajax({
 		url: ajax_address,
 		dataType: 'json',
 		data: data,
 		method: "POST",
 		complete: function(response) {
-			XDRO.enable_buttons()
-			XDRO.response = response
+			ARIES.enable_buttons()
+			ARIES.response = response
 			// console.log('response', response)
 			if (response.responseJSON.error) {
-				XDRO.show_error(response.responseJSON.error)
+				ARIES.show_error(response.responseJSON.error)
 			} else if (response.responseJSON.success) {
 				// remove user with this ID
-				var i = XDRO.users.length
+				var i = ARIES.users.length
 				while (i--) {
-					if (XDRO.users[i].id == user_id)
-						XDRO.users[i].email = new_email
+					if (ARIES.users[i].id == user_id)
+						ARIES.users[i].email = new_email
 				}
 				
-				XDRO.refresh()
+				ARIES.refresh()
 			}
 		}
 	})
 }
 
-XDRO.reset_password = function() {
+ARIES.reset_password = function() {
 	var user_id = $("#users table tr.selected").attr('data-id')
 	
 	if (user_id === undefined)
@@ -160,24 +160,24 @@ XDRO.reset_password = function() {
 		action: 'reset_password'
 	}
 	
-	XDRO.disable_buttons()
+	ARIES.disable_buttons()
 	$.ajax({
 		url: ajax_address,
 		dataType: 'json',
 		data: data,
 		method: "POST",
 		complete: function(response) {
-			XDRO.enable_buttons()
-			XDRO.response = response
+			ARIES.enable_buttons()
+			ARIES.response = response
 			// console.log('response', response)
 			if (response.responseJSON.error) {
-				XDRO.show_error(response.responseJSON.error)
+				ARIES.show_error(response.responseJSON.error)
 			}
 		}
 	})
 }
 
-XDRO.delete_user = function() {
+ARIES.delete_user = function() {
 	var user_id = $("#users table tr.selected").attr('data-id')
 	
 	var data = {
@@ -185,27 +185,27 @@ XDRO.delete_user = function() {
 		action: 'delete_user'
 	}
 	
-	XDRO.disable_buttons()
+	ARIES.disable_buttons()
 	$.ajax({
 		url: ajax_address,
 		dataType: 'json',
 		data: data,
 		method: "POST",
 		complete: function(response) {
-			XDRO.enable_buttons()
-			XDRO.response = response
+			ARIES.enable_buttons()
+			ARIES.response = response
 			// console.log('response', response)
 			if (response.responseJSON.error) {
-				XDRO.show_error(response.responseJSON.error)
+				ARIES.show_error(response.responseJSON.error)
 			} else if (response.responseJSON.success) {
 				// remove user with this ID
-				var i = XDRO.users.length
+				var i = ARIES.users.length
 				while (i--) {
-					if (XDRO.users[i].id == user_id)
-						XDRO.users.splice(i, 1)
+					if (ARIES.users[i].id == user_id)
+						ARIES.users.splice(i, 1)
 				}
 				
-				XDRO.refresh()
+				ARIES.refresh()
 			}
 		}
 	})
@@ -213,7 +213,7 @@ XDRO.delete_user = function() {
 
 // facility
 
-XDRO.add_facility = function() {
+ARIES.add_facility = function() {
 	var facility = {
 		name: $("#add-facility").val()
 	}
@@ -223,29 +223,29 @@ XDRO.add_facility = function() {
 		action: 'add_facility'
 	}
 	
-	XDRO.disable_buttons()
+	ARIES.disable_buttons()
 	$.ajax({
 		url: ajax_address,
 		dataType: 'json',
 		data: data,
 		method: "POST",
 		complete: function(response) {
-			XDRO.enable_buttons()
-			XDRO.response = response
+			ARIES.enable_buttons()
+			ARIES.response = response
 			// console.log('response', response)
 			if (response.responseJSON.error) {
-				XDRO.show_error(response.responseJSON.error)
+				ARIES.show_error(response.responseJSON.error)
 			} else if (response.responseJSON.success) {
-				if (!XDRO.facilities)
-					XDRO.facilities = []
-				XDRO.facilities.push(response.responseJSON.facility)
-				XDRO.refresh()
+				if (!ARIES.facilities)
+					ARIES.facilities = []
+				ARIES.facilities.push(response.responseJSON.facility)
+				ARIES.refresh()
 			}
 		}
 	})
 }
 
-XDRO.remove_facility = function() {
+ARIES.remove_facility = function() {
 	var fac_id = $("#facilities .fac-list").val()
 	
 	var data = {
@@ -253,38 +253,38 @@ XDRO.remove_facility = function() {
 		action: 'remove_facility'
 	}
 	
-	XDRO.disable_buttons()
+	ARIES.disable_buttons()
 	$.ajax({
 		url: ajax_address,
 		dataType: 'json',
 		data: data,
 		method: "POST",
 		complete: function(response) {
-			XDRO.enable_buttons()
-			XDRO.response = response
+			ARIES.enable_buttons()
+			ARIES.response = response
 			// console.log('response', response)
 			if (response.responseJSON.error) {
-				XDRO.show_error(response.responseJSON.error)
+				ARIES.show_error(response.responseJSON.error)
 			} else if (response.responseJSON.success) {
 				// remove facility with this ID
-				var i = XDRO.facilities.length
+				var i = ARIES.facilities.length
 				while (i--) {
-					if (XDRO.facilities[i].id == fac_id)
-						XDRO.facilities.splice(i, 1)
+					if (ARIES.facilities[i].id == fac_id)
+						ARIES.facilities.splice(i, 1)
 				}
 				
-				XDRO.refresh()
+				ARIES.refresh()
 			}
 		}
 	})
 }
 
-XDRO.rename_facility = function() {
+ARIES.rename_facility = function() {
 	var new_fac_name = $("#rename input").val()
 	var fac_id = $("#facilities .fac-list").val()
 	
 	if (!new_fac_name || new_fac_name == "") {
-		XDRO.show_error("Must provide a non-empty value for new facility name")
+		ARIES.show_error("Must provide a non-empty value for new facility name")
 		return
 	}
 	
@@ -294,27 +294,27 @@ XDRO.rename_facility = function() {
 		action: 'rename_facility'
 	}
 	
-	XDRO.disable_buttons()
+	ARIES.disable_buttons()
 	$.ajax({
 		url: ajax_address,
 		dataType: 'json',
 		data: data,
 		method: "POST",
 		complete: function(response) {
-			XDRO.enable_buttons()
-			XDRO.response = response
+			ARIES.enable_buttons()
+			ARIES.response = response
 			// console.log('response', response)
 			if (response.responseJSON.error) {
-				XDRO.show_error(response.responseJSON.error)
+				ARIES.show_error(response.responseJSON.error)
 			} else if (response.responseJSON.success) {
 				// rename facility with this ID
-				var i = XDRO.facilities.length
+				var i = ARIES.facilities.length
 				while (i--) {
-					if (XDRO.facilities[i].id == fac_id)
-						XDRO.facilities[i].name = new_fac_name
+					if (ARIES.facilities[i].id == fac_id)
+						ARIES.facilities[i].name = new_fac_name
 				}
 				
-				XDRO.refresh()
+				ARIES.refresh()
 			}
 		}
 	})

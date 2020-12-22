@@ -128,17 +128,17 @@ function checkWorkbookFile($file_param_name) {
 }
 
 function get_assoc_form($column_name) {
-	// given "patient_ssn" would return "xdro_registry" -- return form name that a field belongs to
+	// given "patient_ssn" would return "aries_registry" -- return form name that a field belongs to
 	$forms = [
-		"patientID" => "xdro_registry",
-		"PATIENT_LOCAL_ID" => "xdro_registry",
-		"PATIENT_DOB" => "xdro_registry",
-		"PATIENT_SSN" => "xdro_registry",
-		"PATIENT_RACE_CALCULATED" => "xdro_registry",
-		"PATIENT_ETHNICITY" => "xdro_registry",
-		"reporterName" => "xdro_registry",
-		"reporterPhone" => "xdro_registry",
-		"JURISDICTION_NM" => "xdro_registry",
+		"patientID" => "aries_registry",
+		"PATIENT_LOCAL_ID" => "aries_registry",
+		"PATIENT_DOB" => "aries_registry",
+		"PATIENT_SSN" => "aries_registry",
+		"PATIENT_RACE_CALCULATED" => "aries_registry",
+		"PATIENT_ETHNICITY" => "aries_registry",
+		"reporterName" => "aries_registry",
+		"reporterPhone" => "aries_registry",
+		"JURISDICTION_NM" => "aries_registry",
 		"PATIENT_FIRST_NAME" => "demographics",
 		"PATIENT_LAST_NAME" => "demographics",
 		"PATIENT_CURRENT_SEX" => "demographics",
@@ -305,7 +305,7 @@ function import_data_row($row, $row_index) {
 		collect/collate $result["errors"] for response to client
 	*/
 	$imported = [];
-	$imported["xdro_registry"] = [];
+	$imported["aries_registry"] = [];
 	$imported["demographics"] = [];
 	$imported["antimicrobial_susceptibilities_and_resistance_mech"] = [];
 	
@@ -365,7 +365,7 @@ function import_data_row($row, $row_index) {
 	
 	// save to redcap
 	$rows = [];
-	$pati_id = $imported["xdro_registry"]["patientid"];
+	$pati_id = $imported["aries_registry"]["patientid"];
 	if (empty($pati_id)) {
 		$rows[] = [$row, "[NOT FOUND]", "N/A", "No patient ID found -- make sure patient_ID or PATIENT_LOCAL_ID column isn't empty!"];
 	} else {
@@ -373,13 +373,13 @@ function import_data_row($row, $row_index) {
 		$next_demographics_instance = get_next_instance(reset($data), "demographics");
 		$next_antimicrobial_instance = get_next_instance(reset($data), "antimicrobial_susceptibilities_and_resistance_mech");
 		
-		// overwrite xdro_registry form values (if imported values)
-		if (!empty($imported["xdro_registry"])) {
-			$data[$pati_id][$eid] = $imported["xdro_registry"];
+		// overwrite aries_registry form values (if imported values)
+		if (!empty($imported["aries_registry"])) {
+			$data[$pati_id][$eid] = $imported["aries_registry"];
 			
 			// add to \$rows for reporting purposes
-			$fields = array_keys($imported["xdro_registry"]);
-			$rows[] = [$row_index, $pati_id, 'xdro_registry', "Updating fields: " . implode(', ', $fields)];
+			$fields = array_keys($imported["aries_registry"]);
+			$rows[] = [$row_index, $pati_id, 'aries_registry', "Updating fields: " . implode(', ', $fields)];
 		}
 		
 		// add instances to repeatable forms (if imported values)

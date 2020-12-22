@@ -67,8 +67,8 @@ $table_json = json_encode($table_data);
 ?>
 
 <script type='text/javascript'>
-	XDRO = {};
-	XDRO.table_data = JSON.parse('<?php echo $table_json; ?>');
+	ARIES = {};
+	ARIES.table_data = JSON.parse('<?php echo $table_json; ?>');
 	$(document).ready(
 		function() {
 			// Setup - add a text input to each footer cell
@@ -78,8 +78,8 @@ $table_json = json_encode($table_data);
 				$(this).html( '<input type="text" placeholder="Search '+title+'" />' );
 		 
 				$( 'input', this ).on( 'keyup change', function () {
-					if ( XDRO.datatable.column(i).search() !== this.value ) {
-						XDRO.datatable
+					if ( ARIES.datatable.column(i).search() !== this.value ) {
+						ARIES.datatable
 							.column(i)
 							.search( this.value )
 							.draw();
@@ -87,8 +87,8 @@ $table_json = json_encode($table_data);
 				} );
 			} );
 		
-			XDRO.datatable = $('#match-table').DataTable({
-				data: XDRO.table_data,
+			ARIES.datatable = $('#match-table').DataTable({
+				data: ARIES.table_data,
 				pageLength: 25,
 				order: [[0, 'desc']],
 				columnDefs: [

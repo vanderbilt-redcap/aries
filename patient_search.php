@@ -2,10 +2,16 @@
 require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "redcap_connect.php";
 
 session_start();
-if ($_SESSION['authenticated'] !== true) {
-	if (!defined("USERID"))
-		header("location: " . $module->getUrl('sign_in.php') . "&unauthorized&NOAUTH");
+if (!$module->userIsAuthenticated()) {
+	if ($redcap_username = $_SESSION['username']) {	// try to auth if redcap user
+		$module->authenticateREDCapUser($redcap_username);
+		if (!$module->userIsAuthenticated())
+			header("location: " . $module->getUrl('sign_in.php') . "&NOAUTH");
+	} else {
+		header("location: " . $module->getUrl('sign_in.php') . "&NOAUTH");
+	}
 }
+
 $pid = $module->getProjectId();
 $fa_path = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css";
 $row_query_fields = [
@@ -49,7 +55,7 @@ if ($fieldsAdded > 0) {
 <html>
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-	<title>XDRO | REDCap</title>
+	<title>ARIES | REDCap</title>
 	<meta name="googlebot" content="noindex, noarchive, nofollow, nosnippet">
 	<meta name="robots" content="noindex, noarchive, nofollow">
 	<meta name="slurp" content="noindex, noarchive, nofollow, noodp, noydir">
@@ -92,14 +98,14 @@ if ($fieldsAdded > 0) {
 <link rel="stylesheet" href="<?=$module->getUrl('css/search_datatable.css')?>"/>
 <script type="text/javascript" src="<?=$module->getUrl('js/search.js')?>"></script>
 <script type="text/javascript">
-	XDRO.moduleAddress = "<?=$module->getUrl('XDRO.php')?>"
-	XDRO.recordAddress = "<?=$module->getUrl('patient_record.php') . '&NOAUTH'?>"
+	ARIES.moduleAddress = "<?=$module->getUrl('ARIES.php')?>"
+	ARIES.recordAddress = "<?=$module->getUrl('patient_record.php') . '&NOAUTH'?>"
 	<?php
 	if (!empty($search_results)) {
-		?>;XDRO.search_results = JSON.parse(<?php echo("'$search_results');");
+		?>;ARIES.search_results = JSON.parse(<?php echo("'$search_results');");
 	}
 	if ($fieldsAdded > 0) {
-		?>;XDRO.use_file_interface = true<?php
+		?>;ARIES.use_file_interface = true<?php
 	}
 	?>
 </script>
@@ -108,11 +114,11 @@ if ($fieldsAdded > 0) {
 <div id="main">
 <div id='header' class=''>
 	<div class='logo'>
-		<span id='xdro-title'>xdro</span>
+		<span id='aries-title'>aries</span>
 		<img id='tdh-logo' src="<?=$module->getUrl('res/tdh-logo.png')?>"></img>
 	</div>
 	<div id='registry-title'>
-		<h1>Extensively Drug Resistant Organism Registry</h1>
+		<h1>Antibiotic Resistance Information Exchange System</h1>
 	</div>
 </div>
 
@@ -130,7 +136,7 @@ if ($fieldsAdded > 0) {
 	</div>
 	<form id="search-input" class='col-8'>
 		<input style="display:none;" name="NOAUTH" value="1">
-		<input style="display:none;" name="prefix" value="xdro">
+		<input style="display:none;" name="prefix" value="aries">
 		<input style="display:none;" name="page" value="patient_search">
 		<input style="display:none;" name="pid" value="<?php echo($pid); ?>">
 		<div class='col-8'>
@@ -166,7 +172,7 @@ if ($fieldsAdded > 0) {
 	</div>
 	<form method="post" enctype="multipart/form-data" id="file-search-input" class='col-8'>
 		<input style="display:none;" name="NOAUTH" value="1">
-		<input style="display:none;" name="prefix" value="xdro">
+		<input style="display:none;" name="prefix" value="aries">
 		<input style="display:none;" name="page" value="patient_search">
 		<input style="display:none;" name="pid" value="<?php echo($pid); ?>">
 		<div class="input-group col-8">
@@ -177,7 +183,7 @@ if ($fieldsAdded > 0) {
 			<div id="autocomplete"></div>
 		</div>
 		<div class='mx-2 px-2 col-2'>
-			<button id="file-submit-search" type="button" class="btn btn-primary" onclick="XDRO.submit_row_query()">Search</button>
+			<button id="file-submit-search" type="button" class="btn btn-primary" onclick="ARIES.submit_row_query()">Search</button>
 			<!--  <input type="submit" value="Search"> -->
 		</div>
 		<div id="file-search-feedback" class='mr-3 pr-3 col-2'>
@@ -212,8 +218,8 @@ if ($fieldsAdded > 0) {
 
 <div id='footer-link'>
 	<div>
-		<span class='pb-3'>Click <b><a href='http://www.tn.gov/hai/xdro'>HERE</a></b> for educational materials about XDRO organisms</span>
-		<a href='http://www.tn.gov/hai/xdro'>http://www.tn.gov/hai/xdro</a>
+		<span class='pb-3'>Click <b><a href='http://www.tn.gov/hai/aries'>HERE</a></b> for educational materials about ARIES organisms</span>
+		<a href='http://www.tn.gov/hai/aries'>http://www.tn.gov/hai/aries</a>
 	</div>
 </div>
 </div>

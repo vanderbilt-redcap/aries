@@ -1,5 +1,5 @@
 
-XDRO = {
+ARIES = {
 	fileReader: new FileReader(),
 	validCSVHeaders: [
 		"patientid",
@@ -10,7 +10,7 @@ XDRO = {
 		"patient_street_address_1"
 	]
 }
-XDRO.shrinkSearch = function() {
+ARIES.shrinkSearch = function() {
 	$("#search-info").html("<h6><b>Results for:</b></h6>")
 	$("#search-info").css('padding', '20px 8px')
 	$("#search-info").removeClass('col-4').addClass('col-2')
@@ -21,20 +21,20 @@ XDRO.shrinkSearch = function() {
 	$("#error_alert").hide()
 }
 
-XDRO.predictPatients = function() {
+ARIES.predictPatients = function() {
 	var searchBar = $("#query")
 	var searchString = searchBar.val()
 	
 	$("#search-feedback").css('visibility', 'visible')
 	
 	$.ajax({
-		url: XDRO.moduleAddress + "&action=predictPatients&searchString=" + encodeURI(searchString),
+		url: ARIES.moduleAddress + "&action=predictPatients&searchString=" + encodeURI(searchString) + "&NOAUTH",
 		dataType: 'json',
 		complete: function(response) {
-			XDRO.response = response
+			ARIES.response = response
 			console.log('response', response)
 			if (response.responseJSON && response.responseJSON.length > 0) {
-				XDRO.showPredictions(response.responseJSON)
+				ARIES.showPredictions(response.responseJSON)
 			} else {
 				// no results so hide predictions
 				$("#autocomplete").css('display', 'none')
@@ -45,7 +45,7 @@ XDRO.predictPatients = function() {
 	})
 }
 
-XDRO.showPredictions = function(predictions) {
+ARIES.showPredictions = function(predictions) {
 	// console.log('predictions', predictions)
 	var items = ""
 	
@@ -61,15 +61,15 @@ XDRO.showPredictions = function(predictions) {
 	$("#autocomplete").css('left', search.position().left + 'px')
 }
 
-XDRO.submit_row_query = function(query_index = 0) {
+ARIES.submit_row_query = function(query_index = 0) {
 	// console.log("query_index", query_index)
-	if (XDRO.rowQueries == undefined || XDRO.rowQueries[query_index] == undefined) {
+	if (ARIES.rowQueries == undefined || ARIES.rowQueries[query_index] == undefined) {
 		alert("Please upload a .csv search file before searching.")
 	} else {
-		var rowQuery = XDRO.rowQueries[query_index]
+		var rowQuery = ARIES.rowQueries[query_index]
 		
 		if (!rowQuery || rowQuery == undefined) {
-			alert("There was an error finding a valid search query. Please send this error message to the XDRO administrators.")
+			alert("There was an error finding a valid search query. Please send this error message to the ARIES administrators.")
 		}
 		
 		
@@ -89,7 +89,7 @@ XDRO.submit_row_query = function(query_index = 0) {
 	}
 }
 
-XDRO.make_results_table = function(records) {
+ARIES.make_results_table = function(records) {
 	// remove all rows from results table
 	var table = $("div#results table").DataTable()
 	table.rows().remove()
@@ -97,7 +97,7 @@ XDRO.make_results_table = function(records) {
 	var table = $("div#results table").DataTable()
 	// console.log('records seen by make_results_table', records)
 	records.forEach(function (record, i) {
-		var link = "<a href=" + XDRO.recordAddress + "&rid=" + record.patientid + ">" + record.patientid + "</a>"
+		var link = "<a href=" + ARIES.recordAddress + "&rid=" + record.patientid + ">" + record.patientid + "</a>"
 		var node = table.row.add([
 			link,
 			record.patient_first_name + " " + record.patient_last_name,
@@ -113,14 +113,14 @@ XDRO.make_results_table = function(records) {
 	table.draw()
 }
 
-XDRO.add_file_interface = function() {
+ARIES.add_file_interface = function() {
 	// add buttons
 	var leftChev = String.fromCharCode(0xf054);
 	var rightChev = '\uF054';
-	first = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="XDRO.first_query()"><i class="fa fa-chevron-left"></i><i class="fa fa-chevron-left"></i></button>'
-	prev = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="XDRO.prev_query()"><i class="fa fa-chevron-left"></i></button>'
-	next = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="XDRO.next_query()"><i class="fa fa-chevron-right"></i></button>'
-	last = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="XDRO.last_query()"><i class="fa fa-chevron-right"></i><i class="fa fa-chevron-right"></i></button>'
+	first = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="ARIES.first_query()"><i class="fa fa-chevron-left"></i><i class="fa fa-chevron-left"></i></button>'
+	prev = '<button type="button" class="btn btn-primary mx-1 neg_iter" onclick="ARIES.prev_query()"><i class="fa fa-chevron-left"></i></button>'
+	next = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="ARIES.next_query()"><i class="fa fa-chevron-right"></i></button>'
+	last = '<button type="button" class="btn btn-primary mx-1 pos_iter" onclick="ARIES.last_query()"><i class="fa fa-chevron-right"></i><i class="fa fa-chevron-right"></i></button>'
 	$("#search-input div:eq(0)").prepend(prev)
 	$("#search-input div:eq(0)").prepend(first)
 	$("#search-input div:eq(0)").append(next)
@@ -128,12 +128,12 @@ XDRO.add_file_interface = function() {
 	
 	// show file queries alert
 	$("#file-queries").show()
-	$("#file-queries .filename").text(XDRO.filename)
+	$("#file-queries .filename").text(ARIES.filename)
 	$("#search").css('margin-top', '10px')
 	
 	// enable/disable seek buttons
 	var query_row = Number(getQueryVariable("query_row"))
-	if (query_row == XDRO.rowQueries.length - 1) {
+	if (query_row == ARIES.rowQueries.length - 1) {
 		$(".pos_iter").attr('disabled', true)
 	} else {
 		$(".pos_iter").attr('disabled', false)
@@ -145,10 +145,10 @@ XDRO.add_file_interface = function() {
 	}
 }
 
-XDRO.process_selected_file = function(file_text) {
+ARIES.process_selected_file = function(file_text) {
 	// make sure we get SOME text out of the selected file
 	if (!file_text.length) {
-		alert("When the XDRO module read your selected file, it couldn't find valid text data. Please select a .csv file to upload.")
+		alert("When the ARIES module read your selected file, it couldn't find valid text data. Please select a .csv file to upload.")
 		var input = $('.custom-file-label')
 		input.html("Upload a CSV")
 		input.val(null)
@@ -170,11 +170,11 @@ XDRO.process_selected_file = function(file_text) {
 	})
 	
 	//	make sure we have at least one valid header (to correlate with searched patient info)
-	var validHeaderFound = XDRO.validCSVHeaders.some(function(valid_header) {
+	var validHeaderFound = ARIES.validCSVHeaders.some(function(valid_header) {
 		return headers.includes(valid_header)
 	})
 	if (!validHeaderFound) {
-		alert("The XDRO module couldn't find a valid header in the selected .csv file.\nPlease ensure the first csv row in your file contains at least one of the following:\n\n" + XDRO.validCSVHeaders.join("\n"))
+		alert("The ARIES module couldn't find a valid header in the selected .csv file.\nPlease ensure the first csv row in your file contains at least one of the following:\n\n" + ARIES.validCSVHeaders.join("\n"))
 		var input = $('.custom-file-label')
 		input.html("Upload a CSV")
 		input.val(null)
@@ -183,7 +183,7 @@ XDRO.process_selected_file = function(file_text) {
 	
 	// no errors, get a map of valid header names to column indices (e.g. "patient_dob" maps to csv column 3)
 	var headerIndices = {}
-	XDRO.validCSVHeaders.forEach(function(validHeader) {
+	ARIES.validCSVHeaders.forEach(function(validHeader) {
 		var foundIndex = headers.findIndex(header => header == validHeader)
 		if (foundIndex >= 0)
 			headerIndices[validHeader] = foundIndex
@@ -209,42 +209,42 @@ XDRO.process_selected_file = function(file_text) {
 		if (!$.isEmptyObject(rowQuery))
 			rowQueries.push(rowQuery)
 	})
-	XDRO.rowQueries = rowQueries
+	ARIES.rowQueries = rowQueries
 	
 	// store queries in local storage
 	try {
-		localStorage.setItem('xdro_csv_search_row_queries', JSON.stringify(rowQueries))
-		localStorage.setItem('xdro_csv_filename', XDRO.filename)
+		localStorage.setItem('aries_csv_search_row_queries', JSON.stringify(rowQueries))
+		localStorage.setItem('aries_csv_filename', ARIES.filename)
 	} catch(err) {
-		alert("REDCap's XDRO module couldn't save the file to local (browser) storage -- try clearing your local storage or restarting your browser in non-private mode. Error message: " + String(err))
+		alert("REDCap's ARIES module couldn't save the file to local (browser) storage -- try clearing your local storage or restarting your browser in non-private mode. Error message: " + String(err))
 	}
 	
-	XDRO.processedFileThisSession = true
+	ARIES.processedFileThisSession = true
 }
 
-XDRO.prev_query = function() {
-	XDRO.submit_row_query(Number(getQueryVariable("query_row")) - 1)
+ARIES.prev_query = function() {
+	ARIES.submit_row_query(Number(getQueryVariable("query_row")) - 1)
 }
 
-XDRO.next_query = function() {
-	XDRO.submit_row_query(Number(getQueryVariable("query_row")) + 1)
+ARIES.next_query = function() {
+	ARIES.submit_row_query(Number(getQueryVariable("query_row")) + 1)
 }
 
-XDRO.first_query = function() {
-	XDRO.submit_row_query(0)
+ARIES.first_query = function() {
+	ARIES.submit_row_query(0)
 }
 
-XDRO.last_query = function() {
-	XDRO.submit_row_query(XDRO.rowQueries.length - 1)
+ARIES.last_query = function() {
+	ARIES.submit_row_query(ARIES.rowQueries.length - 1)
 }
 
 // on document ready
 $(function() {
 	// autocomplete prediction stuff
 	$("#search-input input").on('input', function() {
-		clearTimeout(XDRO.predict_timer)
+		clearTimeout(ARIES.predict_timer)
 		$("#error_alert").hide()
-		XDRO.predict_timer = setTimeout(XDRO.predictPatients, 500)
+		ARIES.predict_timer = setTimeout(ARIES.predictPatients, 500)
 	})
 	
 	// forward to patient record on prediction clicked
@@ -255,7 +255,7 @@ $(function() {
 		}
 		var rid = span.attr('data-rid')
 		if (rid) {
-			window.location.href = XDRO.recordAddress + "&rid=" + rid + "&NOAUTH"
+			window.location.href = ARIES.recordAddress + "&rid=" + rid + "&NOAUTH"
 		}
 	})
 	
@@ -274,23 +274,23 @@ $(function() {
 	
 	// if a file has been previously selected/loaded, use rowQueries from that
 	try {
-		XDRO.rowQueries = JSON.parse(localStorage.getItem("xdro_csv_search_row_queries"))
-		XDRO.filename = localStorage.getItem("xdro_csv_filename")
+		ARIES.rowQueries = JSON.parse(localStorage.getItem("aries_csv_search_row_queries"))
+		ARIES.filename = localStorage.getItem("aries_csv_filename")
 	} catch(exception) {
 		
 	}
 	
 	// show search results (should be present if query parameters are set)
 	var url_query = getQueryVariable('query');
-	if (XDRO.search_results) {
-		XDRO.shrinkSearch()
+	if (ARIES.search_results) {
+		ARIES.shrinkSearch()
 		$("#search-feedback").css('visibility', 'hidden')
 		
-		if (XDRO.use_file_interface) {
-			XDRO.add_file_interface()
+		if (ARIES.use_file_interface) {
+			ARIES.add_file_interface()
 			var query_string = ""
-			for(const i in XDRO.validCSVHeaders) {
-				var field = XDRO.validCSVHeaders[i]
+			for(const i in ARIES.validCSVHeaders) {
+				var field = ARIES.validCSVHeaders[i]
 				var param = getQueryVariable(field)
 				if (param)
 					query_string += param + ", "
@@ -302,8 +302,8 @@ $(function() {
 			$("#query").val(decodeURIComponent(url_query.replace(/\+/g, " ")))
 		}
 		
-		if (XDRO.search_results.length) {
-			XDRO.make_results_table(XDRO.search_results)
+		if (ARIES.search_results.length) {
+			ARIES.make_results_table(ARIES.search_results)
 		} else {
 			$(".dataTables_empty").text("Search for '" + url_query + "' yielded no matching results")
 		}
@@ -326,23 +326,23 @@ $(document).mouseup(function (e){
 $("body").on("click", ".highlightable", function(e) {
 	var rid = $(this).attr('data-rid')
 	if (rid)
-		window.location.href = XDRO.recordAddress + "&rid=" + rid + "&NOAUTH";
+		window.location.href = ARIES.recordAddress + "&rid=" + rid + "&NOAUTH";
 })
 
 $('body').on('change', ".custom-file-input", function(e) {
 	var fileName = $(this).val().split('\\').pop()
-	XDRO.filename = fileName
+	ARIES.filename = fileName
 	var input = $('.custom-file-label')
 	input.html(fileName)
 	
 	if (e.target.files[0]) {
-		XDRO.fileReader.readAsText(e.target.files[0])
+		ARIES.fileReader.readAsText(e.target.files[0])
 	}
 })
 
 // load file into localstorage on upload
-XDRO.fileReader.addEventListener("load", function() {
-	XDRO.process_selected_file(this.result)
+ARIES.fileReader.addEventListener("load", function() {
+	ARIES.process_selected_file(this.result)
 })
 
 // helper functions
