@@ -12,6 +12,7 @@
 	
 */
 
+$module->llog('hit patient_match_ajax');
 // make response object
 $json = new \stdClass();
 $json->errors = [];

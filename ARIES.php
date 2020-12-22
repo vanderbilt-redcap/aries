@@ -414,9 +414,9 @@ class ARIES extends \ExternalModules\AbstractExternalModule {
 	}
 	
 	function llog($text) {
-		if (file_exists("C:/vumc/log.txt")) {
-			file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
-		}
+		// if (file_exists("C:/vumc/log.txt")) {
+			// file_put_contents("C:/vumc/log.txt", "$text\n", FILE_APPEND);
+		// }
 	}
 	
 	function rlog($msg) {

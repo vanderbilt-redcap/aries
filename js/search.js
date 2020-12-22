@@ -32,7 +32,7 @@ ARIES.predictPatients = function() {
 		dataType: 'json',
 		complete: function(response) {
 			ARIES.response = response
-			console.log('response', response)
+			// console.log('response', response)
 			if (response.responseJSON && response.responseJSON.length > 0) {
 				ARIES.showPredictions(response.responseJSON)
 			} else {

@@ -101,7 +101,7 @@ ARIES.save_patient_match = function() {
 	
 	$.ajax({
 		type: "POST",
-		url: ARIES.patient_match_ajax,
+		url: ARIES.patient_match_ajax + "&NOAUTH",
 		data: data,
 		success: function(response) {
 			// console.log('response', response)

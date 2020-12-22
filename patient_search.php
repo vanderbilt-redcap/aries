@@ -215,13 +215,6 @@ if ($fieldsAdded > 0) {
 <div id='match-listed'>
 	<b><span> NO MATCH LISTED</span></b>
 </div>
-
-<div id='footer-link'>
-	<div>
-		<span class='pb-3'>Click <b><a href='http://www.tn.gov/hai/aries'>HERE</a></b> for educational materials about ARIES organisms</span>
-		<a href='http://www.tn.gov/hai/aries'>http://www.tn.gov/hai/aries</a>
-	</div>
-</div>
 </div>
 </body>
 </html>

@@ -51,6 +51,7 @@
 		"sign_in",
 		"patient_record",
 		"patient_search",
+		"patient_match_ajax",
 		"ARIES"
 	],
 	"project-settings": [],
