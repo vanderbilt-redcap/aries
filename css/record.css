@@ -133,6 +133,9 @@ div.header-info {
 #susceptibilities th {
 	padding: .5em;
 }
+#susceptibilities table {
+	width: 100%;
+}
 #susceptibilities table, #susceptibilities tr, #susceptibilities th, #susceptibilities td {
 	border: 1px dashed #888;
 }
