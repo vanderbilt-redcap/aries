@@ -9,6 +9,16 @@ session_start();
 // $module->llog("_REQUEST: " . print_r($_REQUEST, true));
 // $module->llog("_SESSION: " . print_r($_SESSION, true));
 
+// check for REDCap user
+if ($redcap_user = $_SESSION['username']) {
+	$module->llog("\$redcap_user detected: " . $redcap_user);
+	list($authenticated_user, $errmsg) = $module->authenticate();
+	if ($authenticated_user) {
+		$_SESSION['xdro_authenticated'] = true;
+		$_SESSION['xdro_username'] = $authenticated_user;
+		header("location: " . $module->getUrl('patient_search.php') . "&NOUATH");
+	}
+}
 
 if (isset($_GET['unauthorized'])) {
 	$errmsg = $_GET['unauthorized'];
@@ -20,15 +30,14 @@ if (isset($_POST['sign-in'])) {
 	// $module->llog("authenticating...");
 	list($authenticated_user, $errmsg) = $module->authenticate();
 	if ($authenticated_user) {
-		$_SESSION['authenticated'] = true;
-		$_SESSION['username'] = $authenticated_user;
+		$_SESSION['xdro_authenticated'] = true;
+		$_SESSION['xdro_username'] = $authenticated_user;
 		header("location: " . $module->getUrl('patient_search.php') . "&NOUATH");
 	}
 }
 
 if (isset($_GET['logout'])) {
 	$_SESSION = [];
-	$authenticated = null;
 	$errmsg = "You were successfully logged out";
 }
 

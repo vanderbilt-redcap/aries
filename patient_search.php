@@ -3,7 +3,8 @@ require_once str_replace("temp" . DIRECTORY_SEPARATOR, "", APP_PATH_TEMP) . "red
 
 session_start();
 if ($_SESSION['authenticated'] !== true) {
-	header("location: " . $module->getUrl('sign_in.php') . "&unauthorized&NOAUTH");
+	if (!defined("USERID"))
+		header("location: " . $module->getUrl('sign_in.php') . "&unauthorized&NOAUTH");
 }
 $pid = $module->getProjectId();
 $fa_path = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css";

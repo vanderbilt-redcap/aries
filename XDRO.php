@@ -29,42 +29,73 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 	
 	// sign-in / authentication
 	function authenticate() {
+		// check redcap login
+		if ($redcap_user = $_SESSION['username']) {
+			return $this->authRedcapUser($redcap_user);
+		}
+		
+		// non-redcap access
 		$username = db_escape(trim($_POST['username']));
-		if (empty($username))
+		if (empty($username)) { 
 			return [false, "Please provide a username to login"];
+		}
 		
 		$password = db_escape(trim($_POST['password']));
-		if (empty($password))
+		if (empty($password)) {
 			return [false, "Please provide a password to login"];
-		
+		}
+	
 		foreach($this->auth_data->users as $i => $user) {
 			if ($user->username == $username) {
 				if (password_verify($password, $user->pw_hash)) {
+					$this->rlog("XDRO user '$username' logged in successfully");
 					return [$user->username, null];
 				} else {
+					$this->rlog("XDRO user '$username' failed to login - wrong password");
 					return [false, "Authentication failed -- password incorrect"];
 				}
 			}
 		}
+		$this->rlog("XDRO user '$username' failed to login - not a valid username");
 		return [false, "Authentication failed -- username '$username' not found"];
 	}
 	
+	function authRedcapUser($username) {
+		$this->llog("in authRedcapUser");
+		$rights = \REDCap::getUserRights($username);
+		
+		$this->llog("redcap user rights: " . print_r($rights, true));
+		
+		if (empty($rights)) {
+			$this->rlog("Authentication failed for REDCap user '$username' -- user not assigned to XDRO project.");
+			return [false, "REDCap users must have Project Design rights for the XDRO project to be allowed access to resources."];
+		}
+		
+		$design_rights = false;
+		foreach ($rights as $right) {
+			
+		}
+		$this->rlog("Authenticated REDCap user '$username'");
+		
+		return [USERID, null];
+	}
+	
 	function makeCSRFToken() {
-		if (empty($username = $_SESSION['username']))
+		if (empty($username = $_SESSION['xdro_username']))
 			throw new \Exception('XDRO module expected username to be stored in SESSION data.');
 		
 		global $salt;
 		if (empty($salt))
 			throw new \Exception('XDRO module expected non-empty password salt value.');
 		
-		$_SESSION['csrf_ts'] = time();
-		$token = md5($salt . $_SESSION['csrf_ts'] . $username);
+		$_SESSION['xdro_csrf_ts'] = time();
+		$token = md5($salt . $_SESSION['xdro_csrf_ts'] . $username);
 		return $token;
 	}
 	
 	function checkCSRFToken($token) {
-		$username = $_SESSION['username'];
-		$csrf_ts = $_SESSION['csrf_ts'];
+		$username = $_SESSION['xdro_username'];
+		$csrf_ts = $_SESSION['xdro_csrf_ts'];
 		global $salt;
 		if (empty($salt) or empty($csrf_ts) or empty($username)) {
 			// $this->llog("csrf NOT OK: " . date('c'));
@@ -362,7 +393,7 @@ class XDRO extends \ExternalModules\AbstractExternalModule {
 if ($_GET['action'] == 'predictPatients') {
 	$module = new XDRO();
 	session_start();
-	if (!$_SESSION['authenticated']) {
+	if (!$_SESSION['xdro_authenticated']) {
 		$response = ['error' => "The XDRO module can't return patient information without first authenticating -- please sign in"];
 		echo(json_encode((object) $response));
 	} else {
